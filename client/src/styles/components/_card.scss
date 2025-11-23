@@ -1,0 +1,42 @@
+// ============================================
+// Card Component (OOCSS)
+// ============================================
+
+.card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: $radius-lg;
+  overflow: hidden;
+  @include transition(box-shadow, $transition-base);
+  
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+  
+  &__header {
+    padding: $spacing-lg;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-xs;
+  }
+  
+  &__description {
+    color: hsl(var(--muted-foreground));
+    font-size: $font-size-sm;
+  }
+  
+  &__content {
+    padding: $spacing-lg;
+  }
+  
+  &__footer {
+    padding: $spacing-lg;
+    border-top: 1px solid hsl(var(--border));
+    background-color: hsl(var(--muted));
+  }
+}
+

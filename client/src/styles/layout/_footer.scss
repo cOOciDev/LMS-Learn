@@ -1,0 +1,19 @@
+// ============================================
+// Footer Layout
+// ============================================
+
+.footer {
+  width: 100%;
+  padding: $spacing-xl;
+  border-top: 1px solid hsl(var(--border));
+  background-color: hsl(var(--background));
+  margin-top: auto;
+  
+  &__container {
+    @include container();
+    text-align: center;
+    color: hsl(var(--muted-foreground));
+    font-size: $font-size-sm;
+  }
+}
+

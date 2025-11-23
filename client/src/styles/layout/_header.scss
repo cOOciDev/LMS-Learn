@@ -1,0 +1,57 @@
+// ============================================
+// Header Layout
+// ============================================
+
+.header {
+  width: 100%;
+  padding: $spacing-md;
+  border-bottom: 1px solid hsl(var(--border));
+  background-color: hsl(var(--background));
+  
+  @include respond-to(md) {
+    padding: $spacing-lg;
+  }
+  
+  &__container {
+    @include flex-between;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  
+  &__left {
+    @include flex-center;
+    gap: $spacing-md;
+  }
+  
+  &__right {
+    @include flex-center;
+    gap: $spacing-sm;
+    
+    @include respond-to(sm) {
+      gap: $spacing-md;
+    }
+  }
+  
+  &__logo {
+    @include flex-center;
+    gap: $spacing-sm;
+    font-weight: $font-weight-extrabold;
+    font-size: $font-size-xl;
+    color: hsl(var(--foreground));
+    
+    @include respond-to(md) {
+      font-size: $font-size-2xl;
+    }
+  }
+  
+  &__actions {
+    @include flex-center;
+    gap: $spacing-sm;
+    
+    @include respond-to(sm) {
+      gap: $spacing-md;
+    }
+  }
+}
+

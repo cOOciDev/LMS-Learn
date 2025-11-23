@@ -1,0 +1,62 @@
+// ============================================
+// Form Component (OOCSS)
+// ============================================
+
+.form {
+  width: 100%;
+  
+  &__group {
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    margin-bottom: $spacing-xs;
+    color: hsl(var(--foreground));
+  }
+  
+  &__input,
+  &__textarea,
+  &__select {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-base;
+    line-height: $line-height-normal;
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--input));
+    border-radius: $radius-md;
+    @include transition(all, $transition-base);
+    
+    &:focus {
+      outline: none;
+      border-color: hsl(var(--ring));
+      box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+  
+  &__textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  &__error {
+    margin-top: $spacing-xs;
+    font-size: $font-size-xs;
+    color: hsl(var(--destructive));
+  }
+  
+  &__help {
+    margin-top: $spacing-xs;
+    font-size: $font-size-xs;
+    color: hsl(var(--muted-foreground));
+  }
+}
+

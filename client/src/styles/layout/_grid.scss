@@ -1,0 +1,41 @@
+// ============================================
+// Grid Layout
+// ============================================
+
+.grid {
+  display: grid;
+  gap: $spacing-md;
+  
+  &--2 {
+    grid-template-columns: repeat(1, 1fr);
+    
+    @include respond-to(md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  &--3 {
+    grid-template-columns: repeat(1, 1fr);
+    
+    @include respond-to(sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include respond-to(lg) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  &--4 {
+    grid-template-columns: repeat(1, 1fr);
+    
+    @include respond-to(sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include respond-to(lg) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+

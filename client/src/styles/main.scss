@@ -1,0 +1,42 @@
+// ============================================
+// Main SCSS Entry Point
+// Object-Oriented CSS Architecture
+// ============================================
+
+// Tailwind CSS (must come first for proper cascade)
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// 1. Abstracts (Variables, Mixins, Functions)
+@import 'abstracts/variables';
+@import 'abstracts/mixins';
+@import 'abstracts/functions';
+
+// 2. Base (Reset, Typography, Base Elements)
+@import 'base/reset';
+@import 'base/typography';
+@import 'base/base';
+
+// 3. Layout (Header, Footer, Grid, Containers)
+@import 'layout/header';
+@import 'layout/footer';
+@import 'layout/grid';
+@import 'layout/container';
+
+// 4. Components (Buttons, Cards, Forms, etc.)
+@import 'components/theme-switcher';
+@import 'components/language-switcher';
+@import 'components/button';
+@import 'components/card';
+@import 'components/form';
+
+// 5. Pages (Page-specific styles)
+@import 'pages/auth';
+@import 'pages/dashboard';
+
+// 6. Utilities (Helper classes)
+@import 'utilities/spacing';
+@import 'utilities/display';
+@import 'utilities/responsive';
+

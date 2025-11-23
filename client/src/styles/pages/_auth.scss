@@ -1,0 +1,44 @@
+// ============================================
+// Auth Page Styles
+// ============================================
+
+.auth-page {
+  min-height: 100vh;
+  @include flex-center;
+  padding: $spacing-md;
+  background-color: hsl(var(--background));
+  
+  &__container {
+    width: 100%;
+    max-width: 28rem;
+  }
+  
+  &__card {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: $radius-lg;
+    padding: $spacing-xl;
+    box-shadow: $shadow-lg;
+  }
+  
+  &__header {
+    margin-bottom: $spacing-lg;
+    text-align: center;
+  }
+  
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-sm;
+    
+    @include respond-to(md) {
+      font-size: $font-size-3xl;
+    }
+  }
+  
+  &__description {
+    color: hsl(var(--muted-foreground));
+    font-size: $font-size-sm;
+  }
+}
+

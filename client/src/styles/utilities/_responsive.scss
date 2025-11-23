@@ -1,0 +1,36 @@
+// ============================================
+// Responsive Utilities
+// ============================================
+
+// Hide on mobile
+.hide-mobile {
+  @include respond-below(md) {
+    display: none !important;
+  }
+}
+
+// Show only on mobile
+.show-mobile {
+  display: block;
+  
+  @include respond-to(md) {
+    display: none !important;
+  }
+}
+
+// Hide on desktop
+.hide-desktop {
+  @include respond-to(md) {
+    display: none !important;
+  }
+}
+
+// Show only on desktop
+.show-desktop {
+  display: none;
+  
+  @include respond-to(md) {
+    display: block !important;
+  }
+}
+

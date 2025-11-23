@@ -1,0 +1,93 @@
+// ============================================
+// Button Component (OOCSS)
+// ============================================
+
+.btn {
+  @include button-reset;
+  @include flex-center;
+  @include transition(all, $transition-base);
+  position: relative;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: 1;
+  border-radius: $radius-md;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  
+  @include respond-to(sm) {
+    padding: $spacing-sm $spacing-lg;
+    font-size: $font-size-base;
+  }
+  
+  &:focus-visible {
+    @include focus-ring;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  // Button Sizes
+  &--sm {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-xs;
+  }
+  
+  &--lg {
+    padding: $spacing-md $spacing-xl;
+    font-size: $font-size-lg;
+  }
+  
+  // Button Variants
+  &--primary {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    
+    &:hover:not(:disabled) {
+      background-color: hsl(var(--primary) / 0.9);
+    }
+  }
+  
+  &--secondary {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    
+    &:hover:not(:disabled) {
+      background-color: hsl(var(--secondary) / 0.8);
+    }
+  }
+  
+  &--outline {
+    background-color: transparent;
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--border));
+    
+    &:hover:not(:disabled) {
+      background-color: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
+    }
+  }
+  
+  &--ghost {
+    background-color: transparent;
+    color: hsl(var(--foreground));
+    
+    &:hover:not(:disabled) {
+      background-color: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
+    }
+  }
+  
+  &--destructive {
+    background-color: hsl(var(--destructive));
+    color: hsl(var(--destructive-foreground));
+    
+    &:hover:not(:disabled) {
+      background-color: hsl(var(--destructive) / 0.9);
+    }
+  }
+}
+
