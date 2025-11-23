@@ -1,0 +1,83 @@
+{
+  "common": {
+    "signIn": "ورود",
+    "signOut": "خروج",
+    "signUp": "ثبت نام",
+    "register": "ثبت نام",
+    "login": "ورود",
+    "logout": "خروج",
+    "email": "ایمیل",
+    "password": "رمز عبور",
+    "userName": "نام کاربری",
+    "role": "نقش",
+    "submit": "ارسال",
+    "cancel": "لغو",
+    "save": "ذخیره",
+    "delete": "حذف",
+    "edit": "ویرایش",
+    "create": "ایجاد",
+    "update": "به‌روزرسانی",
+    "search": "جستجو",
+    "loading": "در حال بارگذاری...",
+    "error": "خطا",
+    "success": "موفقیت",
+    "welcome": "خوش آمدید",
+    "home": "خانه",
+    "courses": "دوره‌ها",
+    "myCourses": "دوره‌های من",
+    "exploreCourses": "کشف دوره‌ها",
+    "language": "زبان",
+    "user": "کاربر",
+    "instructor": "مدرس",
+    "admin": "مدیر"
+  },
+  "auth": {
+    "signInToAccount": "ورود به حساب کاربری",
+    "enterEmailPassword": "ایمیل و رمز عبور خود را وارد کنید",
+    "createNewAccount": "ایجاد حساب کاربری جدید",
+    "enterDetails": "اطلاعات خود را وارد کنید",
+    "registerNewUser": "ثبت نام کاربر جدید",
+    "createUserAccount": "ایجاد حساب کاربری جدید. فقط مدیران می‌توانند کاربران را ثبت نام کنند.",
+    "registerUser": "ثبت نام کاربر",
+    "invalidCredentials": "اعتبارنامه‌های نامعتبر",
+    "userRegistered": "کاربر با موفقیت ثبت نام شد!",
+    "failedToRegister": "ثبت نام کاربر ناموفق بود"
+  },
+  "admin": {
+    "adminPanel": "پنل مدیریت",
+    "registerUser": "ثبت نام کاربر",
+    "userManagement": "مدیریت کاربران"
+  },
+  "instructor": {
+    "instructorDashboard": "داشبورد مدرس",
+    "myCourses": "دوره‌های من",
+    "createCourse": "ایجاد دوره",
+    "editCourse": "ویرایش دوره"
+  },
+  "student": {
+    "studentDashboard": "داشبورد دانشجو",
+    "enrolledCourses": "دوره‌های ثبت نام شده",
+    "courseProgress": "پیشرفت دوره",
+    "purchaseCourse": "خرید دوره"
+  },
+  "course": {
+    "title": "عنوان",
+    "description": "توضیحات",
+    "category": "دسته‌بندی",
+    "level": "سطح",
+    "price": "قیمت",
+    "enroll": "ثبت نام",
+    "enrolled": "ثبت نام شده",
+    "viewCourse": "مشاهده دوره",
+    "courseDetails": "جزئیات دوره",
+    "courseContent": "محتوای دوره",
+    "lectures": "جلسات",
+    "curriculum": "برنامه درسی"
+  },
+  "validation": {
+    "required": "این فیلد الزامی است",
+    "invalidEmail": "آدرس ایمیل نامعتبر",
+    "passwordTooShort": "رمز عبور باید حداقل ۶ کاراکتر باشد"
+  }
+}
+

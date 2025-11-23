@@ -3,10 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useContext } from "react";
 import { AuthContext } from "@/context/auth-context";
+import { useLanguage } from "@/context/language-context";
+import LanguageSwitcher from "@/components/language-switcher";
+import ThemeSwitcher from "@/components/theme-switcher";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
   const { resetCredentials } = useContext(AuthContext);
+  const { t } = useLanguage();
 
   function handleLogout() {
     resetCredentials();
@@ -32,7 +36,7 @@ function StudentViewCommonHeader() {
             }}
             className="text-[14px] md:text-[16px] font-medium"
           >
-            Explore Courses
+            {t("common.exploreCourses")}
           </Button>
         </div>
       </div>
@@ -43,11 +47,13 @@ function StudentViewCommonHeader() {
             className="flex cursor-pointer items-center gap-3"
           >
             <span className="font-extrabold md:text-xl text-[14px]">
-              My Courses
+              {t("common.myCourses")}
             </span>
             <TvMinimalPlay className="w-8 h-8 cursor-pointer" />
           </div>
-          <Button onClick={handleLogout}>Sign Out</Button>
+          <ThemeSwitcher />
+          <LanguageSwitcher />
+          <Button onClick={handleLogout}>{t("common.signOut")}</Button>
         </div>
       </div>
     </header>

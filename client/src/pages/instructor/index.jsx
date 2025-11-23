@@ -4,15 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
+import { useLanguage } from "@/context/language-context";
 import { fetchInstructorCourseListService } from "@/services";
 import { BarChart, Book, LogOut } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
+import LanguageSwitcher from "@/components/language-switcher";
+import ThemeSwitcher from "@/components/theme-switcher";
 
 function InstructorDashboardpage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { resetCredentials } = useContext(AuthContext);
   const { instructorCoursesList, setInstructorCoursesList } =
     useContext(InstructorContext);
+  const { t } = useLanguage();
 
   async function fetchAllCourses() {
     const response = await fetchInstructorCourseListService();
@@ -26,19 +30,19 @@ function InstructorDashboardpage() {
   const menuItems = [
     {
       icon: BarChart,
-      label: "Dashboard",
+      label: t("instructor.instructorDashboard"),
       value: "dashboard",
       component: <InstructorDashboard listOfCourses={instructorCoursesList} />,
     },
     {
       icon: Book,
-      label: "Courses",
+      label: t("common.courses"),
       value: "courses",
       component: <InstructorCourses listOfCourses={instructorCoursesList} />,
     },
     {
       icon: LogOut,
-      label: "Logout",
+      label: t("common.logout"),
       value: "logout",
       component: null,
     },
@@ -54,7 +58,13 @@ function InstructorDashboardpage() {
     <div className="flex h-full min-h-screen bg-gray-100">
       <aside className="w-64 bg-white shadow-md hidden md:block">
         <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">Instructor View</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">{t("instructor.instructorDashboard")}</h2>
+            <div className="flex items-center gap-2">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
+          </div>
           <nav>
             {menuItems.map((menuItem) => (
               <Button
@@ -76,10 +86,10 @@ function InstructorDashboardpage() {
       </aside>
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-8">{t("instructor.instructorDashboard")}</h1>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {menuItems.map((menuItem) => (
-              <TabsContent value={menuItem.value}>
+              <TabsContent key={menuItem.value} value={menuItem.value}>
                 {menuItem.component !== null ? menuItem.component : null}
               </TabsContent>
             ))}

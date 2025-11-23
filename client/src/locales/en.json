@@ -1,0 +1,83 @@
+{
+  "common": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signUp": "Sign Up",
+    "register": "Register",
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "userName": "User Name",
+    "role": "Role",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "welcome": "Welcome",
+    "home": "Home",
+    "courses": "Courses",
+    "myCourses": "My Courses",
+    "exploreCourses": "Explore Courses",
+    "language": "Language",
+    "user": "User",
+    "instructor": "Instructor",
+    "admin": "Admin"
+  },
+  "auth": {
+    "signInToAccount": "Sign in to your account",
+    "enterEmailPassword": "Enter your email and password to access your account",
+    "createNewAccount": "Create a new account",
+    "enterDetails": "Enter your details to get started",
+    "registerNewUser": "Register New User",
+    "createUserAccount": "Create a new user account. Only admins can register users.",
+    "registerUser": "Register User",
+    "invalidCredentials": "Invalid credentials",
+    "userRegistered": "User registered successfully!",
+    "failedToRegister": "Failed to register user"
+  },
+  "admin": {
+    "adminPanel": "Admin Panel",
+    "registerUser": "Register User",
+    "userManagement": "User Management"
+  },
+  "instructor": {
+    "instructorDashboard": "Instructor Dashboard",
+    "myCourses": "My Courses",
+    "createCourse": "Create Course",
+    "editCourse": "Edit Course"
+  },
+  "student": {
+    "studentDashboard": "Student Dashboard",
+    "enrolledCourses": "Enrolled Courses",
+    "courseProgress": "Course Progress",
+    "purchaseCourse": "Purchase Course"
+  },
+  "course": {
+    "title": "Title",
+    "description": "Description",
+    "category": "Category",
+    "level": "Level",
+    "price": "Price",
+    "enroll": "Enroll",
+    "enrolled": "Enrolled",
+    "viewCourse": "View Course",
+    "courseDetails": "Course Details",
+    "courseContent": "Course Content",
+    "lectures": "Lectures",
+    "curriculum": "Curriculum"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordTooShort": "Password must be at least 6 characters"
+  }
+}
+

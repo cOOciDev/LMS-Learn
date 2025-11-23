@@ -1,125 +1,240 @@
 const Course = require("../../models/Course");
 const StudentCourses = require("../../models/StudentCourses");
+const { asyncHandler } = require("../../middleware/error-handler");
+const { validatePagination } = require("../../middleware/validation");
 
-const getAllStudentViewCourses = async (req, res) => {
-  try {
-    const {
-      category = [],
-      level = [],
-      primaryLanguage = [],
-      sortBy = "price-lowtohigh",
-    } = req.query;
+// @desc    Get all published courses with filters
+// @route   GET /student/course/get
+// @access  Public
+const getAllPublishedCourses = asyncHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 12,
+    category,
+    level,
+    search,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    minPrice,
+    maxPrice,
+  } = req.query;
 
-    console.log(req.query, "req.query");
+  const skip = (page - 1) * limit;
+  const query = { isPublished: true, status: "published" };
 
-    let filters = {};
-    if (category.length) {
-      filters.category = { $in: category.split(",") };
-    }
-    if (level.length) {
-      filters.level = { $in: level.split(",") };
-    }
-    if (primaryLanguage.length) {
-      filters.primaryLanguage = { $in: primaryLanguage.split(",") };
-    }
+  // Filters
+  if (category) query.category = category;
+  if (level) query.level = level;
+  if (minPrice !== undefined) query.pricing = { ...query.pricing, $gte: parseFloat(minPrice) };
+  if (maxPrice !== undefined) {
+    query.pricing = { ...query.pricing, $lte: parseFloat(maxPrice) };
+  }
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+      { subtitle: { $regex: search, $options: "i" } },
+      { tags: { $in: [new RegExp(search, "i")] } },
+    ];
+  }
 
-    let sortParam = {};
-    switch (sortBy) {
-      case "price-lowtohigh":
-        sortParam.pricing = 1;
+  // Sort
+  const sort = {};
+  sort[sortBy] = sortOrder === "asc" ? 1 : -1;
 
-        break;
-      case "price-hightolow":
-        sortParam.pricing = -1;
+  const courses = await Course.find(query)
+    .populate("instructorId", "userName userEmail profile")
+    .select("-curriculum -students")
+    .sort(sort)
+    .skip(skip)
+    .limit(parseInt(limit));
 
-        break;
-      case "title-atoz":
-        sortParam.title = 1;
+  const total = await Course.countDocuments(query);
 
-        break;
-      case "title-ztoa":
-        sortParam.title = -1;
+  // Get unique categories and levels for filters
+  const categories = await Course.distinct("category", { isPublished: true });
+  const levels = await Course.distinct("level", { isPublished: true });
 
-        break;
+  res.status(200).json({
+    success: true,
+    data: {
+      courses,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+      filters: {
+        categories,
+        levels,
+      },
+    },
+  });
+});
 
-      default:
-        sortParam.pricing = 1;
-        break;
-    }
+// @desc    Get course details by ID
+// @route   GET /student/course/get/details/:id
+// @access  Public
+const getCourseDetails = asyncHandler(async (req, res) => {
+  const course = await Course.findOne({
+    _id: req.params.id,
+    isPublished: true,
+    status: "published",
+  })
+    .populate("instructorId", "userName userEmail profile")
+    .select("-students");
 
-    const coursesList = await Course.find(filters).sort(sortParam);
-
-    res.status(200).json({
-      success: true,
-      data: coursesList,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
+  if (!course) {
+    return res.status(404).json({
       success: false,
-      message: "Some error occured in (getAllStudentViewCourses)",
+      message: "Course not found",
     });
   }
-};
 
-const getStudentViewCourseDetails = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const courseDetails = await Course.findById(id);
+  // Check if user is enrolled (if authenticated)
+  let isEnrolled = false;
+  let userProgress = null;
 
-    if (!courseDetails) {
-      return res.status(404).json({
-        success: false,
-        message: "No course details found",
-        data: null,
+  if (req.user) {
+    const userId = req.user.userId || req.user._id;
+    const studentCourse = await StudentCourses.findOne({
+      userId,
+      "courses.courseId": req.params.id,
+    });
+
+    if (studentCourse) {
+      isEnrolled = true;
+      // Get progress if enrolled
+      const Progress = require("../../models/CourseProgress");
+      userProgress = await Progress.findOne({
+        userId,
+        courseId: req.params.id,
       });
     }
-
-    res.status(200).json({
-      success: true,
-      data: courseDetails,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Some error occured in (getStudentViewCourseDetails)",
-    });
   }
-};
 
-const checkCoursePurchaseInfo = async (req, res) => {
-  try {
-    const { id, studentId } = req.params; // Extract course ID and student ID
-    const studentCourses = await StudentCourses.findOne({ userId: studentId }); // Find student's courses
-    if (!studentCourses) {
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
-    data: false, // Student hasn't purchased any courses
+    data: {
+      course,
+      enrollment: {
+        isEnrolled,
+        progress: userProgress,
+      },
+    },
   });
-}
+});
 
+// @desc    Get featured courses
+// @route   GET /student/course/featured
+// @access  Public
+const getFeaturedCourses = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit) || 6;
 
-    // Check if the student has already bought the course
-    const ifStudentAlreadyBoughtCurrentCourse =
-      studentCourses.courses.findIndex((item) => item.courseId === id) > -1;
+  const courses = await Course.find({
+    isPublished: true,
+    status: "published",
+    isFeatured: true,
+  })
+    .populate("instructorId", "userName userEmail profile")
+    .select("-curriculum -students")
+    .sort({ "rating.average": -1, totalEnrollments: -1 })
+    .limit(limit);
 
-    res.status(200).json({
-      success: true,
-      data: ifStudentAlreadyBoughtCurrentCourse,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
+  res.status(200).json({
+    success: true,
+    data: { courses },
+  });
+});
+
+// @desc    Get courses by category
+// @route   GET /student/course/category/:category
+// @access  Public
+const getCoursesByCategory = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 12 } = req.query;
+  const skip = (page - 1) * limit;
+
+  const courses = await Course.find({
+    category: req.params.category,
+    isPublished: true,
+    status: "published",
+  })
+    .populate("instructorId", "userName userEmail profile")
+    .select("-curriculum -students")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  const total = await Course.countDocuments({
+    category: req.params.category,
+    isPublished: true,
+    status: "published",
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      courses,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    },
+  });
+});
+
+// @desc    Check if user can purchase course
+// @route   GET /student/course/purchase-info/:courseId/:studentId
+// @access  Private
+const getPurchaseInfo = asyncHandler(async (req, res) => {
+  const { courseId, studentId } = req.params;
+  const userId = req.user.userId || req.user._id;
+
+  // Verify user can only check their own purchase info
+  if (studentId !== userId.toString()) {
+    return res.status(403).json({
       success: false,
-      message: "Some error occured in (checkCoursePurchaseInfo)",
+      message: "Unauthorized",
     });
   }
-};
 
+  const course = await Course.findById(courseId);
+  if (!course) {
+    return res.status(404).json({
+      success: false,
+      message: "Course not found",
+    });
+  }
+
+  const studentCourse = await StudentCourses.findOne({
+    userId,
+    "courses.courseId": courseId,
+  });
+
+  const canPurchase = !studentCourse && course.isPublished;
+
+  res.status(200).json({
+    success: true,
+    data: {
+      canPurchase,
+      isEnrolled: !!studentCourse,
+      course: {
+        _id: course._id,
+        title: course.title,
+        pricing: course.pricing,
+        image: course.image,
+      },
+    },
+  });
+});
 
 module.exports = {
-  getAllStudentViewCourses,
-  getStudentViewCourseDetails,
-  checkCoursePurchaseInfo,
+  getAllPublishedCourses,
+  getCourseDetails,
+  getFeaturedCourses,
+  getCoursesByCategory,
+  getPurchaseInfo,
 };
