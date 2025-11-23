@@ -4,34 +4,36 @@ import { Fragment } from "react";
 function RouteGuard({ authenticated, user, element }) {
   const location = useLocation();
 
-
+  // If not authenticated and trying to access protected route, redirect to auth
   if (!authenticated && !location.pathname.includes("/auth")) {
-    return <Navigate to="/auth" />;
+    return <Navigate to="/auth" replace />;
+  }
+
+  // If authenticated and on auth page, redirect based on role
+  if (authenticated && location.pathname.includes("/auth")) {
+    if (user?.role === "admin" || user?.role === "instructor") {
+      return <Navigate to="/instructor" replace />;
+    }
+    return <Navigate to="/home" replace />;
   }
 
   // Admin routes - only admins can access
   if (location.pathname.includes("/admin") && user?.role !== "admin") {
-    return <Navigate to="/home" />;
+    return <Navigate to="/home" replace />;
   }
 
+  // Instructor/Admin routes - only instructors and admins can access
   if (
-    authenticated &&
+    location.pathname.includes("/instructor") &&
     user?.role !== "instructor" &&
-    user?.role !== "admin" &&
-    (location.pathname.includes("instructor") ||
-      location.pathname.includes("/auth"))
+    user?.role !== "admin"
   ) {
-    return <Navigate to="/home" />;
+    return <Navigate to="/home" replace />;
   }
 
-  if (
-    authenticated &&
-    user?.role === "instructor" &&
-    !location.pathname.includes("instructor") &&
-    !location.pathname.includes("admin")
-  ) {
-    return <Navigate to="/instructor" />;
-  }
+  // Students can access student routes (home, courses, etc.)
+  // Instructors and admins can also access student routes (they can view courses)
+  // So we don't block them from student routes
 
   return <Fragment>{element}</Fragment>;
 }

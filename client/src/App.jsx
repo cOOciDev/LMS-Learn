@@ -4,6 +4,7 @@ import RouteGuard from "./components/route-guard";
 import { useContext } from "react";
 import { AuthContext } from "./context/auth-context";
 import InstructorDashboardpage from "./pages/instructor";
+import InstructorCommonLayout from "./components/instructor-view/common-layout";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
 import StudentHomePage from "./pages/student/home";
 import NotFoundPage from "./pages/not-found";
@@ -14,6 +15,9 @@ import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
 import AdminRegisterUserPage from "./pages/admin/register-user";
+import AdminCommonLayout from "./components/admin-view/common-layout";
+import AdminDashboard from "./pages/admin/dashboard";
+import AdminUserManagement from "./pages/admin/users";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -34,42 +38,30 @@ function App() {
         path="/instructor"
         element={
           <RouteGuard
-            element={<InstructorDashboardpage />}
+            element={<InstructorCommonLayout />}
             authenticated={auth?.authenticate}
             user={auth?.user}
           />
         }
-      />
+      >
+        <Route index element={<InstructorDashboardpage />} />
+        <Route path="create-new-course" element={<AddNewCoursePage />} />
+        <Route path="edit-course/:courseId" element={<AddNewCoursePage />} />
+      </Route>
       <Route
-        path="/instructor/create-new-course"
+        path="/admin"
         element={
           <RouteGuard
-            element={<AddNewCoursePage />}
+            element={<AdminCommonLayout />}
             authenticated={auth?.authenticate}
             user={auth?.user}
           />
         }
-      />
-      <Route
-        path="/instructor/edit-course/:courseId"
-        element={
-          <RouteGuard
-            element={<AddNewCoursePage />}
-            authenticated={auth?.authenticate}
-            user={auth?.user}
-          />
-        }
-      />
-      <Route
-        path="/admin/register-user"
-        element={
-          <RouteGuard
-            element={<AdminRegisterUserPage />}
-            authenticated={auth?.authenticate}
-            user={auth?.user}
-          />
-        }
-      />
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUserManagement />} />
+        <Route path="register-user" element={<AdminRegisterUserPage />} />
+      </Route>
       <Route
         path="/"
         element={

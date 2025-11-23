@@ -10,20 +10,35 @@ import {
 import { DollarSign, Users } from "lucide-react";
 
 function InstructorDashboard({ listOfCourses }) {
-  console.log(listOfCourses)
-  function calculateTotalStudentsAndProfit() {
-    const { totalStudents, totalProfit, studentList } = listOfCourses.reduce(      
-      
-      (acc, course) => {
-        const studentCount = course.students.length;
-        acc.totalStudents += studentCount;
-        acc.totalProfit += course.pricing * studentCount;
+  // Handle different response structures
+  // API might return { courses: [], pagination: {} } or just an array
+  const courses = Array.isArray(listOfCourses) 
+    ? listOfCourses 
+    : (listOfCourses?.courses || []);
 
-        course.students.forEach((student) => {
+  function calculateTotalStudentsAndProfit() {
+    // Ensure courses is an array
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return {
+        totalProfit: 0,
+        totalStudents: 0,
+        studentList: [],
+      };
+    }
+
+    const { totalStudents, totalProfit, studentList } = courses.reduce(      
+      (acc, course) => {
+        // Handle courses that might not have students array
+        const students = course.students || [];
+        const studentCount = students.length;
+        acc.totalStudents += studentCount;
+        acc.totalProfit += (course.pricing || 0) * studentCount;
+
+        students.forEach((student) => {
           acc.studentList.push({
-            courseTitle: course.title,
-            studentName: student.studentName,
-            studentEmail: student.studentEmail,
+            courseTitle: course.title || "Untitled Course",
+            studentName: student.studentName || student.name || "Unknown",
+            studentEmail: student.studentEmail || student.email || "No email",
           });
         });
 

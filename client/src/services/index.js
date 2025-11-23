@@ -7,9 +7,13 @@ export async function registerService(formData) {
 }
 
 export async function loginService(formData) {
-  const { data } = await axiosInstance.post("/auth/login", formData);
-
-  return data;
+  try {
+    const { data } = await axiosInstance.post("/auth/login", formData);
+    return data;
+  } catch (error) {
+    // Return error in a consistent format
+    throw error; // Let the auth context handle it
+  }
 }
 
 export async function checkAuthService() {
@@ -159,5 +163,43 @@ export async function resetCourseProgressService(userId, courseId) {
     }
   );
 
+  return data;
+}
+
+// Admin Services
+export async function getAdminDashboardStatsService() {
+  const { data } = await axiosInstance.get("/admin/dashboard/stats");
+  return data;
+}
+
+export async function getAllUsersService(params = {}) {
+  const queryParams = new URLSearchParams(params).toString();
+  const { data } = await axiosInstance.get(`/admin/users?${queryParams}`);
+  return data;
+}
+
+export async function getUserByIdService(userId) {
+  const { data } = await axiosInstance.get(`/admin/users/${userId}`);
+  return data;
+}
+
+export async function updateUserService(userId, userData) {
+  const { data } = await axiosInstance.put(`/admin/users/${userId}`, userData);
+  return data;
+}
+
+export async function deleteUserService(userId) {
+  const { data } = await axiosInstance.delete(`/admin/users/${userId}`);
+  return data;
+}
+
+export async function getUserGrowthStatsService() {
+  const { data } = await axiosInstance.get("/admin/users/growth/stats");
+  return data;
+}
+
+export async function getAllCoursesAdminService(params = {}) {
+  const queryParams = new URLSearchParams(params).toString();
+  const { data } = await axiosInstance.get(`/admin/courses?${queryParams}`);
   return data;
 }

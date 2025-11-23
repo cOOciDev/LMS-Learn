@@ -21,22 +21,56 @@ export default function AuthProvider({ children }) {
 
   async function handleLoginUser(event) {
     event.preventDefault();
-    const data = await loginService(signInFormData);
+    try {
+      const data = await loginService(signInFormData);
 
-    if (data.success) {
-      sessionStorage.setItem(
-        "accessToken",
-        JSON.stringify(data.data.accessToken)
-      );
-      setAuth({
-        authenticate: true,
-        user: data.data.user,
-      });
-    } else {
+      if (data?.success) {
+        // Store tokens
+        sessionStorage.setItem(
+          "accessToken",
+          JSON.stringify(data.data.accessToken)
+        );
+        if (data.data.refreshToken) {
+          sessionStorage.setItem(
+            "refreshToken",
+            JSON.stringify(data.data.refreshToken)
+          );
+        }
+        
+        // Update auth state
+        const userData = data.data.user;
+        setAuth({
+          authenticate: true,
+          user: userData,
+        });
+        
+        // Reset form
+        setSignInFormData(initialSignInFormData);
+        
+        return { 
+          success: true, 
+          message: data.message || "Login successful",
+          user: userData // Return user data for navigation
+        };
+      } else {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+        return { 
+          success: false, 
+          message: data?.message || "Login failed. Please try again." 
+        };
+      }
+    } catch (error) {
       setAuth({
         authenticate: false,
         user: null,
       });
+      return { 
+        success: false, 
+        message: error?.response?.data?.message || "An error occurred. Please try again." 
+      };
     }
   }
 
@@ -45,28 +79,28 @@ export default function AuthProvider({ children }) {
   async function checkAuthUser() {
     try {
       const data = await checkAuthService();
-      if (data.success) {
+      if (data?.success) {
         setAuth({
           authenticate: true,
-          user: data.data.user,
+          user: data.data?.user,
         });
-        setLoading(false);
       } else {
         setAuth({
           authenticate: false,
           user: null,
         });
-        setLoading(false);
       }
     } catch (error) {
-      console.log(error);
-      if (!error?.response?.data?.success) {
-        setAuth({
-          authenticate: false,
-          user: null,
-        });
-        setLoading(false);
-      }
+      console.error("Auth check error:", error);
+      // Clear tokens if check fails
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
+    } finally {
+      setLoading(false);
     }
   }
 

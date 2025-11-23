@@ -17,7 +17,10 @@
     "edit": "ویرایش",
     "create": "ایجاد",
     "update": "به‌روزرسانی",
+    "back": "بازگشت",
     "search": "جستجو",
+    "previous": "قبلی",
+    "next": "بعدی",
     "loading": "در حال بارگذاری...",
     "error": "خطا",
     "success": "موفقیت",
@@ -41,12 +44,39 @@
     "registerUser": "ثبت نام کاربر",
     "invalidCredentials": "اعتبارنامه‌های نامعتبر",
     "userRegistered": "کاربر با موفقیت ثبت نام شد!",
-    "failedToRegister": "ثبت نام کاربر ناموفق بود"
+    "failedToRegister": "ثبت نام کاربر ناموفق بود",
+    "loginSuccessful": "ورود موفقیت‌آمیز بود! در حال هدایت...",
+    "loginFailed": "ورود ناموفق بود. لطفاً اعتبارنامه‌های خود را بررسی کنید و دوباره تلاش کنید.",
+    "pleaseFillAllFields": "لطفاً تمام فیلدهای الزامی را پر کنید"
   },
   "admin": {
     "adminPanel": "پنل مدیریت",
+    "adminDashboard": "داشبورد مدیریت",
     "registerUser": "ثبت نام کاربر",
-    "userManagement": "مدیریت کاربران"
+    "userManagement": "مدیریت کاربران",
+    "dashboard": "داشبورد",
+    "totalUsers": "کل کاربران",
+    "totalCourses": "کل دوره‌ها",
+    "totalRevenue": "کل درآمد",
+    "growth": "رشد",
+    "recentUsers": "کاربران اخیر",
+    "active": "فعال",
+    "inactive": "غیرفعال",
+    "status": "وضعیت",
+    "usersList": "لیست کاربران",
+    "lastLogin": "آخرین ورود",
+    "createdAt": "تاریخ ایجاد",
+    "actions": "عملیات",
+    "editUser": "ویرایش کاربر",
+    "updateUserDetails": "به‌روزرسانی اطلاعات و وضعیت کاربر",
+    "confirmDeleteUser": "آیا مطمئن هستید که می‌خواهید این کاربر را غیرفعال کنید؟",
+    "allRoles": "همه نقش‌ها",
+    "allStatuses": "همه وضعیت‌ها",
+    "noUsersFound": "کاربری یافت نشد",
+    "showing": "نمایش",
+    "of": "از",
+    "activeUsers": "کاربران فعال",
+    "newUsers": "جدید این ماه"
   },
   "instructor": {
     "instructorDashboard": "داشبورد مدرس",
@@ -72,7 +102,8 @@
     "courseDetails": "جزئیات دوره",
     "courseContent": "محتوای دوره",
     "lectures": "جلسات",
-    "curriculum": "برنامه درسی"
+    "curriculum": "برنامه درسی",
+    "settings": "تنظیمات"
   },
   "validation": {
     "required": "این فیلد الزامی است",

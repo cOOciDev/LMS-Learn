@@ -6,6 +6,7 @@ const {
   deleteUser,
   getDashboardStats,
   getAllCourses,
+  getUserGrowthStats,
 } = require("../../controllers/admin-controller/index");
 const authenticateMiddleware = require("../../middleware/auth-middleware");
 const isAdmin = require("../../middleware/admin-middleware");
@@ -21,6 +22,7 @@ router.get("/dashboard/stats", getDashboardStats);
 
 // User management
 router.get("/users", validatePagination, getAllUsers);
+router.get("/users/growth/stats", getUserGrowthStats);
 router.get("/users/:id", getUserById);
 router.put("/users/:id", updateUser);
 router.delete("/users/:id", deleteUser);

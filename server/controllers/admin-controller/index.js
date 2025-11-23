@@ -215,6 +215,36 @@ const getAllCourses = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get user growth statistics
+// @route   GET /admin/users/growth/stats
+// @access  Private/Admin
+const getUserGrowthStats = asyncHandler(async (req, res) => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+  const [total, active, thisMonth, lastMonth] = await Promise.all([
+    User.countDocuments(),
+    User.countDocuments({ isActive: true }),
+    User.countDocuments({ createdAt: { $gte: startOfMonth } }),
+    User.countDocuments({
+      createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
+    }),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: {
+      total,
+      active,
+      thisMonth,
+      lastMonth,
+      growth: lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth * 100).toFixed(1) : 0,
+    },
+  });
+});
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -222,5 +252,6 @@ module.exports = {
   deleteUser,
   getDashboardStats,
   getAllCourses,
+  getUserGrowthStats,
 };
 

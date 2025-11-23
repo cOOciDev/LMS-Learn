@@ -17,6 +17,7 @@
     "edit": "Edit",
     "create": "Create",
     "update": "Update",
+    "back": "Back",
     "search": "Search",
     "loading": "Loading...",
     "error": "Error",
@@ -41,12 +42,39 @@
     "registerUser": "Register User",
     "invalidCredentials": "Invalid credentials",
     "userRegistered": "User registered successfully!",
-    "failedToRegister": "Failed to register user"
+    "failedToRegister": "Failed to register user",
+    "loginSuccessful": "Login successful! Redirecting...",
+    "loginFailed": "Login failed. Please check your credentials and try again.",
+    "pleaseFillAllFields": "Please fill in all required fields"
   },
   "admin": {
     "adminPanel": "Admin Panel",
+    "adminDashboard": "Admin Dashboard",
     "registerUser": "Register User",
-    "userManagement": "User Management"
+    "userManagement": "User Management",
+    "dashboard": "Dashboard",
+    "totalUsers": "Total Users",
+    "totalCourses": "Total Courses",
+    "totalRevenue": "Total Revenue",
+    "growth": "Growth",
+    "recentUsers": "Recent Users",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "usersList": "Users List",
+    "lastLogin": "Last Login",
+    "createdAt": "Created",
+    "actions": "Actions",
+    "editUser": "Edit User",
+    "updateUserDetails": "Update user details and status",
+    "confirmDeleteUser": "Are you sure you want to deactivate this user?",
+    "allRoles": "All Roles",
+    "allStatuses": "All Statuses",
+    "noUsersFound": "No users found",
+    "showing": "Showing",
+    "of": "of",
+    "activeUsers": "Active Users",
+    "newUsers": "New This Month"
   },
   "instructor": {
     "instructorDashboard": "Instructor Dashboard",
@@ -72,7 +100,8 @@
     "courseDetails": "Course Details",
     "courseContent": "Course Content",
     "lectures": "Lectures",
-    "curriculum": "Curriculum"
+    "curriculum": "Curriculum",
+    "settings": "Settings"
   },
   "validation": {
     "required": "This field is required",

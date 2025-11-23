@@ -15,6 +15,7 @@ function StudentViewCommonHeader() {
   function handleLogout() {
     resetCredentials();
     sessionStorage.clear();
+    window.location.href = "/auth";
   }
 
   return (

@@ -25,6 +25,11 @@ function InstructorCourses({ listOfCourses }) {
     setCourseCurriculumFormData,
   } = useContext(InstructorContext);
 
+  // Handle different response structures
+  const courses = Array.isArray(listOfCourses) 
+    ? listOfCourses 
+    : (listOfCourses?.courses || []);
+
   return (
     <Card>
       <CardHeader className="flex justify-between flex-row items-center">
@@ -53,15 +58,15 @@ function InstructorCourses({ listOfCourses }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {listOfCourses && listOfCourses.length > 0
-                ? listOfCourses.map((course) => (
+              {courses && courses.length > 0
+                ? courses.map((course) => (
                     <TableRow>
                       <TableCell className="font-medium">
                         {course?.title}
                       </TableCell>
-                      <TableCell>{course?.students?.length}</TableCell>
+                      <TableCell>{course?.students?.length || 0}</TableCell>
                       <TableCell>
-                        ${course?.students?.length * course?.pricing}
+                        ${((course?.students?.length || 0) * (course?.pricing || 0)).toFixed(2)}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
