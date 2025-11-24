@@ -59,8 +59,6 @@ function AddNewCoursePage() {
       return false;
     }
 
-    let hasFreePreview = false;
-
     for (const item of courseCurriculumFormData) {
       if (
         isEmpty(item.title) ||
@@ -69,20 +67,17 @@ function AddNewCoursePage() {
       ) {
         return false;
       }
-
-      if (item.freePreview) {
-        hasFreePreview = true; //found at least one free preview
-      }
     }
 
-    return hasFreePreview;
+    return true;
   }
 
   async function handleCreateCourse() {
     if (!validateFormData()) {
       toast({
         title: t("common.error"),
-        description: "Please fill in all required fields and add at least one free preview lecture.",
+        description:
+          "Please complete all required fields and provide valid curriculum videos before submitting.",
         variant: "destructive",
       });
       return;
@@ -116,7 +111,9 @@ function AddNewCoursePage() {
             : "Course created successfully!",
         });
         setCourseLandingFormData(courseLandingInitialFormData);
-        setCourseCurriculumFormData(courseCurriculumInitialFormData);
+        setCourseCurriculumFormData(
+          courseCurriculumInitialFormData.map((item) => ({ ...item }))
+        );
         setCurrentEditedCourseId(null);
         navigate("/instructor");
       } else {

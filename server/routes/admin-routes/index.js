@@ -7,6 +7,10 @@ const {
   getDashboardStats,
   getAllCourses,
   getUserGrowthStats,
+  getFinancialReports,
+  getAllInstructors,
+  getInstructorDetails,
+  updateInstructor,
 } = require("../../controllers/admin-controller/index");
 const authenticateMiddleware = require("../../middleware/auth-middleware");
 const isAdmin = require("../../middleware/admin-middleware");
@@ -29,6 +33,14 @@ router.delete("/users/:id", deleteUser);
 
 // Course management
 router.get("/courses", validatePagination, getAllCourses);
+
+// Financial reports
+router.get("/financial/reports", getFinancialReports);
+
+// Instructor management
+router.get("/instructors", validatePagination, getAllInstructors);
+router.get("/instructors/:id", getInstructorDetails);
+router.put("/instructors/:id", updateInstructor);
 
 module.exports = router;
 

@@ -59,8 +59,8 @@ function InstructorCourses({ listOfCourses }) {
             </TableHeader>
             <TableBody>
               {courses && courses.length > 0
-                ? courses.map((course) => (
-                    <TableRow>
+                ? courses.map((course, index) => (
+                    <TableRow key={index}>
                       <TableCell className="font-medium">
                         {course?.title}
                       </TableCell>

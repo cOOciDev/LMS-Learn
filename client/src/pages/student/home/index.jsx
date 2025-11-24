@@ -29,21 +29,25 @@ function StudentHomePage() {
 
   async function fetchAllStudentViewCourses() {
     const response = await fetchStudentViewCourseListService();
-    if (response?.success) setStudentViewCoursesList(response?.data);
+    if (response?.success) {
+      setStudentViewCoursesList(response?.data?.courses || []);
+    }
   }
 
   async function handleCourseNavigate(getCurrentCourseId) {
-    const response = await checkCoursePurchaseInfoService(
-      getCurrentCourseId,
-      auth?.user?._id
-    );
+    try {
+      const response = await checkCoursePurchaseInfoService(
+        getCurrentCourseId,
+        auth?.user?._id
+      );
 
-    if (response?.success) {
-      if (response?.data) {
+      if (response?.success && response?.data?.isEnrolled) {
         navigate(`/course-progress/${getCurrentCourseId}`);
       } else {
         navigate(`/course/details/${getCurrentCourseId}`);
       }
+    } catch (error) {
+      navigate(`/course/details/${getCurrentCourseId}`);
     }
   }
 
@@ -88,8 +92,9 @@ function StudentHomePage() {
         <h2 className="text-2xl font-bold mb-6">Featured COourses</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {studentViewCoursesList && studentViewCoursesList.length > 0 ? (
-            studentViewCoursesList.map((courseItem) => (
+            studentViewCoursesList.map((courseItem, index) => (
               <div
+                key={index}
                 onClick={() => handleCourseNavigate(courseItem?._id)}
                 className="border rounded-lg overflow-hidden shadow cursor-pointer"
               >

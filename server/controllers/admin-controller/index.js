@@ -245,6 +245,279 @@ const getUserGrowthStats = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get financial reports summary
+// @route   GET /admin/financial/reports
+// @access  Private/Admin
+const getFinancialReports = asyncHandler(async (req, res) => {
+  const paidMatchStage = { paymentStatus: "paid" };
+
+  const [revenueSummary, monthlyRevenue, topCourses, topInstructors] = await Promise.all([
+    Order.aggregate([
+      { $match: paidMatchStage },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: { $toDouble: "$coursePricing" } },
+          totalOrders: { $sum: 1 },
+        },
+      },
+    ]),
+    Order.aggregate([
+      { $match: paidMatchStage },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$orderDate" },
+            month: { $month: "$orderDate" },
+          },
+          revenue: { $sum: { $toDouble: "$coursePricing" } },
+          orders: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]),
+    Order.aggregate([
+      { $match: paidMatchStage },
+      {
+        $group: {
+          _id: "$courseId",
+          title: { $first: "$courseTitle" },
+          revenue: { $sum: { $toDouble: "$coursePricing" } },
+          orders: { $sum: 1 },
+        },
+      },
+      { $sort: { revenue: -1 } },
+      { $limit: 5 },
+    ]),
+    Order.aggregate([
+      { $match: paidMatchStage },
+      {
+        $group: {
+          _id: "$instructorId",
+          instructorName: { $first: "$instructorName" },
+          revenue: { $sum: { $toDouble: "$coursePricing" } },
+          orders: { $sum: 1 },
+        },
+      },
+      { $sort: { revenue: -1 } },
+      { $limit: 5 },
+    ]),
+  ]);
+
+  const summary = revenueSummary[0] || { totalRevenue: 0, totalOrders: 0 };
+  const avgOrderValue =
+    summary.totalOrders > 0
+      ? Number(summary.totalRevenue / summary.totalOrders).toFixed(2)
+      : 0;
+
+  res.status(200).json({
+    success: true,
+    data: {
+      summary: {
+        totalRevenue: summary.totalRevenue || 0,
+        totalOrders: summary.totalOrders || 0,
+        avgOrderValue,
+      },
+      monthlyRevenue,
+      topCourses,
+      topInstructors,
+    },
+  });
+});
+
+// @desc    Get all instructors with stats
+// @route   GET /admin/instructors
+// @access  Private/Admin
+const getAllInstructors = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10, search, isActive } = req.query;
+  const skip = (page - 1) * limit;
+
+  const matchQuery = { role: "instructor" };
+  if (search) {
+    matchQuery.$or = [
+      { userName: { $regex: search, $options: "i" } },
+      { userEmail: { $regex: search, $options: "i" } },
+    ];
+  }
+  if (isActive !== undefined) {
+    matchQuery.isActive = isActive === "true";
+  }
+
+  const [instructors, total, totalInstructors, activeInstructors, courseStats] =
+    await Promise.all([
+      User.aggregate([
+        { $match: matchQuery },
+        {
+          $lookup: {
+            from: "courses",
+            localField: "_id",
+            foreignField: "instructorId",
+            as: "courses",
+          },
+        },
+        {
+          $addFields: {
+            ratingAverage: {
+              $cond: [
+                { $gt: [{ $size: "$courses" }, 0] },
+                {
+                  $avg: {
+                    $map: {
+                      input: "$courses",
+                      as: "course",
+                      in: "$$course.rating.average",
+                    },
+                  },
+                },
+                0,
+              ],
+            },
+          },
+        },
+        {
+          $addFields: {
+            totalCourses: { $size: "$courses" },
+            publishedCourses: {
+              $size: {
+                $filter: {
+                  input: "$courses",
+                  as: "course",
+                  cond: { $eq: ["$$course.isPublished", true] },
+                },
+              },
+            },
+            totalStudents: { $sum: "$courses.totalEnrollments" },
+          },
+        },
+        {
+          $project: {
+            password: 0,
+            refreshToken: 0,
+            courses: 0,
+            passwordResetToken: 0,
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: parseInt(limit) },
+      ]),
+      User.countDocuments(matchQuery),
+      User.countDocuments({ role: "instructor" }),
+      User.countDocuments({ role: "instructor", isActive: true }),
+      Course.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalCourses: { $sum: 1 },
+            publishedCourses: {
+              $sum: { $cond: [{ $eq: ["$isPublished", true] }, 1, 0] },
+            },
+            totalStudents: { $sum: "$totalEnrollments" },
+          },
+        },
+      ]),
+    ]);
+
+  const aggregatedCourseStats = courseStats[0] || {
+    totalCourses: 0,
+    publishedCourses: 0,
+    totalStudents: 0,
+  };
+
+  res.status(200).json({
+    success: true,
+    data: {
+      instructors,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+      stats: {
+        totalInstructors,
+        activeInstructors,
+        totalCourses: aggregatedCourseStats.totalCourses,
+        publishedCourses: aggregatedCourseStats.publishedCourses,
+        totalStudents: aggregatedCourseStats.totalStudents,
+      },
+    },
+  });
+});
+
+// @desc    Get instructor details with courses
+// @route   GET /admin/instructors/:id
+// @access  Private/Admin
+const getInstructorDetails = asyncHandler(async (req, res) => {
+  const instructor = await User.findOne({
+    _id: req.params.id,
+    role: "instructor",
+  }).select("-password -refreshToken -passwordResetToken");
+
+  if (!instructor) {
+    return res.status(404).json({
+      success: false,
+      message: "Instructor not found",
+    });
+  }
+
+  const courses = await Course.find({ instructorId: instructor._id })
+    .sort({ createdAt: -1 })
+    .select(
+      "title status isPublished totalEnrollments createdAt level category pricing"
+    );
+
+  res.status(200).json({
+    success: true,
+    data: {
+      instructor,
+      courses,
+    },
+  });
+});
+
+// @desc    Update instructor (status/profile)
+// @route   PUT /admin/instructors/:id
+// @access  Private/Admin
+const updateInstructor = asyncHandler(async (req, res) => {
+  const { isActive, profile } = req.body;
+
+  const instructor = await User.findOne({
+    _id: req.params.id,
+    role: "instructor",
+  });
+
+  if (!instructor) {
+    return res.status(404).json({
+      success: false,
+      message: "Instructor not found",
+    });
+  }
+
+  if (isActive !== undefined) {
+    instructor.isActive = isActive;
+  }
+  if (profile) {
+    instructor.profile = profile;
+  }
+
+  await instructor.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Instructor updated successfully",
+    data: {
+      instructor: {
+        _id: instructor._id,
+        userName: instructor.userName,
+        userEmail: instructor.userEmail,
+        isActive: instructor.isActive,
+        profile: instructor.profile,
+      },
+    },
+  });
+});
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -253,5 +526,9 @@ module.exports = {
   getDashboardStats,
   getAllCourses,
   getUserGrowthStats,
+  getFinancialReports,
+  getAllInstructors,
+  getInstructorDetails,
+  updateInstructor,
 };
 

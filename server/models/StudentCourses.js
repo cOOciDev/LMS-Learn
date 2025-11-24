@@ -10,6 +10,13 @@ const StudentCoursesSchema = new mongoose.Schema({
       instructorName: String,
       dateOfPurchase: Date,
       courseImage: String,
+      rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+      },
+      review: String,
+      ratedAt: Date,
     },
   ],
 });

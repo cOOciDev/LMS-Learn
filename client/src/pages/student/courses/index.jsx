@@ -8,6 +8,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { filterOptions, sortOptions } from "@/config";
@@ -17,8 +18,8 @@ import {
   checkCoursePurchaseInfoService,
   fetchStudentViewCourseListService,
 } from "@/services";
-import { ArrowUpDownIcon } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import { ArrowUpDownIcon, Search as SearchIcon } from "lucide-react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function createSearchParamsHelper(filterParams) {
@@ -38,6 +39,8 @@ function createSearchParamsHelper(filterParams) {
 function StudentViewCoursesPage() {
   const [sort, setSort] = useState("price-lowtohigh");
   const [filters, setFilters] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     studentViewCoursesList,
@@ -45,8 +48,19 @@ function StudentViewCoursesPage() {
     loadingState,
     setLoadingState,
   } = useContext(StudentContext);
+  const [resultsTotal, setResultsTotal] = useState(0);
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
+
+  const sortQueryMap = useMemo(
+    () => ({
+      "price-lowtohigh": { sortBy: "pricing", sortOrder: "asc" },
+      "price-hightolow": { sortBy: "pricing", sortOrder: "desc" },
+      "title-atoz": { sortBy: "title", sortOrder: "asc" },
+      "title-ztoa": { sortBy: "title", sortOrder: "desc" },
+    }),
+    []
+  );
 
   function handleFilterOnChange(getSectionId, getCurrentOption) {
     let cpyFilters = { ...filters };
@@ -73,37 +87,67 @@ function StudentViewCoursesPage() {
     sessionStorage.setItem("filters", JSON.stringify(cpyFilters));
   }
 
-  async function fetchAllStudentViewCourses(filters, sort) {
-    const query = new URLSearchParams({
-      ...filters,
-      sortBy: sort,
+  async function fetchAllStudentViewCourses(filters, sort, searchValue) {
+    setLoadingState(true);
+    const query = new URLSearchParams();
+
+    Object.entries(filters || {}).forEach(([key, value]) => {
+      if (Array.isArray(value) && value.length > 0) {
+        query.set(key, value.join(","));
+      }
     });
-    const response = await fetchStudentViewCourseListService(query);
-    if (response?.success) {
-      setStudentViewCoursesList(response?.data);
+
+    const currentSort = sortQueryMap[sort] || {
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    };
+    query.set("sortBy", currentSort.sortBy);
+    query.set("sortOrder", currentSort.sortOrder);
+
+    if (searchValue) {
+      query.set("search", searchValue);
+    }
+
+    try {
+      const response = await fetchStudentViewCourseListService(query);
+      if (response?.success) {
+        const courses = response?.data?.courses || [];
+        setStudentViewCoursesList(courses);
+        setResultsTotal(response?.data?.pagination?.total ?? courses.length);
+      } else {
+        setStudentViewCoursesList([]);
+        setResultsTotal(0);
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      setStudentViewCoursesList([]);
+      setResultsTotal(0);
+    } finally {
       setLoadingState(false);
     }
   }
 
   async function handleCourseNavigate(getCurrentCourseId) {
-    const response = await checkCoursePurchaseInfoService(
-      getCurrentCourseId,
-      auth?.user?._id
-    );
+    try {
+      const response = await checkCoursePurchaseInfoService(
+        getCurrentCourseId,
+        auth?.user?._id
+      );
 
-    if (response?.success) {
-      if (response?.data) {
+      if (response?.success && response?.data?.isEnrolled) {
         navigate(`/course-progress/${getCurrentCourseId}`);
       } else {
         navigate(`/course/details/${getCurrentCourseId}`);
       }
+    } catch (error) {
+      navigate(`/course/details/${getCurrentCourseId}`);
     }
   }
 
   useEffect(() => {
     const buildQueryStringForFilters = createSearchParamsHelper(filters);
     setSearchParams(new URLSearchParams(buildQueryStringForFilters));
-  }, [filters]);
+  }, [filters, setSearchParams]);
 
   useEffect(() => {
     setSort("price-lowtohigh");
@@ -111,13 +155,22 @@ function StudentViewCoursesPage() {
   }, []);
 
   useEffect(() => {
-    if (filters !== null && sort !== null)
-      fetchAllStudentViewCourses(filters, sort);
-  }, [filters, sort]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (filters !== null && sort !== null) {
+      fetchAllStudentViewCourses(filters, sort, debouncedSearch);
+    }
+  }, [filters, sort, debouncedSearch]);
 
   useEffect(() => {
     return () => {
       sessionStorage.removeItem("filters");
+      setSearchTerm("");
     };
   }, []);
 
@@ -128,12 +181,12 @@ function StudentViewCoursesPage() {
       <div className="flex flex-col md:flex-row gap-4">
         <aside className="w-full md:w-64 space-y-4">
           <div>
-            {Object.keys(filterOptions).map((ketItem) => (
-              <div className="p-4 border-b">
+            {Object.keys(filterOptions).map((ketItem, index) => (
+              <div key={index} className="p-4 border-b">
                 <h3 className="font-bold mb-3">{ketItem.toUpperCase()}</h3>
                 <div className="grid gap-2 mt-2">
                   {filterOptions[ketItem].map((option) => (
-                    <Label className="flex font-medium items-center gap-3">
+                    <Label key={option.id} className="flex font-medium items-center gap-3">
                       <Checkbox
                         checked={
                           filters &&
@@ -154,7 +207,16 @@ function StudentViewCoursesPage() {
           </div>
         </aside>
         <main className="flex-1">
-          <div className="flex justify-end items-center mb-4 gap-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div className="w-full md:max-w-sm relative">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search courses..."
+                className="pl-9"
+              />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -183,7 +245,7 @@ function StudentViewCoursesPage() {
               </DropdownMenuContent>
             </DropdownMenu>
             <span className="text-sm text-black font-bold">
-              {studentViewCoursesList.length} Results
+              {resultsTotal || studentViewCoursesList.length} Results
             </span>
           </div>
           <div className="space-y-4">

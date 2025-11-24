@@ -11,7 +11,10 @@ function RouteGuard({ authenticated, user, element }) {
 
   // If authenticated and on auth page, redirect based on role
   if (authenticated && location.pathname.includes("/auth")) {
-    if (user?.role === "admin" || user?.role === "instructor") {
+    if (user?.role === "admin") {
+      return <Navigate to="/admin" replace />;
+    }
+    if (user?.role === "instructor") {
       return <Navigate to="/instructor" replace />;
     }
     return <Navigate to="/home" replace />;
@@ -22,13 +25,21 @@ function RouteGuard({ authenticated, user, element }) {
     return <Navigate to="/home" replace />;
   }
 
-  // Instructor/Admin routes - only instructors and admins can access
+  // Instructor routes - only instructors can access
   if (
     location.pathname.includes("/instructor") &&
-    user?.role !== "instructor" &&
-    user?.role !== "admin"
+    user?.role !== "instructor"
   ) {
     return <Navigate to="/home" replace />;
+  }
+
+  // Redirect admins to their dashboard when accessing student routes
+  if (
+    user?.role === "admin" &&
+    !location.pathname.startsWith("/admin") &&
+    !location.pathname.startsWith("/auth")
+  ) {
+    return <Navigate to="/admin" replace />;
   }
 
   // Students can access student routes (home, courses, etc.)

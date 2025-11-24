@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -18,15 +20,20 @@ import {
   getCurrentCourseProgressService,
   markLectureAsViewedService,
   resetCourseProgressService,
+  submitCourseRatingService,
 } from "@/services";
+import { useToast } from "@/hooks/use-toast";
 import { Check, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { useNavigate, useParams } from "react-router-dom";
+import { useLanguage } from "@/context/language-context";
 
 function StudentViewCourseProgressPage() {
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
+  const { toast } = useToast();
+  const { t } = useLanguage();
   const { studentCurrentCourseProgress, setStudentCurrentCourseProgress } =
     useContext(StudentContext);
   const [lockCourse, setLockCourse] = useState(false);
@@ -35,9 +42,17 @@ function StudentViewCourseProgressPage() {
     useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const [ratingValue, setRatingValue] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const { id } = useParams();
 
   async function fetchCurrentCourseProgress() {
+    if (!auth?.user?._id || !id) {
+      return;
+    }
+
     const response = await getCurrentCourseProgressService(auth?.user?._id, id);
     if (response?.success) {
       if (!response?.data?.isPurchased) {
@@ -52,6 +67,9 @@ function StudentViewCourseProgressPage() {
           setCurrentLecture(response?.data?.courseDetails?.curriculum[0]);
           setShowCourseCompleteDialog(true);
           setShowConfetti(true);
+          setRatingSubmitted(false);
+          setRatingValue(5);
+          setReviewText("");
 
           return;
         }
@@ -74,6 +92,12 @@ function StudentViewCourseProgressPage() {
           );
         }
       }
+    }
+  }
+
+  function handleSelectLecture(lecture) {
+    if (lecture) {
+      setCurrentLecture(lecture);
     }
   }
 
@@ -106,8 +130,10 @@ function StudentViewCourseProgressPage() {
   }
 
   useEffect(() => {
-    fetchCurrentCourseProgress();
-  }, [id]);
+    if (id && auth?.user?._id) {
+      fetchCurrentCourseProgress();
+    }
+  }, [id, auth?.user?._id]);
 
   useEffect(() => {
     if (currentLecture?.progressValue === 1) updateCourseProgress();
@@ -116,6 +142,45 @@ function StudentViewCourseProgressPage() {
   useEffect(() => {
     if (showConfetti) setTimeout(() => setShowConfetti(false), 15000);
   }, [showConfetti]);
+
+  async function handleSubmitRating() {
+    if (!studentCurrentCourseProgress?.courseDetails?._id) return;
+    if (ratingValue < 1 || ratingValue > 5) {
+      toast({
+        title: t("course.rateCourse") || "Rate this course",
+        description:
+          t("course.ratingRange") || "Rating must be between 1 and 5.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setRatingSubmitting(true);
+    try {
+      const response = await submitCourseRatingService({
+        courseId: studentCurrentCourseProgress?.courseDetails?._id,
+        rating: Number(ratingValue),
+        review: reviewText,
+      });
+      if (response?.success) {
+        toast({
+          title: t("course.ratingSuccess") || "Thanks for the rating!",
+          description: response?.message,
+        });
+        setRatingSubmitted(true);
+      }
+    } catch (error) {
+      toast({
+        title: t("common.error") || "Error",
+        description:
+          error?.response?.data?.message ||
+          t("course.ratingError") ||
+          "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setRatingSubmitting(false);
+    }
+  }
 
   console.log(currentLecture, "currentLecture");
 
@@ -190,6 +255,7 @@ function StudentViewCourseProgressPage() {
                       <div
                         className="flex items-center space-x-2 text-sm text-white font-bold cursor-pointer"
                         key={item._id}
+                        onClick={() => handleSelectLecture(item)}
                       >
                         {studentCurrentCourseProgress?.progress?.find(
                           (progressItem) => progressItem.lectureId === item._id
@@ -239,6 +305,42 @@ function StudentViewCourseProgressPage() {
                   My Courses Page
                 </Button>
                 <Button onClick={handleRewatchCourse}>Rewatch Course</Button>
+              </div>
+              <div className="border-t border-gray-300/20 pt-4 space-y-3">
+              <Label className="text-white text-sm">
+                {ratingSubmitted
+                  ? t("course.ratingSuccess") || "Thanks for rating!"
+                  : t("course.rateCourse") || "Rate this course"}
+              </Label>
+              {!ratingSubmitted && (
+                <>
+                  <Input
+                    type="number"
+                      min={1}
+                      max={5}
+                      value={ratingValue}
+                      onChange={(e) => setRatingValue(+e.target.value)}
+                      className="bg-[#1c1d1f] border-gray-700 text-white"
+                    />
+                    <Textarea
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      placeholder={
+                        t("course.leaveReview") ||
+                        "Leave a review (optional)"
+                      }
+                      className="bg-[#1c1d1f] border-gray-700 text-white"
+                    />
+                    <Button
+                      onClick={handleSubmitRating}
+                      disabled={ratingSubmitting}
+                    >
+                      {ratingSubmitting
+                        ? t("common.loading") || "Loading..."
+                        : t("course.submitFeedback") || "Submit Feedback"}
+                    </Button>
+                  </>
+                )}
               </div>
             </DialogDescription>
           </DialogHeader>

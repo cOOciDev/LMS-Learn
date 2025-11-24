@@ -6,12 +6,15 @@ import { createContext, useState } from "react";
 
 export const InstructorContext = createContext(null);
 
+const getInitialCurriculumState = () =>
+  courseCurriculumInitialFormData.map((item) => ({ ...item }));
+
 export default function InstructorProvider({ children }) {
   const [courseLandingFormData, setCourseLandingFormData] = useState(
     courseLandingInitialFormData
   );
   const [courseCurriculumFormData, setCourseCurriculumFormData] = useState(
-    courseCurriculumInitialFormData
+    getInitialCurriculumState()
   );
   const [mediaUploadProgress, setMediaUploadProgress] = useState(false);
   const [mediaUploadProgressPercentage, setMediaUploadProgressPercentage] =

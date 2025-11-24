@@ -20,9 +20,10 @@ import {
 import { CheckCircle, Globe, Lock, PlayCircle } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe("REACT_APP_STRIPE_PUBLIC_KEY");
+const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePromise = STRIPE_PUBLIC_KEY ? loadStripe(STRIPE_PUBLIC_KEY) : null;
 
 function StudentViewCourseDetailsPage() {
   const {
@@ -39,40 +40,69 @@ function StudentViewCourseDetailsPage() {
   const [displayCurrentVideoFreePreview, setDisplayCurrentVideoFreePreview] =
     useState(null);
   const [showFreePreviewDialog, setShowFreePreviewDialog] = useState(false);
-  const [approvalUrl, setApprovalUrl] = useState("");
+  const [purchaseInfo, setPurchaseInfo] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
 
   async function fetchStudentViewCourseDetails() {
-  try {
-    const checkCoursePurchaseInfoResponse = await checkCoursePurchaseInfoService(
-      currentCourseDetailsId,
-      auth?.user._id
-    );
+    setLoadingState(true);
+    try {
+      if (auth?.user?._id && currentCourseDetailsId) {
+        const checkCoursePurchaseInfoResponse =
+          await checkCoursePurchaseInfoService(
+            currentCourseDetailsId,
+            auth?.user?._id
+          );
 
-    if (checkCoursePurchaseInfoResponse?.success && checkCoursePurchaseInfoResponse?.data) {
-      navigate(`/course-progress/${currentCourseDetailsId}`);
-      return;
+        if (checkCoursePurchaseInfoResponse?.success) {
+          setPurchaseInfo(checkCoursePurchaseInfoResponse?.data);
+        } else {
+          setPurchaseInfo(null);
+        }
+      } else {
+        setPurchaseInfo(null);
+      }
+
+      if (currentCourseDetailsId) {
+        const response = await fetchStudentViewCourseDetailsService(
+          currentCourseDetailsId
+        );
+
+        if (response?.success) {
+          setStudentViewCourseDetails(response?.data?.course || null);
+          setPurchaseInfo((prev) => ({
+            ...(prev || {}),
+            enrollment: response?.data?.enrollment,
+          }));
+        } else {
+          setStudentViewCourseDetails(null);
+        }
+      }
+    } finally {
+      setLoadingState(false);
     }
-
-    const response = await fetchStudentViewCourseDetailsService(currentCourseDetailsId);
-
-    if (response?.success) {
-      setStudentViewCourseDetails(response?.data);
-    } else {
-      setStudentViewCourseDetails(null);
-    }
-  } finally {
-    setLoadingState(false);
   }
-}
 
   function handleSetFreePreview(getCurrentVideoInfo) {
     setDisplayCurrentVideoFreePreview(getCurrentVideoInfo?.videoUrl);
   }
 
   async function handleCreatePayment() {
+    if (purchaseInfo?.isEnrolled) {
+      navigate(`/course-progress/${studentViewCourseDetails?._id}`);
+      return;
+    }
+
+    if (!auth?.authenticate) {
+      navigate("/auth");
+      return;
+    }
+
+    if (!auth?.user?._id || !studentViewCourseDetails?._id) {
+      return;
+    }
+
     const paymentPayload = {
       userId: auth?.user?._id,
       userName: auth?.user?.userName,
@@ -90,14 +120,43 @@ function StudentViewCourseDetailsPage() {
     };
 
     const response = await createPaymentService(paymentPayload);
-    if (response.success) {
-      const stripe = await stripePromise;
-      const { sessionId } = response.data;
-      const result = await stripe.redirectToCheckout({ sessionId });
+    if (!response?.success) return;
 
-      if (result.error) {
-        console.error(result.error.message);
-      }
+    if (response?.data?.freeEnrollment) {
+      navigate(`/course-progress/${studentViewCourseDetails?._id}`);
+      return;
+    }
+
+    // If backend returns a direct payment URL (e.g., Shaparak/PayPal)
+    if (response?.data?.paymentUrl) {
+      window.location.href = response.data.paymentUrl;
+      return;
+    }
+
+    if (!stripePromise) {
+      console.error("Stripe public key is not configured.");
+      return;
+    }
+
+    const stripe = await stripePromise;
+    if (!stripe) {
+      console.error("Stripe failed to initialize.");
+      return;
+    }
+
+    if (response.data?.orderId) {
+      sessionStorage.setItem(
+        "currentOrderId",
+        JSON.stringify(response.data.orderId)
+      );
+    }
+
+    const { sessionId } = response.data;
+    if (!sessionId) return;
+
+    const result = await stripe.redirectToCheckout({ sessionId });
+    if (result?.error) {
+      console.error(result.error.message);
     }
   }
 
@@ -107,7 +166,7 @@ function StudentViewCourseDetailsPage() {
 
   useEffect(() => {
     if (currentCourseDetailsId !== null) fetchStudentViewCourseDetails();
-  }, [currentCourseDetailsId]);
+  }, [currentCourseDetailsId, auth?.user?._id]);
 
   useEffect(() => {
     if (id) setCurrentCourseDetailsId(id);
@@ -115,16 +174,10 @@ function StudentViewCourseDetailsPage() {
 
   useEffect(() => {
     if (!location.pathname.includes("course/details"))
-      setStudentViewCourseDetails(null),
-        setCurrentCourseDetailsId(null),
-        setCoursePurchaseId(null);
+      setStudentViewCourseDetails(null), setCurrentCourseDetailsId(null);
   }, [location.pathname]);
 
   if (loadingState) return <Skeleton />;
-
-  if (approvalUrl !== "") {
-    window.location.href = approvalUrl;
-  }
 
   const getIndexOfFreePreviewUrl =
     studentViewCourseDetails !== null
@@ -132,6 +185,12 @@ function StudentViewCourseDetailsPage() {
         (item) => item.freePreview
       )
       : -1;
+
+  const isEnrolled =
+    purchaseInfo?.isEnrolled || purchaseInfo?.enrollment?.isEnrolled;
+  const isFreeCourse =
+    Number(studentViewCourseDetails?.pricing) <= 0 ||
+    !studentViewCourseDetails?.pricing;
 
   return (
     <div className=" mx-auto p-4">
@@ -142,14 +201,23 @@ function StudentViewCourseDetailsPage() {
         <p className="text-xl mb-4">{studentViewCourseDetails?.subtitle}</p>
         <div className="flex items-center space-x-4 mt-2 text-sm">
           <span>Created By {studentViewCourseDetails?.instructorName}</span>
-          <span>Created On {studentViewCourseDetails?.date.split("T")[0]}</span>
+            <span>
+              Created On{" "}
+              {studentViewCourseDetails?.date
+                ? studentViewCourseDetails?.date?.split("T")[0]
+                : studentViewCourseDetails?.createdAt
+                ? studentViewCourseDetails?.createdAt?.split("T")[0]
+                : "N/A"}
+            </span>
           <span className="flex items-center">
             <Globe className="mr-1 h-4 w-4" />
             {studentViewCourseDetails?.primaryLanguage}
           </span>
           <span>
-            {studentViewCourseDetails?.students.length}{" "}
-            {studentViewCourseDetails?.students.length <= 1
+            {studentViewCourseDetails?.students
+              ? studentViewCourseDetails.students.length
+              : 0}{" "}
+            {(studentViewCourseDetails?.students?.length || 0) <= 1
               ? "Student"
               : "Students"}
           </span>
@@ -163,14 +231,17 @@ function StudentViewCourseDetailsPage() {
             </CardHeader>
             <CardContent>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {studentViewCourseDetails?.objectives
-                  .split(",")
-                  .map((objective, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                      <span>{objective}</span>
-                    </li>
-                  ))}
+                {(Array.isArray(studentViewCourseDetails?.objectives)
+                  ? studentViewCourseDetails?.objectives
+                  : (studentViewCourseDetails?.objectives || "")
+                      .split(",")
+                      .filter(Boolean)
+                ).map((objective, index) => (
+                  <li key={index} className="flex items-start">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+                    <span>{objective}</span>
+                  </li>
+                ))}
               </ul>
             </CardContent>
           </Card>
@@ -216,10 +287,10 @@ function StudentViewCourseDetailsPage() {
               <div className="aspect-video mb-4 rounded-lg flex items-center justify-center">
                 <VideoPlayer
                   url={
-                    getIndexOfFreePreviewUrl !== -1
-                      ? studentViewCourseDetails?.curriculum[
-                        getIndexOfFreePreviewUrl
-                      ].videoUrl
+                    getIndexOfFreePreviewUrl !== -1 &&
+                    studentViewCourseDetails?.curriculum?.[getIndexOfFreePreviewUrl]
+                      ? studentViewCourseDetails.curriculum[getIndexOfFreePreviewUrl]
+                          .videoUrl
                       : ""
                   }
                   width="450px"
@@ -228,11 +299,15 @@ function StudentViewCourseDetailsPage() {
               </div>
               <div className="mb-4">
                 <span className="text-3xl font-bold">
-                  ${studentViewCourseDetails?.pricing}
+                  {isFreeCourse ? "Free" : `$${studentViewCourseDetails?.pricing}`}
                 </span>
               </div>
               <Button onClick={handleCreatePayment} className="w-full">
-                Buy Now
+                {isEnrolled
+                  ? "Go to Course"
+                  : isFreeCourse
+                  ? "Enroll for Free"
+                  : "Buy Now"}
               </Button>
             </CardContent>
           </Card>

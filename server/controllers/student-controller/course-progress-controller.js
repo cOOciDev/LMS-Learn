@@ -82,9 +82,9 @@ const getCurrentCourseProgress = async (req, res) => {
     const studentPurchasedCourses = await StudentCourses.findOne({ userId });
 
     const isCurrentCoursePurchasedByCurrentUserOrNot =
-      studentPurchasedCourses?.courses?.findIndex(
-        (item) => item.courseId === courseId
-      ) > -1;
+      studentPurchasedCourses?.courses?.some(
+        (item) => item.courseId?.toString() === courseId?.toString()
+      ) || false;
 
     if (!isCurrentCoursePurchasedByCurrentUserOrNot) {
       return res.status(200).json({

@@ -28,10 +28,13 @@ function CourseCurriculum() {
   const bulkUploadInputRef = useRef(null);
 
   function handleNewLecture() {
-    setCourseCurriculumFormData([
-      ...courseCurriculumFormData,
+    setCourseCurriculumFormData((prev) => [
+      ...prev,
       {
-        ...courseCurriculumInitialFormData[0],
+        title: "",
+        videoUrl: "",
+        freePreview: false,
+        public_id: "",
       },
     ]);
   }
@@ -103,17 +106,6 @@ function CourseCurriculum() {
 
       setCourseCurriculumFormData(cpyCourseCurriculumFormData);
     }
-  }
-
-  function isCourseCurriculumFormDataValid() {
-    return courseCurriculumFormData.every((item) => {
-      return (
-        item &&
-        typeof item === "object" &&
-        item.title.trim() !== "" &&
-        item.videoUrl.trim() !== ""
-      );
-    });
   }
 
   function handleOpenBulkUploadDialog() {
@@ -212,10 +204,7 @@ function CourseCurriculum() {
         </div>
       </CardHeader>
       <CardContent>
-        <Button
-          disabled={!isCourseCurriculumFormDataValid() || mediaUploadProgress}
-          onClick={handleNewLecture}
-        >
+        <Button disabled={mediaUploadProgress} onClick={handleNewLecture}>
           Add Lecture
         </Button>
         {mediaUploadProgress ? (

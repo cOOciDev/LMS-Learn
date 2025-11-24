@@ -84,7 +84,21 @@ export async function mediaBulkUploadService(formData, onProgressCallback) {
 }
 
 export async function fetchStudentViewCourseListService(query) {
-  const { data } = await axiosInstance.get(`/student/course/get?${query}`);
+  let queryString = "";
+
+  if (query) {
+    if (typeof query === "string") {
+      queryString = query;
+    } else if (typeof query.toString === "function") {
+      queryString = query.toString();
+    }
+  }
+
+  const endpoint = queryString
+    ? `/student/course/get?${queryString}`
+    : `/student/course/get`;
+
+  const { data } = await axiosInstance.get(endpoint);
 
   return data;
 }
@@ -201,5 +215,37 @@ export async function getUserGrowthStatsService() {
 export async function getAllCoursesAdminService(params = {}) {
   const queryParams = new URLSearchParams(params).toString();
   const { data } = await axiosInstance.get(`/admin/courses?${queryParams}`);
+  return data;
+}
+
+export async function getFinancialReportsService() {
+  const { data } = await axiosInstance.get("/admin/financial/reports");
+  return data;
+}
+
+export async function submitCourseRatingService(payload) {
+  const { data } = await axiosInstance.post("/student/course/rate", payload);
+  return data;
+}
+
+// Instructor management services
+export async function getAllInstructorsService(params = {}) {
+  const queryParams = new URLSearchParams(params).toString();
+  const { data } = await axiosInstance.get(
+    `/admin/instructors?${queryParams}`
+  );
+  return data;
+}
+
+export async function getInstructorDetailsService(instructorId) {
+  const { data } = await axiosInstance.get(`/admin/instructors/${instructorId}`);
+  return data;
+}
+
+export async function updateInstructorService(instructorId, payload) {
+  const { data } = await axiosInstance.put(
+    `/admin/instructors/${instructorId}`,
+    payload
+  );
   return data;
 }

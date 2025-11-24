@@ -3,7 +3,7 @@ import AuthPage from "./pages/auth";
 import RouteGuard from "./components/route-guard";
 import { useContext } from "react";
 import { AuthContext } from "./context/auth-context";
-import InstructorDashboardpage from "./pages/instructor";
+import InstructorDashboardPage from "./pages/instructor";
 import InstructorCommonLayout from "./components/instructor-view/common-layout";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
 import StudentHomePage from "./pages/student/home";
@@ -18,6 +18,11 @@ import AdminRegisterUserPage from "./pages/admin/register-user";
 import AdminCommonLayout from "./components/admin-view/common-layout";
 import AdminDashboard from "./pages/admin/dashboard";
 import AdminUserManagement from "./pages/admin/users";
+import AdminCoursesPage from "./pages/admin/courses";
+import AdminFinancialReportsPage from "./pages/admin/financial-reports";
+import AdminMessagesPage from "./pages/admin/messages";
+import AdminSettingsPage from "./pages/admin/settings";
+import AdminInstructorManagement from "./pages/admin/instructors";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -44,7 +49,7 @@ function App() {
           />
         }
       >
-        <Route index element={<InstructorDashboardpage />} />
+        <Route index element={<InstructorDashboardPage />} />
         <Route path="create-new-course" element={<AddNewCoursePage />} />
         <Route path="edit-course/:courseId" element={<AddNewCoursePage />} />
       </Route>
@@ -61,6 +66,11 @@ function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUserManagement />} />
         <Route path="register-user" element={<AdminRegisterUserPage />} />
+        <Route path="instructors" element={<AdminInstructorManagement />} />
+        <Route path="courses" element={<AdminCoursesPage />} />
+        <Route path="financial" element={<AdminFinancialReportsPage />} />
+        <Route path="messages" element={<AdminMessagesPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
       <Route
         path="/"
