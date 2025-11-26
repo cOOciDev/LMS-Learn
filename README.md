@@ -44,11 +44,16 @@ LMS Learn provides a seamless platform for managing online courses, students, an
 * Configure environment variables (create a .env file in the server directory and add necessary values like database URI, JWT secret, etc.).
 ```
 MONGO_URI
+PORT=5000
 JWT_SECRET
 STRIPE_SECRET_KEY
 STRIPE_PUBLIC_KEY
 ```
 
+* Configure environment variables (create a .env file in the client directory and add necessary values like REACT_APP_STRIPE_PUBLIC_KEY, etc.).
+```
+REACT_APP_STRIPE_PUBLIC_KEY
+```
 ### Executing program
 
 * How to run server
