@@ -22,7 +22,7 @@ LMS Learn provides a seamless platform for managing online courses, students, an
 * Clone the repository:
 
   ```bash
-  git clone https://github.com/sudoyasir/learn-managment-system-mern/
+  git clone https://github.com/cOOciDev/LMS-Learn.git
   ```
   
 * Navigate to the project directory:
