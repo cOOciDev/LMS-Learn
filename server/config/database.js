@@ -1,3 +1,4 @@
+// server/config/database.js
 require("dotenv").config();
 const mongoose = require("mongoose");
 

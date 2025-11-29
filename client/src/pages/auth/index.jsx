@@ -90,6 +90,7 @@ function AuthPage() {
           title: t("common.error"),
           description: result?.message || t("auth.loginFailed"),
           variant: "destructive",
+          what_the_resault : console.log(result)
         });
       }
     } catch (error) {

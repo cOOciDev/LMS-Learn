@@ -40,7 +40,8 @@
     "createdAt": "Created",
     "price": "Price",
     "course": "Course",
-    "actions":"Actions"
+    "actions":"Actions",
+    "view": "View"
   },
   "auth": {
     "signInToAccount": "Sign in to your account",
@@ -170,5 +171,17 @@
     "required": "This field is required",
     "invalidEmail": "Invalid email address",
     "passwordTooShort": "Password must be at least 6 characters"
+  },
+  "categories": {
+    "Web_Development": "Web Development",
+    "Backend_Development": "Backend Development",
+    "Data_Science": "Data Science",
+    "Machine_Learning": "Machine Learning",
+    "Artificial_Intelligence": "Artificial Intelligence",
+    "Cloud_Computing": "Cloud Computing",
+    "Cyber_Security": "Cyber Security",
+    "Mobile_Development": "Mobile Development",
+    "Game_Development": "Game Development",
+    "Software_Engineering": "Software Engineering"
   }
 }

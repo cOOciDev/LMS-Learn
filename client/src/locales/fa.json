@@ -40,7 +40,8 @@
     "createdAt": "تاریخ ایجاد",
     "price": "قیمت",
     "course": "دوره",
-    "actions":"اقدامات"
+    "actions": "اقدامات",
+    "view": "مشاهده"
   },
   "auth": {
     "signInToAccount": "ورود به حساب کاربری",
@@ -168,5 +169,17 @@
     "required": "این فیلد الزامی است",
     "invalidEmail": "ایمیل نامعتبر است",
     "passwordTooShort": "رمز عبور باید حداقل ۶ حرف باشد"
+  },
+  "categories": {
+    "Web_Development": "توسعه وب",
+    "Backend_Development": "برنامه نویس سمت سرور",
+    "Data_Science": "مدیریت داده",
+    "Machine_Learning": "هوش ماشین",
+    "Artificial_Intelligence": "هوش مصنوعی",
+    "Cloud_Computing": "رایانش ابری",
+    "Cyber_Security": "امنیت سایبری",
+    "Mobile_Development": "توسعه موبایل",
+    "Game_Development": "توسعه بازی",
+    "Software_Engineering": "مهندسی نرم‌افزار"
   }
 }

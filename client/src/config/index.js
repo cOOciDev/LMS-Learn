@@ -64,16 +64,18 @@ export const initialSignUpFormData = {
 };
 
 export const languageOptions = [
+  { id: "persian", label: "Persian" },
   { id: "english", label: "English" },
-  { id: "spanish", label: "Spanish" },
-  { id: "french", label: "French" },
-  { id: "german", label: "German" },
-  { id: "chinese", label: "Chinese" },
-  { id: "japanese", label: "Japanese" },
-  { id: "korean", label: "Korean" },
-  { id: "portuguese", label: "Portuguese" },
-  { id: "arabic", label: "Arabic" },
-  { id: "russian", label: "Russian" },
+  // { id: "spanish", label: "Spanish" },
+  // { id: "french", label: "French" },
+  // { id: "german", label: "German" },
+  // { id: "chinese", label: "Chinese" },
+  // { id: "japanese", label: "Japanese" },
+  // { id: "korean", label: "Korean" },
+  // { id: "portuguese", label: "Portuguese" },
+  // { id: "arabic", label: "Arabic" },
+  // { id: "russian", label: "Russian" },
+
 ];
 
 export const courseLevelOptions = [
@@ -83,16 +85,16 @@ export const courseLevelOptions = [
 ];
 
 export const courseCategories = [
-  { id: "web-development", label: "Web Development" },
-  { id: "backend-development", label: "Backend Development" },
-  { id: "data-science", label: "Data Science" },
-  { id: "machine-learning", label: "Machine Learning" },
-  { id: "artificial-intelligence", label: "Artificial Intelligence" },
-  { id: "cloud-computing", label: "Cloud Computing" },
-  { id: "cyber-security", label: "Cyber Security" },
-  { id: "mobile-development", label: "Mobile Development" },
-  { id: "game-development", label: "Game Development" },
-  { id: "software-engineering", label: "Software Engineering" },
+  { id: "web-development", label: "categories.Web Development" },
+  { id: "backend-development", label: "categories.Backend Development" },
+  { id: "data-science", label: "categories.Data Science" },
+  { id: "machine-learning", label: "categories.Machine Learning" },
+  { id: "artificial-intelligence", label: "categories.Artificial Intelligence" },
+  { id: "cloud-computing", label: "categories.Cloud Computing" },
+  { id: "cyber-security", label: "categories.Cyber Security" },
+  { id: "mobile-development", label: "categories.Mobile Development" },
+  { id: "game-development", label: "categories.Game Development" },
+  { id: "software-engineering", label: "categories.Software Engineering" },
 ];
 
 export const courseLandingPageFormControls = [

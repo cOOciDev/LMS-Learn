@@ -1,3 +1,4 @@
+// server/routes/auth-routes/index.js
 const express = require("express");
 const {
   registerUser,
