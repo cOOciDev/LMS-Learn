@@ -40,7 +40,7 @@
     "createdAt": "Created",
     "price": "Price",
     "course": "Course",
-    "actions":"Actions",
+    "actions": "Actions",
     "view": "View"
   },
   "auth": {
@@ -132,7 +132,6 @@
     "siteAnnouncement": "Site Announcement",
     "announcementPlaceholder": "Optional announcement to show users.",
     "settings": "Settings"
-
   },
   "instructor": {
     "instructorDashboard": "Instructor Dashboard",
@@ -183,5 +182,36 @@
     "Mobile_Development": "Mobile Development",
     "Game_Development": "Game Development",
     "Software_Engineering": "Software Engineering"
+  },
+
+  "roadmap": {
+    "title": "roadmap",
+    "description": "A simple step-by-step path to learn courses",
+    "signUpTitle": "Sign Up",
+    "signUpDescription": "First, enroll in the course and start your class.",
+    "startLearningTitle": "Start Learning",
+    "startLearningDescription": "Watch the instructional videos for each category.",
+    "practiceTitle": "Practice",
+    "practiceDescription": "Complete practical exercises to solidify your skills.",
+    "finalExamTitle": "Final Exam",
+    "finalExamDescription": "Take the final exam of each course.",
+    "certificateTitle": "Certificate",
+    "certificateDescription": "Receive the certificate after course completion."
+  },
+
+  "home": {
+    "heroTitle": "Build Your Future with Learning 🚀",
+    "heroDescription": "Acquire skills that guarantee your career today and tomorrow. Learn quickly and practically with the best instructors.",
+    "exploreCoursesButton": "View Courses",
+    "heroImageAlt": "Site Banner",
+    "categoriesTitle": "Course Categories",
+    "categoriesDescription": "Courses are categorized by topics to make it easier to find the skills you want. From programming and design to management and marketing, everything is ready for learning.",
+    "featuredCoursesTitle": "Featured Courses",
+    "featuredCoursesDescription": "These courses are selected by professional instructors with the highest standards. Perfect for students who want to gain practical skills fast and succeed in their careers.",
+    "featuredBadge": "Featured",
+    "noCoursesMessage": "No courses found",
+    "currency": "Toman"
   }
+
+
 }

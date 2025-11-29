@@ -1,3 +1,4 @@
+// client/src/config/index.js
 export const signUpFormControls = [
   {
     name: "userName",
@@ -199,3 +200,11 @@ export const filterOptions = {
   level: courseLevelOptions,
   primaryLanguage: languageOptions,
 };
+
+export const roadmapSteps = [
+  { id: "signUp", titleKey: "roadmap.signUpTitle", descriptionKey: "roadmap.signUpDescription" },
+  { id: "startLearning", titleKey: "roadmap.startLearningTitle", descriptionKey: "roadmap.startLearningDescription" },
+  { id: "practice", titleKey: "roadmap.practiceTitle", descriptionKey: "roadmap.practiceDescription" },
+  { id: "finalExam", titleKey: "roadmap.finalExamTitle", descriptionKey: "roadmap.finalExamDescription" },
+  { id: "certificate", titleKey: "roadmap.certificateTitle", descriptionKey: "roadmap.certificateDescription" }
+];

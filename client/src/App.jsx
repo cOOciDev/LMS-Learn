@@ -13,6 +13,7 @@ import StudentViewCoursesPage from "./pages/student/courses";
 import StudentViewCourseDetailsPage from "./pages/student/course-details";
 import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
+import RoadmapPage from "./pages/student/roadmap";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
 import AdminRegisterUserPage from "./pages/admin/register-user";
 import AdminCommonLayout from "./components/admin-view/common-layout";
@@ -85,6 +86,7 @@ function App() {
         <Route path="" element={<StudentHomePage />} />
         <Route path="home" element={<StudentHomePage />} />
         <Route path="courses" element={<StudentViewCoursesPage />} />
+        <Route path="/roadmap" element={<RoadmapPage />} />
         <Route
           path="course/details/:id"
           element={<StudentViewCourseDetailsPage />}

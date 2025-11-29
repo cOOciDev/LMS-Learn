@@ -1,3 +1,4 @@
+// client/src/components/language-switcher/index.jsx
 import { useLanguage } from "@/context/language-context";
 import { Button } from "@/components/ui/button";
 import { Languages } from "lucide-react";

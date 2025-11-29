@@ -181,5 +181,37 @@
     "Mobile_Development": "توسعه موبایل",
     "Game_Development": "توسعه بازی",
     "Software_Engineering": "مهندسی نرم‌افزار"
+  },
+
+  "roadmap": {
+    "title": "مسیر یادگیری",
+    "description": "یک مسیر ساده و گام‌به‌گام برای یادگیری دوره‌ها",
+    "signUpTitle": "ثبت نام",
+    "signUpDescription": "ابتدا در دوره ثبت نام کنید و کلاس خود را شروع کنید.",
+    "startLearningTitle": "شروع یادگیری",
+    "startLearningDescription": "ویدیوهای آموزشی هر دسته‌بندی را مشاهده کنید.",
+    "practiceTitle": "تمرین‌ها",
+    "practiceDescription": "تمرین‌های عملی برای تثبیت مهارت‌ها.",
+    "finalExamTitle": "آزمون نهایی",
+    "finalExamDescription": "در آزمون پایانی هر دوره شرکت کنید.",
+    "certificateTitle": "دریافت مدرک",
+    "certificateDescription": "مدرک پایان دوره را دریافت کنید."
+  },
+
+  "home": {
+    "heroTitle": "آینده‌ات را با یادگیری بساز 🚀",
+    "heroDescription": "مهارت‌هایی یاد بگیر که امروز و فردای شغلی‌ات را تضمین می‌کنند. با بهترین مدرس‌ها، یادگیری راحت، سریع و کاربردی را تجربه کن.",
+    "exploreCoursesButton": "مشاهده دوره‌ها",
+    "heroImageAlt": "بنر سایت",
+    "categoriesTitle": "دسته‌بندی دوره‌ها",
+    "categoriesDescription": "دوره‌ها بر اساس موضوعات مختلف دسته‌بندی شده‌اند تا راحت‌تر مهارت مورد نظرت را پیدا کنی. از برنامه‌نویسی و طراحی تا مدیریت و بازاریابی، همه چیز آماده یادگیری است.",
+    "featuredCoursesTitle": "دوره‌های ویژه",
+    "featuredCoursesDescription": "این دوره‌ها توسط مدرسین حرفه‌ای و با بهترین استانداردها انتخاب شده‌اند. مناسب برای دانشجویانی که می‌خواهند سریع مهارت عملی کسب کنند و در مسیر شغلی موفق شوند.",
+    "featuredBadge": "ویژه",
+    "noCoursesMessage": "دوره‌ای یافت نشد",
+    "currency": "تومان"
   }
+
+
+
 }

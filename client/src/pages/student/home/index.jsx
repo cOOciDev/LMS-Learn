@@ -1,5 +1,5 @@
 import { courseCategories } from "@/config";
-import banner from "../../../../public/banner-img.png";
+import banner from "../../../../public/hero.webp";
 import { Button } from "@/components/ui/button";
 import { useContext, useEffect } from "react";
 import { StudentContext } from "@/context/student-context";
@@ -9,21 +9,19 @@ import {
 } from "@/services";
 import { AuthContext } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/context/language-context";
 
 function StudentHomePage() {
   const { studentViewCoursesList, setStudentViewCoursesList } =
     useContext(StudentContext);
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   function handleNavigateToCoursesPage(getCurrentId) {
     sessionStorage.removeItem("filters");
-    const currentFilter = {
-      category: [getCurrentId],
-    };
-
+    const currentFilter = { category: [getCurrentId] };
     sessionStorage.setItem("filters", JSON.stringify(currentFilter));
-
     navigate("/courses");
   }
 
@@ -40,7 +38,6 @@ function StudentHomePage() {
         getCurrentCourseId,
         auth?.user?._id
       );
-
       if (response?.success && response?.data?.isEnrolled) {
         navigate(`/course-progress/${getCurrentCourseId}`);
       } else {
@@ -56,31 +53,56 @@ function StudentHomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      <section className="flex flex-col lg:flex-row items-center justify-between py-8 px-4 lg:px-8">
-        <div className="lg:w-1/2 lg:pr-12">
-          <h1 className="text-4xl font-bold mb-4">Learning thet gets you</h1>
-          <p className="text-xl">
-            Skills for your present and your future. Get Started with US
+    <div className="min-h-screen bg-gray-50">
+
+      {/* 🔥 HERO / Banner */}
+      <section className="relative flex flex-col lg:flex-row items-center justify-between py-16 px-6 lg:px-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-b-[60px] overflow-hidden shadow-xl">
+        <div className="lg:w-1/2 z-10 space-y-6">
+          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight drop-shadow-lg animate-fade-in">
+            {t("home.heroTitle")}
+          </h1>
+          <p className="text-lg md:text-xl opacity-90 max-w-[500px] animate-fade-in delay-100">
+            {t("home.heroDescription")}
           </p>
+
+          <Button
+            size="lg"
+            className="mt-4 font-semibold bg-white text-indigo-600 hover:bg-gray-200 hover:scale-105 transform transition-all shadow-lg"
+            onClick={() => navigate("/courses")}
+          >
+            {t("home.exploreCoursesButton")}
+          </Button>
         </div>
-        <div className="lg:w-full mb-8 lg:mb-0">
+
+        <div className="lg:w-[500px] mt-10 lg:mt-0 z-10 flex justify-center">
           <img
             src={banner}
-            width={600}
-            height={400}
-            className="w-full h-auto rounded-lg shadow-lg"
+            alt={t("home.heroImageAlt")}
+            className="w-full max-h-[450px] md:max-h-[500px] lg:max-h-[550px] object-cover rounded-3xl shadow-2xl border-4 border-white animate-float"
           />
         </div>
+
+        {/* افکت‌های بک‌گراند */}
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-pink-400 opacity-20 rounded-full blur-3xl animate-blob"></div>
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-indigo-400 opacity-20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
       </section>
-      <section className="py-8 px-4 lg:px-8 bg-gray-100">
-        <h2 className="text-2xl font-bold mb-6">Course Categories</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+
+      {/* 📌 دسته‌بندی‌ دوره‌ها */}
+      <section className="py-16 px-6 lg:px-16 bg-white rounded-t-[60px] shadow-inner">
+        <div className="mb-10 text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
+            {t("home.categoriesTitle")}
+          </h2>
+          <p className="text-gray-600 text-base max-w-2xl mx-auto">
+            {t("home.categoriesDescription")}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {courseCategories.map((categoryItem) => (
             <Button
-              className="justify-start"
-              variant="outline"
               key={categoryItem.id}
+              variant="outline"
+              className="justify-center h-14 font-semibold text-[15px] rounded-xl shadow hover:bg-indigo-600 hover:text-white hover:scale-105 transform transition-all"
               onClick={() => handleNavigateToCoursesPage(categoryItem.id)}
             >
               {categoryItem.label}
@@ -88,38 +110,53 @@ function StudentHomePage() {
           ))}
         </div>
       </section>
-      <section className="py-12 px-4 lg:px-8">
-        <h2 className="text-2xl font-bold mb-6">Featured COourses</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {studentViewCoursesList && studentViewCoursesList.length > 0 ? (
+
+      {/* 📌 دوره‌های ویژه */}
+      <section className="py-16 px-6 lg:px-16 bg-gray-50">
+        <div className="mb-10 text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
+            {t("home.featuredCoursesTitle")}
+          </h2>
+          <p className="text-gray-600 text-base max-w-2xl mx-auto">
+            {t("home.featuredCoursesDescription")}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+          {studentViewCoursesList?.length > 0 ? (
             studentViewCoursesList.map((courseItem, index) => (
               <div
                 key={index}
                 onClick={() => handleCourseNavigate(courseItem?._id)}
-                className="border rounded-lg overflow-hidden shadow cursor-pointer"
+                className="group border border-gray-200 rounded-2xl overflow-hidden shadow-md cursor-pointer bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center w-full max-w-[280px]"
               >
-                <img
-                  src={courseItem?.image}
-                  width={300}
-                  height={150}
-                  className="w-full h-40 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-bold mb-2">{courseItem?.title}</h3>
-                  <p className="text-sm text-gray-700 mb-2">
-                    {courseItem?.instructorName}
-                  </p>
-                  <p className="font-bold text-[16px]">
-                    ${courseItem?.pricing}
-                  </p>
+                <div className="relative w-full">
+                  <img
+                    src={courseItem?.image}
+                    alt={courseItem?.title}
+                    className="w-full h-44 object-cover group-hover:scale-105 transform transition-all duration-500"
+                  />
+                  <span className="absolute top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                    {t("home.featuredBadge")}
+                  </span>
+                </div>
+                <div className="p-5 space-y-2">
+                  <h3 className="font-bold text-black text-lg group-hover:text-indigo-600 transition-all">
+                    {courseItem?.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">{courseItem?.instructorName}</p>
+                  <p className="font-bold text-indigo-600 text-[18px]">{courseItem?.pricing} {t("home.currency")}</p>
                 </div>
               </div>
             ))
           ) : (
-            <h1>No Courses Found</h1>
+            <h1 className="text-xl text-gray-600 text-center">
+              {t("home.noCoursesMessage")}
+            </h1>
           )}
         </div>
       </section>
+
     </div>
   );
 }
