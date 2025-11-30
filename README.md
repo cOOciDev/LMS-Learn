@@ -58,11 +58,11 @@ REACT_APP_STRIPE_PUBLIC_KEY
 
 * How to run server
   ```bash
-  npm start
+  npm run dev
   ```
 * How to run client
   ```bash
-  npm start
+  npm run dev
   ```
   Once both frontend and backend are running, open a browser and go to: http://localhost:5173 | http://localhost:5174
 
@@ -77,7 +77,7 @@ For common issues, run:
 Contributors names and contact info
 
 * Yasir Nawaz
-  - [yasirnawaz.me](https://yasirnawaz.me) | [Mail ✉️](mailto:y451rmahar@gmail.com) | [LinkedIn](https://linkedin.com/in/suodyasir)
+  - [cOOciDev.me](https://cOOciDev.me) | [Mail ✉️](mailto:cooci.ebrahimi@gmail.com) 
 ## Version History
 
 * 0.1
