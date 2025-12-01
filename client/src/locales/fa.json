@@ -130,7 +130,51 @@
     "supportEmail": "ایمیل پشتیبانی",
     "siteAnnouncement": "اعلان سایت",
     "announcementPlaceholder": "اعلان اختیاری برای نمایش به کاربران",
-    "settings": "تنظیمات"
+    "settings": "تنظیمات",
+    "categoryManagement": "مدیریت دسته بندی",
+    "categoryManagementDescription": "ایجاد، ترجمه و سازماندهی دسته بندی دوره ها.",
+    "addCategory": "اضافه کردن دسته بندی",
+    "categoryName": "نام دسته",
+    "categoryNameFa": "نام دسته (فارسی)",
+    "categoryDescription": "توضیحات آگهی",
+    "saveCategory": "ذخیره دسته بندی",
+    "categoryTips": "دستورالعمل‌های دسته‌بندی",
+    "categoryTipsBody": "دسته‌بندی‌ها به دانش‌آموزان کمک می‌کنند تا محتوای مناسب را سریع‌تر پیدا کنند. نامگذاری را ثابت نگه دارید و عناوین محلی ارائه دهید.",
+    "categoryTipOne": "از نام‌های مختصر و توصیفی استفاده کنید.",
+    "categoryTipTwo": "فقط زمانی دسته‌ها را حذف کنید که هیچ دوره‌ای از آنها استفاده نکند.",
+    "categoryTipThree": "نام‌های محلی‌شده را اضافه کنید تا افراد غیرانگلیسی‌زبان بتوانند دسته‌بندی را درک کنند.",
+    "categoriesList": "دسته بندی از قبل موجود می باشد",
+    "noCategories": "بدون دسته بندی.",
+    "categorySlug": "نامک",
+    "categoryCourses": "دوره های آموزشی",
+    "categoryCreated": "دسته بندی با موفقیت ایجاد شد",
+    "categoryDeleted": "دسته بندی با موفقیت حذف شدند.",
+    "failedToCreateCategory": "ایجاد دسته بندی ناموفق بود.",
+    "failedToDeleteCategory": "حذف دسته ناموفق بود.",
+    "failedToLoadCategories": "بارگیری دسته‌ها ناموفق بود.",
+    "categoryNameRequired": "نام دسته الزامی است",
+    "deleteCategoryConfirm": "این دسته را حذف کنید؟ قابل بازیابی نیست.",
+    "roadmapManagement": "?????? ???? ???",
+    "roadmapManagementDescription": "???? ?? ????????? ???? ??????? ????? ?? ? ????? ?? ?? ???????? ????? ???? ??.",
+    "createRoadmap": "????? ???? ???",
+    "roadmapTitle": "????? ???? ???",
+    "roadmapTitlePlaceholder": "????? ???? ????? ?????????",
+    "selectCategory": "?????? ?????????",
+    "roadmapSteps": "?????",
+    "addStep": "?????? ?????",
+    "stepLabel": "????? {number}",
+    "removeStep": "???",
+    "stepTitlePlaceholder": "????? ?????",
+    "stepDescriptionPlaceholder": "????? ?????",
+    "stepSelectCourse": "?????? ????",
+    "saveRoadmap": "????? ???? ???",
+    "roadmapMissingFields": "????? ? ????????? ?? ???? ??",
+    "roadmapStepValidation": "?? ????? ???? ?????? ????? ? ???? ????? ????.",
+    "roadmapCreated": "???? ??? ?? ?????? ????? ??.",
+    "roadmapCreateFailed": "??? ???? ??? ????? ???.",
+    "existingRoadmaps": "???????? ??? ?????",
+    "noRoadmaps": "???? ???? ???? ???? ?????.",
+    "stepsCountLabel": "?????"
   },
   "instructor": {
     "instructorDashboard": "داشبورد مدرس",
@@ -182,7 +226,6 @@
     "Game_Development": "توسعه بازی",
     "Software_Engineering": "مهندسی نرم‌افزار"
   },
-
   "roadmap": {
     "title": "مسیر یادگیری",
     "description": "یک مسیر ساده و گام‌به‌گام برای یادگیری دوره‌ها",
@@ -195,9 +238,14 @@
     "finalExamTitle": "آزمون نهایی",
     "finalExamDescription": "در آزمون پایانی هر دوره شرکت کنید.",
     "certificateTitle": "دریافت مدرک",
-    "certificateDescription": "مدرک پایان دوره را دریافت کنید."
+    "certificateDescription": "پس از اتمام دوره، گواهی دریافت کنید.",
+    "customTitle": "نقشه راه شخصی‌سازی‌شده بسازید",
+    "customDescription": "با جستجوی هر دسته‌بندی، مسیر یادگیری، مهارت‌ها و پیشنهادهای دوره‌ مرتبط با آن مسیر را مشاهده کنید.",
+    "customSearchPlaceholder": "جستجوی دسته‌بندی‌ها",
+    "customCardDescription": "جریان کامل و مرحله‌به‌مرحله یادگیری این دسته‌بندی را مشاهده کنید.",
+    "customViewButton": "مشاهده نقشه راه",
+    "customEmptyState": "هیچ دسته‌بندی مطابق جستجو پیدا نشد."
   },
-
   "home": {
     "heroTitle": "آینده‌ات را با یادگیری بساز 🚀",
     "heroDescription": "مهارت‌هایی یاد بگیر که امروز و فردای شغلی‌ات را تضمین می‌کنند. با بهترین مدرس‌ها، یادگیری راحت، سریع و کاربردی را تجربه کن.",
@@ -210,8 +258,53 @@
     "featuredBadge": "ویژه",
     "noCoursesMessage": "دوره‌ای یافت نشد",
     "currency": "تومان"
+  },
+  "studentCourses": {
+    "title": "دوره‌های من",
+    "loading": "در حال بارگذاری دوره‌ها...",
+    "startWatching": "شروع تماشا",
+    "noCourses": "هنوز دوره‌ای خریداری نکرده‌ای."
+  },
+  "coursesPage": {
+    "title": "همه دوره‌ها",
+    "searchPlaceholder": "جستجوی دوره‌ها...",
+    "sortBy": "مرتب‌سازی بر اساس",
+    "resultsLabel": "نتایج",
+    "filters": {
+      "category": "دسته‌بندی‌ها",
+      "level": "سطح",
+      "primaryLanguage": "زبان"
+    },
+    "sortLabels": {
+      "priceLowToHigh": "قیمت: از کم به زیاد",
+      "priceHighToLow": "قیمت: از زیاد به کم",
+      "titleAToZ": "عنوان: از A تا Z",
+      "titleZToA": "عنوان: از Z تا A"
+    },
+    "levelOptions": {
+      "beginner": "مقدماتی",
+      "intermediate": "متوسط",
+      "advanced": "پیشرفته"
+    },
+    "languageOptions": {
+      "english": "انگلیسی",
+      "persian": "فارسی"
+    },
+    "createdBy": "ایجاد شده توسط",
+    "lectureSingular": "جلسه",
+    "lecturePlural": "جلسات",
+    "levelLabel": "سطح",
+    "noCourses": "دوره‌ای پیدا نشد"
+  },
+  "roadmapCategory": {
+    "notFound": "???? ??? ????????? ???? ???? ????? ???? ???.",
+    "subtitle": "?? ????? ?? ???? ?? ?? ????? ???? ???? ????? ???? ???.",
+    "stepLabel": "????? {number}",
+    "completed": "????? ??",
+    "inProgress": "?? ??? ?????",
+    "locked": "??? ???",
+    "viewCourse": "?????? ????",
+    "completeStep": "??? ????? ?? ???? ??",
+    "unlockMessage": "???? ??? ??? ??? ????? ????? ????? ???? ?? ???? ??."
   }
-
-
-
 }

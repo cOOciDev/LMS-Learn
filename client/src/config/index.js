@@ -65,18 +65,8 @@ export const initialSignUpFormData = {
 };
 
 export const languageOptions = [
-  { id: "persian", label: "Persian" },
   { id: "english", label: "English" },
-  // { id: "spanish", label: "Spanish" },
-  // { id: "french", label: "French" },
-  // { id: "german", label: "German" },
-  // { id: "chinese", label: "Chinese" },
-  // { id: "japanese", label: "Japanese" },
-  // { id: "korean", label: "Korean" },
-  // { id: "portuguese", label: "Portuguese" },
-  // { id: "arabic", label: "Arabic" },
-  // { id: "russian", label: "Russian" },
-
+  { id: "persian", label: "Persian" },
 ];
 
 export const courseLevelOptions = [
@@ -85,38 +75,41 @@ export const courseLevelOptions = [
   { id: "advanced", label: "Advanced" },
 ];
 
-export const courseCategories = [
-  { id: "web-development", label: "categories.Web Development" },
-  { id: "backend-development", label: "categories.Backend Development" },
-  { id: "data-science", label: "categories.Data Science" },
-  { id: "machine-learning", label: "categories.Machine Learning" },
-  { id: "artificial-intelligence", label: "categories.Artificial Intelligence" },
-  { id: "cloud-computing", label: "categories.Cloud Computing" },
-  { id: "cyber-security", label: "categories.Cyber Security" },
-  { id: "mobile-development", label: "categories.Mobile Development" },
-  { id: "game-development", label: "categories.Game Development" },
-  { id: "software-engineering", label: "categories.Software Engineering" },
+export const defaultCourseCategories = [
+  { id: "web-development", labelKey: "categories.Web_Development", fallbackLabel: "Web Development" },
+  { id: "backend-development", labelKey: "categories.Backend_Development", fallbackLabel: "Backend Development" },
+  { id: "data-science", labelKey: "categories.Data_Science", fallbackLabel: "Data Science" },
+  { id: "machine-learning", labelKey: "categories.Machine_Learning", fallbackLabel: "Machine Learning" },
+  { id: "artificial-intelligence", labelKey: "categories.Artificial_Intelligence", fallbackLabel: "Artificial Intelligence" },
+  { id: "cloud-computing", labelKey: "categories.Cloud_Computing", fallbackLabel: "Cloud Computing" },
+  { id: "cyber-security", labelKey: "categories.Cyber_Security", fallbackLabel: "Cyber Security" },
+  { id: "mobile-development", labelKey: "categories.Mobile_Development", fallbackLabel: "Mobile Development" },
+  { id: "game-development", labelKey: "categories.Game_Development", fallbackLabel: "Game Development" },
+  { id: "software-engineering", labelKey: "categories.Software_Engineering", fallbackLabel: "Software Engineering" },
 ];
 
-export const courseLandingPageFormControls = [
+export const courseLandingPageFormControls = ({
+  categoryOptions = [],
+  t,
+} = {}) => [
   {
     name: "title",
-    label: "Title",
+    label: t?.("course.title") || "Title",
     componentType: "input",
     type: "text",
-    placeholder: "Enter course title",
+    placeholder: t?.("course.title") || "Enter course title",
   },
   {
     name: "category",
-    label: "Category",
+    label: t?.("course.category") || "Category",
     componentType: "select",
     type: "text",
     placeholder: "",
-    options: courseCategories,
+    options: categoryOptions,
   },
   {
     name: "level",
-    label: "Level",
+    label: t?.("course.level") || "Level",
     componentType: "select",
     type: "text",
     placeholder: "",
@@ -124,7 +117,7 @@ export const courseLandingPageFormControls = [
   },
   {
     name: "primaryLanguage",
-    label: "Primary Language",
+    label: t?.("course.primaryLanguage") || "Primary Language",
     componentType: "select",
     type: "text",
     placeholder: "",
@@ -132,37 +125,37 @@ export const courseLandingPageFormControls = [
   },
   {
     name: "subtitle",
-    label: "Subtitle",
+    label: t?.("course.subtitle") || "Subtitle",
     componentType: "input",
     type: "text",
-    placeholder: "Enter course subtitle",
+    placeholder: t?.("course.subtitle") || "Enter course subtitle",
   },
   {
     name: "description",
-    label: "Description",
+    label: t?.("course.description") || "Description",
     componentType: "textarea",
     type: "text",
-    placeholder: "Enter course description",
+    placeholder: t?.("course.description") || "Enter course description",
   },
   {
     name: "pricing",
-    label: "Pricing",
+    label: t?.("course.price") || "Pricing",
     componentType: "input",
     type: "number",
-    placeholder: "Enter course pricing",
+    placeholder: t?.("course.price") || "Enter course pricing",
   },
   {
     name: "objectives",
-    label: "Objectives",
+    label: t?.("course.objectives") || "Objectives",
     componentType: "textarea",
     type: "text",
-    placeholder: "Enter course objectives",
+    placeholder: t?.("course.objectives") || "Enter course objectives",
   },
   {
     name: "welcomeMessage",
-    label: "Welcome Message",
+    label: t?.("course.welcomeMessage") || "Welcome Message",
     componentType: "textarea",
-    placeholder: "Welcome message for students",
+    placeholder: t?.("course.welcomeMessage") || "Welcome message for students",
   },
 ];
 
@@ -195,11 +188,11 @@ export const sortOptions = [
   { id: "title-ztoa", label: "Title: Z to A" },
 ];
 
-export const filterOptions = {
-  category: courseCategories,
+export const buildFilterOptions = ({ categoryOptions = [] } = {}) => ({
+  category: categoryOptions,
   level: courseLevelOptions,
   primaryLanguage: languageOptions,
-};
+});
 
 export const roadmapSteps = [
   { id: "signUp", titleKey: "roadmap.signUpTitle", descriptionKey: "roadmap.signUpDescription" },

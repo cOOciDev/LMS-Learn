@@ -102,7 +102,6 @@
     "enrolledAcrossCourses": "Across all courses",
     "noCourses": "No courses yet.",
     "averageRating": "Average Rating",
-    "averageRating": "Average Rating",
     "financialReports": "Financial Reports",
     "totalOrdersLabel": "Total Orders",
     "avgOrderValue": "Avg. Order Value",
@@ -131,7 +130,51 @@
     "supportEmail": "Support Email",
     "siteAnnouncement": "Site Announcement",
     "announcementPlaceholder": "Optional announcement to show users.",
-    "settings": "Settings"
+    "settings": "Settings",
+    "roadmapManagement": "Roadmap Management",
+    "roadmapManagementDescription": "Design category-based learning journeys and connect each milestone to a course.",
+    "createRoadmap": "Create Roadmap",
+    "roadmapTitle": "Roadmap Title",
+    "roadmapTitlePlaceholder": "e.g. Front-end Career Path",
+    "selectCategory": "Select Category",
+    "roadmapSteps": "Steps",
+    "addStep": "Add Step",
+    "stepLabel": "Step {number}",
+    "removeStep": "Remove",
+    "stepTitlePlaceholder": "Step title",
+    "stepDescriptionPlaceholder": "Describe the focus of this step",
+    "stepSelectCourse": "Attach course",
+    "saveRoadmap": "Save Roadmap",
+    "roadmapMissingFields": "Complete the title and category",
+    "roadmapStepValidation": "Every step must include title, description, and course.",
+    "roadmapCreated": "Roadmap saved successfully.",
+    "roadmapCreateFailed": "Unable to save roadmap.",
+    "existingRoadmaps": "Existing Roadmaps",
+    "noRoadmaps": "No roadmaps defined yet.",
+    "stepsCountLabel": "steps",
+    "categoryManagement": "Category Management",
+    "categoryManagementDescription": "Create, translate, and organize course categories.",
+    "addCategory": "Add Category",
+    "categoryName": "Category Name",
+    "categoryNameFa": "Category Name (Persian)",
+    "categoryDescription": "Description",
+    "saveCategory": "Save Category",
+    "categoryTips": "Category Guidelines",
+    "categoryTipsBody": "Categories help students find the right content faster. Keep naming consistent and provide localized titles.",
+    "categoryTipOne": "Use concise, descriptive names.",
+    "categoryTipTwo": "Delete categories only when no courses use them.",
+    "categoryTipThree": "Add localized names so non-English speakers understand the category.",
+    "categoriesList": "Existing Categories",
+    "noCategories": "No categories yet.",
+    "categorySlug": "Slug",
+    "categoryCourses": "Courses",
+    "categoryCreated": "Category created successfully.",
+    "categoryDeleted": "Category deleted successfully.",
+    "failedToCreateCategory": "Failed to create category.",
+    "failedToDeleteCategory": "Failed to delete category.",
+    "failedToLoadCategories": "Failed to load categories.",
+    "categoryNameRequired": "Category name is required.",
+    "deleteCategoryConfirm": "Delete this category? It cannot be recovered."
   },
   "instructor": {
     "instructorDashboard": "Instructor Dashboard",
@@ -144,6 +187,43 @@
     "enrolledCourses": "Enrolled Courses",
     "courseProgress": "Course Progress",
     "purchaseCourse": "Purchase Course"
+  },
+  "studentCourses": {
+    "title": "My Courses",
+    "loading": "Loading your courses...",
+    "startWatching": "Start Watching",
+    "noCourses": "You haven't purchased any courses yet."
+  },
+  "coursesPage": {
+    "title": "All Courses",
+    "searchPlaceholder": "Search courses...",
+    "sortBy": "Sort By",
+    "resultsLabel": "Results",
+    "filters": {
+      "category": "Categories",
+      "level": "Level",
+      "primaryLanguage": "Language"
+    },
+    "sortLabels": {
+      "priceLowToHigh": "Price: Low to High",
+      "priceHighToLow": "Price: High to Low",
+      "titleAToZ": "Title: A to Z",
+      "titleZToA": "Title: Z to A"
+    },
+    "levelOptions": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "languageOptions": {
+      "english": "English",
+      "persian": "Persian"
+    },
+    "createdBy": "Created by",
+    "lectureSingular": "Lecture",
+    "lecturePlural": "Lectures",
+    "levelLabel": "Level",
+    "noCourses": "No courses found"
   },
   "course": {
     "title": "Title",
@@ -183,7 +263,6 @@
     "Game_Development": "Game Development",
     "Software_Engineering": "Software Engineering"
   },
-
   "roadmap": {
     "title": "roadmap",
     "description": "A simple step-by-step path to learn courses",
@@ -196,9 +275,25 @@
     "finalExamTitle": "Final Exam",
     "finalExamDescription": "Take the final exam of each course.",
     "certificateTitle": "Certificate",
-    "certificateDescription": "Receive the certificate after course completion."
+    "certificateDescription": "Receive the certificate after course completion.",
+    "customTitle": "Create Your Personalized Roadmap",
+    "customDescription": "Search any category to view curated milestones, skills, and course suggestions tailored to that path.",
+    "customSearchPlaceholder": "Search categories",
+    "customCardDescription": "See a detailed learning flow crafted for this category.",
+    "customViewButton": "View Roadmap",
+    "customEmptyState": "No categories match your search."
   },
-
+  "roadmapCategory": {
+    "notFound": "No roadmap defined for this category.",
+    "subtitle": "Complete each milestone to unlock the next stage of your journey.",
+    "stepLabel": "Step {number}",
+    "completed": "Completed",
+    "inProgress": "In progress",
+    "locked": "Locked",
+    "viewCourse": "View Course",
+    "completeStep": "Complete this step",
+    "unlockMessage": "Finish the previous step to unlock this one."
+  },
   "home": {
     "heroTitle": "Build Your Future with Learning 🚀",
     "heroDescription": "Acquire skills that guarantee your career today and tomorrow. Learn quickly and practically with the best instructors.",
@@ -212,6 +307,4 @@
     "noCoursesMessage": "No courses found",
     "currency": "Toman"
   }
-
-
 }
