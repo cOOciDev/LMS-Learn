@@ -1,3 +1,4 @@
+// client/src/pages/student/courses/index.jsx
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";

@@ -1,3 +1,4 @@
+// client/src/services/index.js
 import axiosInstance from "@/api/axiosInstance";
 
 export async function registerService(formData) {

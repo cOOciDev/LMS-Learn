@@ -23,11 +23,15 @@ function StudentViewCommonHeader() {
       <div className="flex items-center space-x-4">
         <Link
           to="/home"
-          className="flex items-center px-2 py-1 rounded-md hover:bg-[#262626]"
+          className="flex items-center px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
         >
-          <GraduationCap className="h-8 w-8 mr-4" />
-          <span className="font-extrabold md:text-xl text-[14px]">
-            LMS LEARN
+          <img 
+  src="/favicon.png" 
+  alt="logo" 
+  className="h-8 w-8 mr-4 object-contain" 
+/>
+          <span className="font-extrabold md:text-xl text-[14px]" style={{ color: '#002F60' }}>
+            Farayad
           </span>
         </Link>
         <div className="flex items-center space-x-1">
