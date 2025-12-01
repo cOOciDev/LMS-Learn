@@ -24,6 +24,9 @@ import AdminFinancialReportsPage from "./pages/admin/financial-reports";
 import AdminMessagesPage from "./pages/admin/messages";
 import AdminSettingsPage from "./pages/admin/settings";
 import AdminInstructorManagement from "./pages/admin/instructors";
+import AdminCategoryManagement from "./pages/admin/categories";
+import AdminRoadmapsPage from "./pages/admin/roadmaps";
+import StudentCategoryRoadmapPage from "./pages/student/roadmap-category";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -69,6 +72,8 @@ function App() {
         <Route path="register-user" element={<AdminRegisterUserPage />} />
         <Route path="instructors" element={<AdminInstructorManagement />} />
         <Route path="courses" element={<AdminCoursesPage />} />
+        <Route path="categories" element={<AdminCategoryManagement />} />
+        <Route path="roadmaps" element={<AdminRoadmapsPage />} />
         <Route path="financial" element={<AdminFinancialReportsPage />} />
         <Route path="messages" element={<AdminMessagesPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
@@ -86,7 +91,8 @@ function App() {
         <Route path="" element={<StudentHomePage />} />
         <Route path="home" element={<StudentHomePage />} />
         <Route path="courses" element={<StudentViewCoursesPage />} />
-        <Route path="/roadmap" element={<RoadmapPage />} />
+        <Route path="roadmap" element={<RoadmapPage />} />
+        <Route path="roadmap/category/:slug" element={<StudentCategoryRoadmapPage />} />
         <Route
           path="course/details/:id"
           element={<StudentViewCourseDetailsPage />}
