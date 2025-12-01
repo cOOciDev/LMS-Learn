@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { filterOptions, sortOptions } from "@/config";
+import { buildFilterOptions, sortOptions } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
 import {
@@ -21,6 +21,9 @@ import {
 import { ArrowUpDownIcon, Search as SearchIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCategories } from "@/context/category-context";
+import { buildCategoryOptions } from "@/utils/category";
+import { useLanguage } from "@/context/language-context";
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
@@ -51,6 +54,26 @@ function StudentViewCoursesPage() {
   const [resultsTotal, setResultsTotal] = useState(0);
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
+  const { categories } = useCategories();
+  const { t, language } = useLanguage();
+
+  const categoryOptions = useMemo(
+    () =>
+      buildCategoryOptions({
+        categories,
+        language,
+        t,
+      }),
+    [categories, language, t]
+  );
+
+  const filterOptions = useMemo(
+    () =>
+      buildFilterOptions({
+        categoryOptions,
+      }),
+    [categoryOptions]
+  );
 
   const sortQueryMap = useMemo(
     () => ({
@@ -175,15 +198,53 @@ function StudentViewCoursesPage() {
   }, []);
 
 
+  const filterLabels = {
+    category: t("coursesPage.filters.category") || t("home.categoriesTitle") || "Categories",
+    level: t("coursesPage.filters.level") || t("course.level") || "Level",
+    primaryLanguage: t("coursesPage.filters.primaryLanguage") || t("course.primaryLanguage") || "Language",
+  };
+
+  const sortLabelMap = {
+    "price-lowtohigh": t("coursesPage.sortLabels.priceLowToHigh") || sortOptions[0].label,
+    "price-hightolow": t("coursesPage.sortLabels.priceHighToLow") || sortOptions[1].label,
+    "title-atoz": t("coursesPage.sortLabels.titleAToZ") || sortOptions[2].label,
+    "title-ztoa": t("coursesPage.sortLabels.titleZToA") || sortOptions[3].label,
+  };
+
+  const levelLabels = {
+    beginner: t("coursesPage.levelOptions.beginner") || "Beginner",
+    intermediate: t("coursesPage.levelOptions.intermediate") || "Intermediate",
+    advanced: t("coursesPage.levelOptions.advanced") || "Advanced",
+  };
+
+  const languageLabels = {
+    english: t("coursesPage.languageOptions.english") || "English",
+    persian: t("coursesPage.languageOptions.persian") || "Persian",
+  };
+
+  const renderOptionLabel = (sectionId, option) => {
+    if (sectionId === "level") {
+      return levelLabels[option.id] || option.label;
+    }
+    if (sectionId === "primaryLanguage") {
+      return languageLabels[option.id] || option.label;
+    }
+    return option.label;
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">All Courses</h1>
+      <h1 className="text-3xl font-bold mb-4">
+        {t("coursesPage.title") || t("common.courses") || "All Courses"}
+      </h1>
       <div className="flex flex-col md:flex-row gap-4">
         <aside className="w-full md:w-64 space-y-4">
           <div>
             {Object.keys(filterOptions).map((ketItem, index) => (
               <div key={index} className="p-4 border-b">
-                <h3 className="font-bold mb-3">{ketItem.toUpperCase()}</h3>
+                <h3 className="font-bold mb-3">
+                  {filterLabels[ketItem] || ketItem.toUpperCase()}
+                </h3>
                 <div className="grid gap-2 mt-2">
                   {filterOptions[ketItem].map((option) => (
                     <Label key={option.id} className="flex font-medium items-center gap-3">
@@ -198,7 +259,7 @@ function StudentViewCoursesPage() {
                           handleFilterOnChange(ketItem, option)
                         }
                       />
-                      {option.label}
+                      {renderOptionLabel(ketItem, option)}
                     </Label>
                   ))}
                 </div>
@@ -213,7 +274,7 @@ function StudentViewCoursesPage() {
               <Input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search courses..."
+                placeholder={t("coursesPage.searchPlaceholder") || "Search courses..."}
                 className="pl-9"
               />
             </div>
@@ -225,7 +286,9 @@ function StudentViewCoursesPage() {
                   className="flex items-center gap-2 p-5"
                 >
                   <ArrowUpDownIcon className="h-4 w-4" />
-                  <span className="text-[16px] font-medium">Sort By</span>
+                  <span className="text-[16px] font-medium">
+                    {t("coursesPage.sortBy") || "Sort By"}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[180px]">
@@ -238,14 +301,15 @@ function StudentViewCoursesPage() {
                       value={sortItem.id}
                       key={sortItem.id}
                     >
-                      {sortItem.label}
+                      {sortLabelMap[sortItem.id] || sortItem.label}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
             <span className="text-sm text-black font-bold">
-              {resultsTotal || studentViewCoursesList.length} Results
+              {resultsTotal || studentViewCoursesList.length}{" "}
+              {t("coursesPage.resultsLabel") || "Results"}
             </span>
           </div>
           <div className="space-y-4">
@@ -268,16 +332,25 @@ function StudentViewCoursesPage() {
                         {courseItem?.title}
                       </CardTitle>
                       <p className="text-sm text-gray-600 mb-1">
-                        Created By{" "}
+                        {t("coursesPage.createdBy") || "Created by"}{" "}
                         <span className="font-bold">
                           {courseItem?.instructorName}
                         </span>
                       </p>
                       <p className="text-[16px] text-gray-600 mt-3 mb-2">
-                        {`${courseItem?.curriculum?.length} ${courseItem?.curriculum?.length <= 1
-                            ? "Lecture"
-                            : "Lectures"
-                          } - ${courseItem?.level.toUpperCase()} Level`}
+                        {(() => {
+                          const lectureCount = courseItem?.curriculum?.length || 0;
+                          const lectureLabel =
+                            lectureCount === 1
+                              ? t("coursesPage.lectureSingular") || "Lecture"
+                              : t("coursesPage.lecturePlural") || "Lectures";
+                          const levelText =
+                            levelLabels[courseItem?.level] ||
+                            courseItem?.level?.toUpperCase();
+                          return `${lectureCount} ${lectureLabel} · ${
+                            t("coursesPage.levelLabel") || "Level"
+                          } ${levelText}`;
+                        })()}
                       </p>
                       <p className="font-bold text-lg">
                         ${courseItem?.pricing}
@@ -289,7 +362,9 @@ function StudentViewCoursesPage() {
             ) : loadingState ? (
               <Skeleton />
             ) : (
-              <h1 className="font-extrabold text-4xl">No Courses Found</h1>
+              <h1 className="font-extrabold text-4xl">
+                {t("coursesPage.noCourses") || t("home.noCoursesMessage") || "No courses found"}
+              </h1>
             )}
           </div>
         </main>

@@ -1,7 +1,6 @@
-import { courseCategories } from "@/config";
 import banner from "../../../../public/hero.webp";
 import { Button } from "@/components/ui/button";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { StudentContext } from "@/context/student-context";
 import {
   checkCoursePurchaseInfoService,
@@ -10,13 +9,26 @@ import {
 import { AuthContext } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/language-context";
+import { useCategories } from "@/context/category-context";
+import { buildCategoryOptions } from "@/utils/category";
 
 function StudentHomePage() {
   const { studentViewCoursesList, setStudentViewCoursesList } =
     useContext(StudentContext);
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { categories } = useCategories();
+
+  const categoryOptions = useMemo(
+    () =>
+      buildCategoryOptions({
+        categories,
+        language,
+        t,
+      }),
+    [categories, language, t]
+  );
 
   function handleNavigateToCoursesPage(getCurrentId) {
     sessionStorage.removeItem("filters");
@@ -53,7 +65,7 @@ function StudentHomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
 
       {/* 🔥 HERO / Banner */}
       <section className="relative flex flex-col lg:flex-row items-center justify-between py-16 px-6 lg:px-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-b-[60px] overflow-hidden shadow-xl">
@@ -88,21 +100,21 @@ function StudentHomePage() {
       </section>
 
       {/* 📌 دسته‌بندی‌ دوره‌ها */}
-      <section className="py-16 px-6 lg:px-16 bg-white rounded-t-[60px] shadow-inner">
+      <section className="py-16 px-6 lg:px-16 bg-white/90 rounded-t-[60px] shadow-inner transition-colors dark:bg-slate-900/80">
         <div className="mb-10 text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-3">
             {t("home.categoriesTitle")}
           </h2>
-          <p className="text-gray-600 text-base max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-slate-300 text-base max-w-2xl mx-auto">
             {t("home.categoriesDescription")}
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {courseCategories.map((categoryItem) => (
+          {categoryOptions.map((categoryItem) => (
             <Button
               key={categoryItem.id}
               variant="outline"
-              className="justify-center h-14 font-semibold text-[15px] rounded-xl shadow hover:bg-indigo-600 hover:text-white hover:scale-105 transform transition-all"
+              className="justify-center h-14 font-semibold text-[15px] rounded-xl border border-slate-200 bg-white text-slate-700 shadow transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:text-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-indigo-500"
               onClick={() => handleNavigateToCoursesPage(categoryItem.id)}
             >
               {categoryItem.label}
@@ -112,12 +124,12 @@ function StudentHomePage() {
       </section>
 
       {/* 📌 دوره‌های ویژه */}
-      <section className="py-16 px-6 lg:px-16 bg-gray-50">
+      <section className="py-16 px-6 lg:px-16 bg-gray-50 transition-colors dark:bg-slate-950">
         <div className="mb-10 text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-3">
             {t("home.featuredCoursesTitle")}
           </h2>
-          <p className="text-gray-600 text-base max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-slate-300 text-base max-w-2xl mx-auto">
             {t("home.featuredCoursesDescription")}
           </p>
         </div>
@@ -128,7 +140,7 @@ function StudentHomePage() {
               <div
                 key={index}
                 onClick={() => handleCourseNavigate(courseItem?._id)}
-                className="group border border-gray-200 rounded-2xl overflow-hidden shadow-md cursor-pointer bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center w-full max-w-[280px]"
+                className="group border border-gray-200 rounded-2xl overflow-hidden shadow-md cursor-pointer bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center w-full max-w-[280px] dark:border-slate-800 dark:bg-slate-900/70"
               >
                 <div className="relative w-full">
                   <img
@@ -141,16 +153,20 @@ function StudentHomePage() {
                   </span>
                 </div>
                 <div className="p-5 space-y-2">
-                  <h3 className="font-bold text-black text-lg group-hover:text-indigo-600 transition-all">
+                  <h3 className="font-bold text-black text-lg group-hover:text-indigo-600 transition-all dark:text-white">
                     {courseItem?.title}
                   </h3>
-                  <p className="text-sm text-gray-500">{courseItem?.instructorName}</p>
-                  <p className="font-bold text-indigo-600 text-[18px]">{courseItem?.pricing} {t("home.currency")}</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
+                    {courseItem?.instructorName}
+                  </p>
+                  <p className="font-bold text-indigo-600 dark:text-indigo-400 text-[18px]">
+                    {courseItem?.pricing} {t("home.currency")}
+                  </p>
                 </div>
               </div>
             ))
           ) : (
-            <h1 className="text-xl text-gray-600 text-center">
+            <h1 className="text-xl text-gray-600 dark:text-slate-400 text-center">
               {t("home.noCoursesMessage")}
             </h1>
           )}

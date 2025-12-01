@@ -249,3 +249,42 @@ export async function updateInstructorService(instructorId, payload) {
   );
   return data;
 }
+
+// Category services
+export async function getPublicCategoriesService() {
+  const { data } = await axiosInstance.get("/categories");
+  return data;
+}
+
+export async function getAdminCategoriesService() {
+  const { data } = await axiosInstance.get("/admin/categories");
+  return data;
+}
+
+export async function createCategoryService(payload) {
+  const { data } = await axiosInstance.post("/admin/categories", payload);
+  return data;
+}
+
+export async function deleteCategoryService(categoryId) {
+  const { data } = await axiosInstance.delete(
+    `/admin/categories/${categoryId}`
+  );
+  return data;
+}
+
+// Roadmap services
+export async function getAdminRoadmapsService() {
+  const { data } = await axiosInstance.get("/admin/roadmaps");
+  return data;
+}
+
+export async function createRoadmapService(payload) {
+  const { data } = await axiosInstance.post("/admin/roadmaps", payload);
+  return data;
+}
+
+export async function getRoadmapByCategoryService(categorySlug) {
+  const { data } = await axiosInstance.get(`/roadmaps/${categorySlug}`);
+  return data;
+}

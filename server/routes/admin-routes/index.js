@@ -15,6 +15,15 @@ const {
 const authenticateMiddleware = require("../../middleware/auth-middleware");
 const isAdmin = require("../../middleware/admin-middleware");
 const { validatePagination } = require("../../middleware/validation");
+const {
+  getAdminCategories,
+  createCategory,
+  deleteCategory,
+} = require("../../controllers/category-controller");
+const {
+  createRoadmap,
+  getAdminRoadmaps,
+} = require("../../controllers/roadmap-controller");
 const router = express.Router();
 
 // All routes require admin authentication
@@ -33,6 +42,15 @@ router.delete("/users/:id", deleteUser);
 
 // Course management
 router.get("/courses", validatePagination, getAllCourses);
+
+// Category management
+router.get("/categories", getAdminCategories);
+router.post("/categories", createCategory);
+router.delete("/categories/:id", deleteCategory);
+
+// Roadmap management
+router.get("/roadmaps", getAdminRoadmaps);
+router.post("/roadmaps", createRoadmap);
 
 // Financial reports
 router.get("/financial/reports", getFinancialReports);

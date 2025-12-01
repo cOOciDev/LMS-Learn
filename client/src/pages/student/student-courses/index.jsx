@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
+import { useLanguage } from "@/context/language-context";
 import { fetchStudentBoughtCoursesService } from "@/services";
 import { Watch } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
@@ -12,6 +13,7 @@ function StudentCoursesPage() {
   const { studentBoughtCoursesList, setStudentBoughtCoursesList } =
     useContext(StudentContext);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   // Loading state
   const [loading, setLoading] = useState(true);
@@ -31,12 +33,15 @@ function StudentCoursesPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold mb-8">My Courses</h1>
+      <h1 className="mb-8 text-3xl font-bold">
+        {t("studentCourses.title") || t("common.myCourses") || "My Courses"}
+      </h1>
       {loading ? (
-        <div className="flex justify-center items-center">
-          {/* Tailwind CSS Spinner */}
-          <div className="animate-spin rounded-full border-t-4 border-blue-500 border-solid w-12 h-12"></div>
-          <span className="ml-4 text-lg">Loading...</span>
+        <div className="flex items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-500 border-t-transparent dark:border-indigo-400"></div>
+          <span className="ml-4 text-lg">
+            {t("studentCourses.loading") || t("common.loading") || "Loading..."}
+          </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -62,13 +67,15 @@ function StudentCoursesPage() {
                     className="flex-1"
                   >
                     <Watch className="mr-2 h-4 w-4" />
-                    Start Watching
+                    {t("studentCourses.startWatching") || "Start Watching"}
                   </Button>
                 </CardFooter>
               </Card>
             ))
           ) : (
-            <h1 className="text-3xl font-bold">No Courses found</h1>
+            <h1 className="text-3xl font-bold text-slate-500 dark:text-slate-300">
+              {t("studentCourses.noCourses") || t("home.noCoursesMessage") || "No courses found"}
+            </h1>
           )}
         </div>
       )}

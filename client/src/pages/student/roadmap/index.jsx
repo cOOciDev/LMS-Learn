@@ -1,11 +1,16 @@
 // client/src/pages/student/roadmap/index.jsx
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useLanguage } from "@/context/language-context";
 import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
-import { FiUserPlus, FiBookOpen, FiEdit, FiCheckCircle, FiAward } from "react-icons/fi";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { FiUserPlus, FiBookOpen, FiEdit, FiCheckCircle, FiAward, FiArrowRight } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { useCategories } from "@/context/category-context";
+import { buildCategoryOptions } from "@/utils/category";
+import { useNavigate } from "react-router-dom";
 
 export const roadmapSteps = [
   {
@@ -46,7 +51,32 @@ export const roadmapSteps = [
 ];
 
 export default function Roadmap() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { categories } = useCategories();
+  const [categorySearch, setCategorySearch] = useState("");
+  const navigate = useNavigate();
+
+  const categoryOptions = useMemo(
+    () =>
+      buildCategoryOptions({
+        categories,
+        language,
+        t,
+      }),
+    [categories, language, t]
+  );
+
+  const filteredCategories = useMemo(() => {
+    const query = categorySearch.trim().toLowerCase();
+    if (!query) return categoryOptions;
+    return categoryOptions.filter((category) =>
+      category.label.toLowerCase().includes(query)
+    );
+  }, [categoryOptions, categorySearch]);
+
+  function handleViewCategory(categoryId) {
+    navigate(`/roadmap/category/${categoryId}`);
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -65,8 +95,8 @@ export default function Roadmap() {
       >
         {step.icon}
       </div>
-    </div>
-  ))}
+      </div>
+    ))}
 </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -90,6 +120,59 @@ export default function Roadmap() {
           </motion.div>
         ))}
       </div>
+
+      <section className="mt-16 rounded-3xl border border-slate-200/60 bg-white/80 p-8 shadow-lg transition dark:border-slate-800/60 dark:bg-slate-900/60">
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl font-bold mb-3">
+            {t("roadmap.customTitle") || "Build Your Personalized Roadmap"}
+          </h2>
+          <p className="text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
+            {t("roadmap.customDescription") ||
+              "Search a category to see curated milestones, skills, and courses tailored to that learning path."}
+          </p>
+        </div>
+
+        <div className="mx-auto mb-8 max-w-xl">
+          <Input
+            value={categorySearch}
+            onChange={(event) => setCategorySearch(event.target.value)}
+            placeholder={t("roadmap.customSearchPlaceholder") || "Search categories"}
+            className="h-12 rounded-2xl border-slate-200 px-5 text-base shadow-sm dark:border-slate-700 dark:bg-slate-900"
+          />
+        </div>
+
+        {filteredCategories.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCategories.map((category) => (
+              <Card
+                key={category.id}
+                className="flex flex-col justify-between border border-slate-200/70 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800/70 dark:bg-slate-900"
+              >
+                <CardContent className="pt-6">
+                  <CardTitle className="text-xl">{category.label}</CardTitle>
+                  <CardDescription className="mt-2 text-sm text-gray-600 dark:text-slate-400">
+                    {t("roadmap.customCardDescription") ||
+                      "View the recommended skills, milestones, and courses for this path."}
+                  </CardDescription>
+                </CardContent>
+                <div className="p-6 pt-0">
+                  <Button
+                    className="w-full gap-2 rounded-2xl bg-indigo-600 text-white hover:bg-indigo-500 dark:bg-indigo-500"
+                    onClick={() => handleViewCategory(category.id)}
+                  >
+                    {t("roadmap.customViewButton") || "View Roadmap"}
+                    <FiArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300">
+            {t("roadmap.customEmptyState") || "No categories match your search."}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
