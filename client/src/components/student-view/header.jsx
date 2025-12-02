@@ -26,12 +26,12 @@ function StudentViewCommonHeader() {
           className="flex items-center px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
         >
           <img 
-  src="/favicon.png" 
-  alt="logo" 
-  className="h-8 w-8 mr-4 object-contain" 
-/>
+            src="/favicon.png" 
+            alt="logo" 
+            className="h-8 w-8 mr-4 object-contain" 
+          />
           <span className="font-extrabold md:text-xl text-[14px]" style={{ color: '#002F60' }}>
-            Farayad
+            Nedayar
           </span>
         </Link>
         <div className="flex items-center space-x-1">

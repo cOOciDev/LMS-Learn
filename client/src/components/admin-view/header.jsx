@@ -18,7 +18,7 @@ function AdminHeader() {
         </div>
         <div className="leading-tight">
           <p className="text-sm uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
-            LMS LEARN
+            Nedayar
           </p>
           <p className="text-base font-bold">{t("admin.adminPanel") || "Admin Control"}</p>
         </div>

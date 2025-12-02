@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import StudentViewCommonHeader from "./header";
+import StudentViewCommonFooter from "./footer";
 
 function StudentViewCommonLayout() {
   const location = useLocation();
@@ -10,6 +11,7 @@ function StudentViewCommonLayout() {
       ) : null}
 
       <Outlet />
+      <StudentViewCommonFooter/>
     </div>
   );
 }

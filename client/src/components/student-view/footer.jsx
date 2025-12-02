@@ -1,4 +1,4 @@
-function InstructorFooter() {
+function StudentViewCommonFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -10,5 +10,5 @@ function InstructorFooter() {
   );
 }
 
-export default InstructorFooter;
+export default StudentViewCommonFooter;
 
