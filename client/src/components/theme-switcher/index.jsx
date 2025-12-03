@@ -1,3 +1,4 @@
+// client/src/components/theme-switcher/index.jsx
 import { useTheme } from "@/context/theme-context";
 import { Moon, Sun } from "lucide-react";
 

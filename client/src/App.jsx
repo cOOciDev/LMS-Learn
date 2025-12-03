@@ -1,3 +1,4 @@
+// client/src/App.jsx
 import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/auth";
 import RouteGuard from "./components/route-guard";

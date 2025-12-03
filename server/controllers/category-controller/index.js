@@ -1,3 +1,4 @@
+// server/controllers/category-controller/index.js
 const Category = require("../../models/Category");
 const Course = require("../../models/Course");
 const { asyncHandler } = require("../../middleware/error-handler");

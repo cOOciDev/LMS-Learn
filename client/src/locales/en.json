@@ -28,6 +28,7 @@
     "myCourses": "My Courses",
     "exploreCourses": "Explore Courses",
     "language": "Language",
+    "theme": "Theme",
     "user": "User",
     "instructor": "Instructor",
     "admin": "Admin",
@@ -41,8 +42,15 @@
     "price": "Price",
     "course": "Course",
     "actions": "Actions",
-    "view": "View"
+    "view": "View",
+    "support": "Support",
+    "currency": "Toman",
+    "free": "Free",
+    "new": "New",
+    "saveAndContinue": "save and continue",
+    "publish": "Publish"
   },
+
   "auth": {
     "signInToAccount": "Sign in to your account",
     "enterEmailPassword": "Enter your email and password to access your account",
@@ -58,6 +66,7 @@
     "loginFailed": "Login failed. Please check your credentials and try again.",
     "pleaseFillAllFields": "Please fill in all required fields"
   },
+
   "admin": {
     "adminPanel": "Admin Panel",
     "panelSubtitle": "Manage everything in one place",
@@ -176,55 +185,55 @@
     "categoryNameRequired": "Category name is required.",
     "deleteCategoryConfirm": "Delete this category? It cannot be recovered."
   },
+
   "instructor": {
     "instructorDashboard": "Instructor Dashboard",
     "myCourses": "My Courses",
     "createCourse": "Create Course",
     "editCourse": "Edit Course"
   },
+
   "student": {
     "studentDashboard": "Student Dashboard",
     "enrolledCourses": "Enrolled Courses",
     "courseProgress": "Course Progress",
     "purchaseCourse": "Purchase Course"
   },
-  "studentCourses": {
-    "title": "My Courses",
-    "loading": "Loading your courses...",
-    "startWatching": "Start Watching",
-    "noCourses": "You haven't purchased any courses yet."
-  },
-  "coursesPage": {
-    "title": "All Courses",
-    "searchPlaceholder": "Search courses...",
-    "sortBy": "Sort By",
-    "resultsLabel": "Results",
-    "filters": {
-      "category": "Categories",
-      "level": "Level",
-      "primaryLanguage": "Language"
-    },
-    "sortLabels": {
-      "priceLowToHigh": "Price: Low to High",
-      "priceHighToLow": "Price: High to Low",
-      "titleAToZ": "Title: A to Z",
-      "titleZToA": "Title: Z to A"
-    },
-    "levelOptions": {
+
+  "filters": {
+    "title": "Filters",
+    "clearAll": "Clear All",
+    "category": "Category",
+    "level": {
+      "title": "Level",
       "beginner": "Beginner",
       "intermediate": "Intermediate",
       "advanced": "Advanced"
     },
-    "languageOptions": {
-      "english": "English",
-      "persian": "Persian"
-    },
-    "createdBy": "Created by",
-    "lectureSingular": "Lecture",
-    "lecturePlural": "Lectures",
-    "levelLabel": "Level",
-    "noCourses": "No courses found"
+    "language": {
+      "title": "Course Language",
+      "persian": "Persian",
+      "english": "English"
+    }
   },
+
+  "sort": {
+    "newest": "Newest",
+    "priceLowToHigh": "Price: Low to High",
+    "priceHighToLow": "Price: High to Low",
+    "titleAtoZ": "Title: A to Z"
+  },
+  "app": {
+    "name": "Nedayar"
+  },
+
+  "coursesPage": {
+    "title": "All Courses",
+    "searchPlaceholder": "Search courses...",
+    "results": "{{count}} courses found",
+    "noCoursesFound": "No courses found"
+  },
+
   "course": {
     "title": "Title",
     "description": "Description",
@@ -239,32 +248,63 @@
     "lectures": "Lectures",
     "curriculum": "Curriculum",
     "settings": "Settings",
+    "courseImage": "Course Picture",
     "rateCourse": "Rate this course",
     "leaveReview": "Leave a review (optional)",
     "submitFeedback": "Submit Feedback",
-    "ratingSuccess": "Thanks for rating this course!",
+    "ratingSuccess": "Thank you for your rating!",
     "ratingRange": "Rating must be between 1 and 5.",
-    "ratingError": "Unable to submit rating right now."
+    "ratingError": "Could not submit rating. Please try again.",
+    "instructor": "Instructor",
+    "students": "Students",
+    "lastUpdated": "Last Updated",
+    "duration": "Duration",
+    "whatYouWillLearn": "What you'll learn",
+    "requirements": "Requirements",
+    "whoThisCourseFor": "Who thisBBC this course is for",
+    "buyNow": "Buy Now",
+    "addToCart": "Add to Cart",
+    "alreadyEnrolled": "You are already enrolled in this course",
+    "startLearning": "Start Learning",
+    "includes": "This course includes",
+    "lifetimeAccess": "Lifetime access",
+    "certificate": "Certificate of completion",
+    "moneyBack": "30-day money-back guarantee",
+    "welcomeMessage": "Course welcome Message",
+    "objectives": "Objectives",
+    "primaryLanguage": "language",
+    "subtitle": "course subtitle under tilte"
   },
-  "validation": {
-    "required": "This field is required",
-    "invalidEmail": "Invalid email address",
-    "passwordTooShort": "Password must be at least 6 characters"
+
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {current} of {total}"
   },
-  "categories": {
-    "Web_Development": "Web Development",
-    "Backend_Development": "Backend Development",
-    "Data_Science": "Data Science",
-    "Machine_Learning": "Machine Learning",
-    "Artificial_Intelligence": "Artificial Intelligence",
-    "Cloud_Computing": "Cloud Computing",
-    "Cyber_Security": "Cyber Security",
-    "Mobile_Development": "Mobile Development",
-    "Game_Development": "Game Development",
-    "Software_Engineering": "Software Engineering"
+
+  "studentCourses": {
+    "title": "My Courses",
+    "loading": "Loading your courses...",
+    "startWatching": "Start Watching",
+    "noCourses": "You haven't purchased any courses yet."
   },
+
+  "home": {
+    "heroTitle": "Build Your Future with Learning",
+    "heroDescription": "Acquire skills that guarantee your career today and tomorrow. Learn quickly and practically with the best instructors.",
+    "exploreCoursesButton": "View Courses",
+    "heroImageAlt": "Site Banner",
+    "categoriesTitle": "Course Categories",
+    "categoriesDescription": "Courses are categorized by topics to make it easier to find the skills you want.",
+    "featuredCoursesTitle": "Featured Courses",
+    "featuredCoursesDescription": "These courses are selected by professional instructors with the highest standards.",
+    "featuredBadge": "Featured",
+    "noCoursesMessage": "No courses found",
+    "currency": "Toman"
+  },
+
   "roadmap": {
-    "title": "roadmap",
+    "title": "Learning Roadmap",
     "description": "A simple step-by-step path to learn courses",
     "signUpTitle": "Sign Up",
     "signUpDescription": "First, enroll in the course and start your class.",
@@ -283,28 +323,72 @@
     "customViewButton": "View Roadmap",
     "customEmptyState": "No categories match your search."
   },
+
   "roadmapCategory": {
     "notFound": "No roadmap defined for this category.",
     "subtitle": "Complete each milestone to unlock the next stage of your journey.",
     "stepLabel": "Step {number}",
     "completed": "Completed",
-    "inProgress": "In progress",
+    "inProgress": "In Progress",
     "locked": "Locked",
     "viewCourse": "View Course",
     "completeStep": "Complete this step",
     "unlockMessage": "Finish the previous step to unlock this one."
   },
-  "home": {
-    "heroTitle": "Build Your Future with Learning 🚀",
-    "heroDescription": "Acquire skills that guarantee your career today and tomorrow. Learn quickly and practically with the best instructors.",
-    "exploreCoursesButton": "View Courses",
-    "heroImageAlt": "Site Banner",
-    "categoriesTitle": "Course Categories",
-    "categoriesDescription": "Courses are categorized by topics to make it easier to find the skills you want. From programming and design to management and marketing, everything is ready for learning.",
-    "featuredCoursesTitle": "Featured Courses",
-    "featuredCoursesDescription": "These courses are selected by professional instructors with the highest standards. Perfect for students who want to gain practical skills fast and succeed in their careers.",
-    "featuredBadge": "Featured",
-    "noCoursesMessage": "No courses found",
-    "currency": "Toman"
+
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordTooShort": "Password must be at least 6 characters"
+  },
+
+  "categories": {
+    "Web_Development": "Web Development",
+    "Backend_Development": "Backend Development",
+    "Data_Science": "Data Science",
+    "Machine_Learning": "Machine Learning",
+    "Artificial_Intelligence": "Artificial Intelligence",
+    "Cloud_Computing": "Cloud Computing",
+    "Cyber_Security": "Cyber Security",
+    "Mobile_Development": "Mobile Development",
+    "Game_Development": "Game Development",
+    "Software_Engineering": "Software Engineering"
+  },
+  "courseSettings": {
+    "title": "Course Image",
+    "uploading": "Uploading...",
+    "courseImageAlt": "Course Image",
+    "changeImage": "Change Image",
+    "removeImage": "Remove Image",
+    "dragDropPrompt": "Drag & drop your course image here",
+    "mobilePrompt": "Select your course image",
+    "selectFromGallery": "Choose ur img",
+    "supportedFormats": "JPG, PNG, WebP",
+    "maxSize": "Max 5MB",
+    "invalidFileType": "Please select an image file",
+    "fileTooLarge": "Image must be less than 5MB",
+    "uploadFailed": "Upload failed"
+  },
+  "curriculum": {
+    "title": "Course Curriculum",
+    "addLecture": "Add Lecture",
+    "bulkUpload": "Bulk Upload",
+    "uploading": "Uploading videos...",
+    "dragDropVideos": "Drag & drop videos here",
+    "mobileUploadPrompt": "Upload course videos",
+    "selectFromGallery": "Choose video",
+    "noLectures": "No lectures added yet",
+    "lecture": "Lecture",
+    "lectureTitle": "Lecture Title",
+    "titlePlaceholder": "e.g., Introduction to React",
+    "freePreview": "Free Preview",
+    "replaceVideo": "Replace Video",
+    "uploadLectureVideo": "Upload video for this lecture",
+    "invalidVideo": "Please select video files only",
+    "uploadFailed": "Video upload failed"
+  },
+  "courseLanding": {
+    "title": "Course Landing Page",
+    "subtitle": "Fill in the main course details to make it more attractive"
   }
 }

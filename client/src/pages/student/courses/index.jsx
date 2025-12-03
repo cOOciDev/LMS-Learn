@@ -1,6 +1,6 @@
 // client/src/pages/student/courses/index.jsx
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -12,40 +12,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { buildFilterOptions, sortOptions } from "@/config";
+import { Badge } from "@/components/ui/badge";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
 import {
   checkCoursePurchaseInfoService,
   fetchStudentViewCourseListService,
 } from "@/services";
-import { ArrowUpDownIcon, Search as SearchIcon } from "lucide-react";
+import { ArrowUpDown, Search, Clock, Users, PlayCircle } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCategories } from "@/context/category-context";
 import { buildCategoryOptions } from "@/utils/category";
 import { useLanguage } from "@/context/language-context";
 
-function createSearchParamsHelper(filterParams) {
-  const queryParams = [];
-
-  for (const [key, value] of Object.entries(filterParams)) {
-    if (Array.isArray(value) && value.length > 0) {
-      const paramValue = value.join(",");
-
-      queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
-    }
-  }
-
-  return queryParams.join("&");
-}
+const ITEMS_PER_PAGE = 8;
 
 function StudentViewCoursesPage() {
-  const [sort, setSort] = useState("price-lowtohigh");
+  const [sort, setSort] = useState("newest");
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(1);
+
   const {
     studentViewCoursesList,
     setStudentViewCoursesList,
@@ -53,214 +42,193 @@ function StudentViewCoursesPage() {
     setLoadingState,
   } = useContext(StudentContext);
   const [resultsTotal, setResultsTotal] = useState(0);
+  const [purchasedCourses, setPurchasedCourses] = useState({});
+
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
   const { categories } = useCategories();
   const { t, language } = useLanguage();
+  const isRTL = language === "fa";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = language;
+  }, [isRTL, language]);
 
   const categoryOptions = useMemo(
-    () =>
-      buildCategoryOptions({
-        categories,
-        language,
-        t,
-      }),
+    () => buildCategoryOptions({ categories, language, t }),
     [categories, language, t]
   );
 
-  const filterOptions = useMemo(
-    () =>
-      buildFilterOptions({
-        categoryOptions,
-      }),
-    [categoryOptions]
-  );
+  const filterOptions = {
+    category: categoryOptions,
+    level: [
+      { id: "beginner", label: t("filters.level.beginner") },
+      { id: "intermediate", label: t("filters.level.intermediate") },
+      { id: "advanced", label: t("filters.level.advanced") },
+    ],
+    primaryLanguage: [
+      { id: "persian", label: t("filters.language.persian") },
+      { id: "english", label: t("filters.language.english") },
+    ],
+  };
 
-  const sortQueryMap = useMemo(
-    () => ({
-      "price-lowtohigh": { sortBy: "pricing", sortOrder: "asc" },
-      "price-hightolow": { sortBy: "pricing", sortOrder: "desc" },
-      "title-atoz": { sortBy: "title", sortOrder: "asc" },
-      "title-ztoa": { sortBy: "title", sortOrder: "desc" },
-    }),
-    []
-  );
+  const sortOptions = [
+    { id: "newest", label: t("sort.newest") },
+    { id: "price-lowtohigh", label: t("sort.priceLowToHigh") },
+    { id: "price-hightolow", label: t("sort.priceHighToLow") },
+    { id: "title-atoz", label: t("sort.titleAtoZ") },
+  ];
 
-  function handleFilterOnChange(getSectionId, getCurrentOption) {
-    let cpyFilters = { ...filters };
-    const indexOfCurrentSeection =
-      Object.keys(cpyFilters).indexOf(getSectionId);
+  const sortQueryMap = {
+    newest: { sortBy: "createdAt", sortOrder: "desc" },
+    "price-lowtohigh": { sortBy: "pricing", sortOrder: "asc" },
+    "price-hightolow": { sortBy: "pricing", sortOrder: "desc" },
+    "title-atoz": { sortBy: "title", sortOrder: "asc" },
+  };
 
-    if (indexOfCurrentSeection === -1) {
-      cpyFilters = {
-        ...cpyFilters,
-        [getSectionId]: [getCurrentOption.id],
-      };
+  const handleFilterChange = (sectionId, optionId) => {
+    setFilters((prev) => {
+      const newFilters = { ...prev };
+      if (!newFilters[sectionId]) newFilters[sectionId] = [];
+      const index = newFilters[sectionId].indexOf(optionId);
+      if (index === -1) newFilters[sectionId].push(optionId);
+      else newFilters[sectionId].splice(index, 1);
+      if (newFilters[sectionId].length === 0) delete newFilters[sectionId];
+      return newFilters;
+    });
+  };
 
-    } else {
-      const indexOfCurrentOption = cpyFilters[getSectionId].indexOf(
-        getCurrentOption.id
-      );
-
-      if (indexOfCurrentOption === -1)
-        cpyFilters[getSectionId].push(getCurrentOption.id);
-      else cpyFilters[getSectionId].splice(indexOfCurrentOption, 1);
-    }
-
-    setFilters(cpyFilters);
-    sessionStorage.setItem("filters", JSON.stringify(cpyFilters));
-  }
-
-  async function fetchAllStudentViewCourses(filters, sort, searchValue) {
+  const fetchCourses = async () => {
     setLoadingState(true);
     const query = new URLSearchParams();
 
-    Object.entries(filters || {}).forEach(([key, value]) => {
-      if (Array.isArray(value) && value.length > 0) {
-        query.set(key, value.join(","));
+    Object.entries(filters).forEach(([key, values]) => {
+      if (Array.isArray(values) && values.length > 0) {
+        query.set(key, values.join(","));
       }
     });
 
-    const currentSort = sortQueryMap[sort] || {
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    };
-    query.set("sortBy", currentSort.sortBy);
-    query.set("sortOrder", currentSort.sortOrder);
-
-    if (searchValue) {
-      query.set("search", searchValue);
-    }
+    const sortInfo = sortQueryMap[sort] || sortQueryMap.newest;
+    query.set("sortBy", sortInfo.sortBy);
+    query.set("sortOrder", sortInfo.sortOrder);
+    if (debouncedSearch) query.set("search", debouncedSearch);
 
     try {
       const response = await fetchStudentViewCourseListService(query);
       if (response?.success) {
-        const courses = response?.data?.courses || [];
+        const courses = response.data?.courses || [];
         setStudentViewCoursesList(courses);
-        setResultsTotal(response?.data?.pagination?.total ?? courses.length);
-      } else {
-        setStudentViewCoursesList([]);
-        setResultsTotal(0);
+        setResultsTotal(courses.length);
+
+        if (auth?.user?._id) {
+          const map = {};
+          for (const c of courses) {
+            try {
+              const res = await checkCoursePurchaseInfoService(
+                c._id,
+                auth.user._id
+              );
+              if (res?.success) {
+                map[c._id] = {
+                  isEnrolled: res.data?.isEnrolled || false,
+                  progress: Math.round(res.data?.progress || 0),
+                };
+              }
+            } catch {}
+          }
+          setPurchasedCourses(map);
+        }
       }
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      setStudentViewCoursesList([]);
-      setResultsTotal(0);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoadingState(false);
     }
-  }
-
-  async function handleCourseNavigate(getCurrentCourseId) {
-    try {
-      const response = await checkCoursePurchaseInfoService(
-        getCurrentCourseId,
-        auth?.user?._id
-      );
-
-      if (response?.success && response?.data?.isEnrolled) {
-        navigate(`/course-progress/${getCurrentCourseId}`);
-      } else {
-        navigate(`/course/details/${getCurrentCourseId}`);
-      }
-    } catch (error) {
-      navigate(`/course/details/${getCurrentCourseId}`);
-    }
-  }
+  };
 
   useEffect(() => {
-    const buildQueryStringForFilters = createSearchParamsHelper(filters);
-    setSearchParams(new URLSearchParams(buildQueryStringForFilters));
-  }, [filters, setSearchParams]);
-
-  useEffect(() => {
-    setSort("price-lowtohigh");
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
-  }, []);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchTerm.trim());
-    }, 400);
-    return () => clearTimeout(handler);
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 500);
+    return () => clearTimeout(timer);
   }, [searchTerm]);
 
   useEffect(() => {
-    if (filters !== null && sort !== null) {
-      fetchAllStudentViewCourses(filters, sort, debouncedSearch);
-    }
+    fetchCourses();
+    setCurrentPage(1);
   }, [filters, sort, debouncedSearch]);
 
-  useEffect(() => {
-    return () => {
-      sessionStorage.removeItem("filters");
-      setSearchTerm("");
-    };
-  }, []);
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return studentViewCoursesList.slice(start, start + ITEMS_PER_PAGE);
+  }, [studentViewCoursesList, currentPage]);
 
+  const totalPages = Math.ceil(resultsTotal / ITEMS_PER_PAGE);
 
-  const filterLabels = {
-    category: t("coursesPage.filters.category") || t("home.categoriesTitle") || "Categories",
-    level: t("coursesPage.filters.level") || t("course.level") || "Level",
-    primaryLanguage: t("coursesPage.filters.primaryLanguage") || t("course.primaryLanguage") || "Language",
-  };
-
-  const sortLabelMap = {
-    "price-lowtohigh": t("coursesPage.sortLabels.priceLowToHigh") || sortOptions[0].label,
-    "price-hightolow": t("coursesPage.sortLabels.priceHighToLow") || sortOptions[1].label,
-    "title-atoz": t("coursesPage.sortLabels.titleAToZ") || sortOptions[2].label,
-    "title-ztoa": t("coursesPage.sortLabels.titleZToA") || sortOptions[3].label,
-  };
-
-  const levelLabels = {
-    beginner: t("coursesPage.levelOptions.beginner") || "Beginner",
-    intermediate: t("coursesPage.levelOptions.intermediate") || "Intermediate",
-    advanced: t("coursesPage.levelOptions.advanced") || "Advanced",
-  };
-
-  const languageLabels = {
-    english: t("coursesPage.languageOptions.english") || "English",
-    persian: t("coursesPage.languageOptions.persian") || "Persian",
-  };
-
-  const renderOptionLabel = (sectionId, option) => {
-    if (sectionId === "level") {
-      return levelLabels[option.id] || option.label;
+  const getDuration = (curriculum) => {
+    if (!curriculum || curriculum.length === 0) {
+      return language === "fa" ? "۰ دقیقه" : "0 min";
     }
-    if (sectionId === "primaryLanguage") {
-      return languageLabels[option.id] || option.label;
+    const mins = curriculum.reduce((a, l) => a + (l.duration || 0), 0);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+
+    if (language === "fa") {
+      return h > 0 ? `${h}س ${m}د` : `${m} دقیقه`;
     }
-    return option.label;
+    return h > 0 ? `${h}h ${m}m` : `${m} min`;
+  };
+
+  const goToCourse = async (id) => {
+    if (!auth?.user?._id) return navigate(`/course/details/${id}`);
+    try {
+      const res = await checkCoursePurchaseInfoService(id, auth.user._id);
+      if (res?.success && res.data?.isEnrolled) {
+        navigate(`/course-progress/${id}`);
+      } else {
+        navigate(`/course/details/${id}`);
+      }
+    } catch {
+      navigate(`/course/details/${id}`);
+    }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">
-        {t("coursesPage.title") || t("common.courses") || "All Courses"}
+    <div className="container mx-auto p-4 py-8 max-w-7xl">
+      <h1 className="text-4xl font-bold mb-8 text-center lg:text-start">
+        {t("coursesPage.title")}
       </h1>
-      <div className="flex flex-col md:flex-row gap-4">
-        <aside className="w-full md:w-64 space-y-4">
-          <div>
-            {Object.keys(filterOptions).map((ketItem, index) => (
-              <div key={index} className="p-4 border-b">
-                <h3 className="font-bold mb-3">
-                  {filterLabels[ketItem] || ketItem.toUpperCase()}
+
+      <div className="grid lg:grid-cols-4 gap-8">
+        {/* فیلترها */}
+        <aside className="lg:col-span-1">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 space-y-8">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">{t("filters.title")}</h2>
+              <Button variant="ghost" size="sm" onClick={() => setFilters({})}>
+                {t("filters.clearAll")}
+              </Button>
+            </div>
+
+            {Object.entries(filterOptions).map(([key, opts]) => (
+              <div key={key}>
+                <h3 className="font-semibold mb-4">
+                  {key === "category"
+                    ? t("filters.category")
+                    : key === "level"
+                    ? t("filters.level.title")
+                    : t("filters.language.title")}
                 </h3>
-                <div className="grid gap-2 mt-2">
-                  {filterOptions[ketItem].map((option) => (
-                    <Label key={option.id} className="flex font-medium items-center gap-3">
+                <div className="space-y-3">
+                  {opts.map((o) => (
+                    <Label
+                      key={o.id}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
                       <Checkbox
-                        checked={
-                          filters &&
-                          Object.keys(filters).length > 0 &&
-                          filters[ketItem] &&
-                          filters[ketItem].indexOf(option.id) > -1
-                        }
-                        onCheckedChange={() =>
-                          handleFilterOnChange(ketItem, option)
-                        }
+                        checked={filters[key]?.includes(o.id) || false}
+                        onCheckedChange={() => handleFilterChange(key, o.id)}
                       />
-                      {renderOptionLabel(ketItem, option)}
+                      <span className="text-sm">{o.label}</span>
                     </Label>
                   ))}
                 </div>
@@ -268,106 +236,215 @@ function StudentViewCoursesPage() {
             ))}
           </div>
         </aside>
-        <main className="flex-1">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <div className="w-full md:max-w-sm relative">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
+        {/* لیست دوره‌ها */}
+        <main className="lg:col-span-3">
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="relative flex-1">
+              <Search
+                className={`absolute ${
+                  isRTL ? "right-3" : "left-3"
+                } top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400`}
+              />
               <Input
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder={t("coursesPage.searchPlaceholder") || "Search courses..."}
-                className="pl-9"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={t("coursesPage.searchPlaceholder")}
+                className={`h-12 ${isRTL ? "pr-10 pl-4" : "pl-10 pr-4"}`}
               />
             </div>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 p-5"
-                >
-                  <ArrowUpDownIcon className="h-4 w-4" />
-                  <span className="text-[16px] font-medium">
-                    {t("coursesPage.sortBy") || "Sort By"}
-                  </span>
+                <Button variant="outline" className="shrink-0">
+                  <ArrowUpDown
+                    className={`h-4 w-4 ${isRTL ? "mr-2" : "ml-2"}`}
+                  />
+                  {sortOptions.find((s) => s.id === sort)?.label}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
-                <DropdownMenuRadioGroup
-                  value={sort}
-                  onValueChange={(value) => setSort(value)}
-                >
-                  {sortOptions.map((sortItem) => (
-                    <DropdownMenuRadioItem
-                      value={sortItem.id}
-                      key={sortItem.id}
-                    >
-                      {sortLabelMap[sortItem.id] || sortItem.label}
+              <DropdownMenuContent align={isRTL ? "start" : "end"}>
+                <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
+                  {sortOptions.map((s) => (
+                    <DropdownMenuRadioItem key={s.id} value={s.id}>
+                      {s.label}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <span className="text-sm text-black font-bold">
-              {resultsTotal || studentViewCoursesList.length}{" "}
-              {t("coursesPage.resultsLabel") || "Results"}
-            </span>
           </div>
-          <div className="space-y-4">
-            {studentViewCoursesList && studentViewCoursesList.length > 0 ? (
-              studentViewCoursesList.map((courseItem) => (
-                <Card
-                  onClick={() => handleCourseNavigate(courseItem?._id)}
-                  className="cursor-pointer"
-                  key={courseItem?._id}
-                >
-                  <CardContent className="flex gap-4 p-4">
-                    <div className="w-48 h-32 flex-shrink-0">
-                      <img
-                        src={courseItem?.image}
-                        className="w-ful h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">
-                        {courseItem?.title}
-                      </CardTitle>
-                      <p className="text-sm text-gray-600 mb-1">
-                        {t("coursesPage.createdBy") || "Created by"}{" "}
-                        <span className="font-bold">
-                          {courseItem?.instructorName}
-                        </span>
-                      </p>
-                      <p className="text-[16px] text-gray-600 mt-3 mb-2">
-                        {(() => {
-                          const lectureCount = courseItem?.curriculum?.length || 0;
-                          const lectureLabel =
-                            lectureCount === 1
-                              ? t("coursesPage.lectureSingular") || "Lecture"
-                              : t("coursesPage.lecturePlural") || "Lectures";
-                          const levelText =
-                            levelLabels[courseItem?.level] ||
-                            courseItem?.level?.toUpperCase();
-                          return `${lectureCount} ${lectureLabel} · ${
-                            t("coursesPage.levelLabel") || "Level"
-                          } ${levelText}`;
-                        })()}
-                      </p>
-                      <p className="font-bold text-lg">
-                        ${courseItem?.pricing}
-                      </p>
-                    </div>
+
+          <p className="mb-6 text-lg text-gray-600 dark:text-gray-400">
+            {t("coursesPage.results").replace(
+              "{{count}}",
+              resultsTotal.toLocaleString()
+            )}
+          </p>
+
+          {/* کارت‌های بهینه‌شده */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {loadingState ? (
+              [...Array(6)].map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="h-48 w-full" />
+                  <CardContent className="p-5 space-y-3">
+                    <Skeleton className="h-6 w-4/5" />
+                    <Skeleton className="h-4 w-3/5" />
+                    <Skeleton className="h-8 w-32" />
                   </CardContent>
                 </Card>
               ))
-            ) : loadingState ? (
-              <Skeleton />
+            ) : paginated.length > 0 ? (
+              paginated.map((course) => {
+                const bought = purchasedCourses[course._id];
+                const isFree = course.pricing === 0;
+                const isNew =
+                  Date.now() - new Date(course.createdAt) <
+                  7 * 24 * 60 * 60 * 1000;
+
+                return (
+                  <Card
+                    key={course._id}
+                    className="group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col h-full"
+                  >
+                    {/* تصویر + hover play */}
+                    <div className="relative aspect-video overflow-hidden bg-gray-100">
+                      <div
+                        onClick={() => goToCourse(course._id)}
+                        className="cursor-pointer h-full"
+                      >
+                        <img
+                          src={course.image}
+                          alt={course.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <PlayCircle className="h-16 w-16 text-white" />
+                        </div>
+                      </div>
+
+                      {/* بج‌های بالا سمت راست/چپ */}
+                      <div
+                        className={`absolute top-3 ${
+                          isRTL ? "left-3" : "right-3"
+                        } flex flex-col gap-2`}
+                      >
+                        {isFree && (
+                          <Badge className="bg-emerald-600 text-xs font-medium">
+                            {t("courses.free")}
+                          </Badge>
+                        )}
+                        {isNew && (
+                          <Badge className="bg-green-500 text-xs font-medium">
+                            {t("courses.new")}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* محتوای کارت */}
+                    <CardContent className="p-5 flex flex-col flex-grow">
+                      <h3 className="font-bold text-lg mb-2 line-clamp-2 leading-tight">
+                        {course.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-1">
+                        {course.instructorName}
+                      </p>
+
+                      {/* اطلاعات کوتاه */}
+                      <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>{getDuration(course.curriculum)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3.5 w-3.5" />
+                          <span>{course.enrolledStudents || 0}</span>
+                        </div>
+                      </div>
+
+                      {/* پیشرفت (اگر خریداری شده) */}
+                      {bought?.isEnrolled && bought.progress > 0 && (
+                        <div className="mb-4 -mx-5 px-5">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>{t("courses.yourProgress")}</span>
+                            <span className="font-medium">
+                              {bought.progress}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                              style={{ width: `${bought.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* فوتر: قیمت + دکمه */}
+                      <div className="mt-auto flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-xl font-bold text-gray-900 dark:text-white">
+                            {isFree ? (
+                              <span className="text-emerald-600">
+                                {t("courses.free")}
+                              </span>
+                            ) : (
+                              `${course.pricing.toLocaleString()} ${t(
+                                "common.currency"
+                              )}`
+                            )}
+                          </span>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="font-medium"
+                          onClick={() => goToCourse(course._id)}
+                        >
+                          {bought?.isEnrolled
+                            ? t("courses.continue")
+                            : t("courses.viewDetails")}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
             ) : (
-              <h1 className="font-extrabold text-4xl">
-                {t("coursesPage.noCourses") || t("home.noCoursesMessage") || "No courses found"}
-              </h1>
+              <div className="col-span-full text-center py-20">
+                <h2 className="text-3xl font-bold text-gray-400">
+                  {t("courses.noCoursesFound")}
+                </h2>
+              </div>
             )}
           </div>
+
+          {/* صفحه‌بندی */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 mt-12">
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                {t("pagination.previous")}
+              </Button>
+              <span className="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium">
+                {t("pagination.pageOf", {
+                  current: currentPage,
+                  total: totalPages,
+                })}
+              </span>
+              <Button
+                variant="outline"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                {t("pagination.next")}
+              </Button>
+            </div>
+          )}
         </main>
       </div>
     </div>

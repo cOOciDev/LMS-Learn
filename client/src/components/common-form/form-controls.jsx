@@ -1,3 +1,4 @@
+// client/src/components/common-form/form-controls.jsx
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import {
@@ -9,100 +10,73 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
-function FormControls({ formControls = [], formData, setFormData }) {
-  function renderComponentByType(getControlItem) {
-    let element = null;
-    const currentControlItemValue = formData[getControlItem.name] || "";
+function FormControls({ formControls = [], formData, setFormData, isRTL = false }) {
+  function renderComponentByType(controlItem) {
+    const value = formData[controlItem.name] || "";
 
-    switch (getControlItem.componentType) {
+    switch (controlItem.componentType) {
       case "input":
-        element = (
+        return (
           <Input
-            id={getControlItem.name}
-            name={getControlItem.name}
-            placeholder={getControlItem.placeholder}
-            type={getControlItem.type}
-            value={currentControlItemValue}
-            onChange={(event) =>
-              setFormData({
-                ...formData,
-                [getControlItem.name]: event.target.value,
-              })
+            id={controlItem.name}
+            name={controlItem.name}
+            placeholder={controlItem.placeholder}
+            type={controlItem.type || "text"}
+            value={value}
+            onChange={(e) =>
+              setFormData({ ...formData, [controlItem.name]: e.target.value })
             }
           />
         );
-        break;
+
       case "select":
-        element = (
+        return (
           <Select
-            onValueChange={(value) =>
-              setFormData({
-                ...formData,
-                [getControlItem.name]: value,
-              })
+            dir={isRTL ? "rtl" : "ltr"}   // این خط همه مشکلات RTL رو حل می‌کنه!
+            onValueChange={(val) =>
+              setFormData({ ...formData, [controlItem.name]: val })
             }
-            value={currentControlItemValue}
+            value={value}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={getControlItem.label} />
+              <SelectValue placeholder={controlItem.placeholder || controlItem.label} />
             </SelectTrigger>
             <SelectContent>
-              {getControlItem.options && getControlItem.options.length > 0
-                ? getControlItem.options.map((optionItem) => (
-                    <SelectItem key={optionItem.id} value={optionItem.id}>
-                      {optionItem.label}
-                    </SelectItem>
-                  ))
-                : null}
+              {controlItem.options?.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         );
-        break;
+
       case "textarea":
-        element = (
+        return (
           <Textarea
-            id={getControlItem.name}
-            name={getControlItem.name}
-            placeholder={getControlItem.placeholder}
-            value={currentControlItemValue}
-            onChange={(event) =>
-              setFormData({
-                ...formData,
-                [getControlItem.name]: event.target.value,
-              })
+            id={controlItem.name}
+            name={controlItem.name}
+            placeholder={controlItem.placeholder}
+            value={value}
+            onChange={(e) =>
+              setFormData({ ...formData, [controlItem.name]: e.target.value })
             }
           />
         );
-        break;
 
       default:
-        element = (
-          <Input
-            id={getControlItem.name}
-            name={getControlItem.name}
-            placeholder={getControlItem.placeholder}
-            type={getControlItem.type}
-            value={currentControlItemValue}
-            onChange={(event) =>
-              setFormData({
-                ...formData,
-                [getControlItem.name]: event.target.value,
-              })
-            }
-          />
-        );
-        break;
+        return null;
     }
-
-    return element;
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {formControls.map((controleItem) => (
-        <div key={controleItem.name}>
-          <Label htmlFor={controleItem.name}>{controleItem.label}</Label>
-          {renderComponentByType(controleItem)}
+    <div className="space-y-6">
+      {formControls.map((item) => (
+        <div key={item.name} className="space-y-2">
+          <Label htmlFor={item.name} className="font-medium">
+            {item.label}
+          </Label>
+          {renderComponentByType(item)}
         </div>
       ))}
     </div>

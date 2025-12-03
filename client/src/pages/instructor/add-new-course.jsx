@@ -1,3 +1,5 @@
+// client/src/pages/instructor/add-new-course.jsx
+
 import CourseCurriculum from "@/components/instructor-view/courses/add-new-course/course-curriculum";
 import CourseLanding from "@/components/instructor-view/courses/add-new-course/course-landing";
 import CourseSettings from "@/components/instructor-view/courses/add-new-course/course-settings";
@@ -15,7 +17,7 @@ import {
   fetchInstructorCourseDetailsService,
   updateCourseByIdService,
 } from "@/services";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
@@ -37,49 +39,72 @@ function AddNewCoursePage() {
   const { t } = useLanguage();
   const { toast } = useToast();
 
-  function isEmpty(value) {
-    if (Array.isArray(value)) {
-      return value.length === 0;
-    }
+  // کنترل تب فعلی
+  const [activeTab, setActiveTab] = useState("course-landing-page");
 
-    return value === "" || value === null || value === undefined;
-  }
+  // اعتبارسنجی مرحله Landing
+  const isLandingValid = () => {
+    const required = [
+      "title",
+      "category",
+      "level",
+      "primaryLanguage",
+      "description",
+      "pricing",
+    ];
+    return required.every(
+      (key) =>
+        courseLandingFormData[key] &&
+        courseLandingFormData[key].toString().trim() !== ""
+    );
+  };
 
-  function validateFormData() {
-    // Validate landing page data
-    const requiredLandingFields = ['title', 'category', 'level', 'primaryLanguage', 'description', 'pricing'];
-    for (const key of requiredLandingFields) {
-      if (isEmpty(courseLandingFormData[key])) {
-        return false;
-      }
-    }
-
-    // Validate curriculum
-    if (!courseCurriculumFormData || courseCurriculumFormData.length === 0) {
+  // اعتبارسنجی مرحله Curriculum
+  const isCurriculumValid = () => {
+    if (!courseCurriculumFormData || courseCurriculumFormData.length === 0)
       return false;
-    }
+    return courseCurriculumFormData.every(
+      (item) => item.title?.trim() && item.videoUrl && item.public_id
+    );
+  };
 
-    for (const item of courseCurriculumFormData) {
-      if (
-        isEmpty(item.title) ||
-        isEmpty(item.videoUrl) ||
-        isEmpty(item.public_id)
-      ) {
-        return false;
-      }
+  // اجازه تغییر تب فقط اگر مرحله قبلی معتبر باشه
+  const handleTabChange = (value) => {
+    if (value === "curriculum" && !isLandingValid()) {
+      toast({
+        title: t("common.error"),
+        description:
+          t("instructor.completeLandingFirst") ||
+          "لطفاً ابتدا اطلاعات صفحه معرفی دوره را کامل کنید.",
+        variant: "destructive",
+      });
+      return;
     }
+    if (value === "settings" && !isCurriculumValid()) {
+      toast({
+        title: t("common.error"),
+        description:
+          t("instructor.completeCurriculumFirst") ||
+          "لطفاً ابتدا برنامه درسی دوره را کامل کنید.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setActiveTab(value);
+  };
 
-    return true;
-  }
+  const validateFormData = () => isLandingValid() && isCurriculumValid();
 
   async function handleCreateCourse() {
     if (!validateFormData()) {
       toast({
         title: t("common.error"),
         description:
-          "Please complete all required fields and provide valid curriculum videos before submitting.",
+          t("instructor.completeAllSteps") || "لطفاً تمام مراحل را کامل کنید.",
         variant: "destructive",
       });
+      if (!isLandingValid()) setActiveTab("course-landing-page");
+      else if (!isCurriculumValid()) setActiveTab("curriculum");
       return;
     }
 
@@ -106,9 +131,9 @@ function AddNewCoursePage() {
       if (response?.success) {
         toast({
           title: t("common.success"),
-          description: currentEditedCourseId 
-            ? "Course updated successfully!" 
-            : "Course created successfully!",
+          description: currentEditedCourseId
+            ? t("instructor.courseUpdated") || "دوره با موفقیت به‌روزرسانی شد!"
+            : t("instructor.courseCreated") || "دوره با موفقیت ایجاد شد!",
         });
         setCourseLandingFormData(courseLandingInitialFormData);
         setCourseCurriculumFormData(
@@ -119,14 +144,16 @@ function AddNewCoursePage() {
       } else {
         toast({
           title: t("common.error"),
-          description: response?.message || "Failed to save course. Please try again.",
+          description:
+            response?.message || t("common.errorOccurred") || "خطایی رخ داد.",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: error?.response?.data?.message || "An error occurred. Please try again.",
+        description:
+          error?.response?.data?.message || t("common.errorOccurred"),
         variant: "destructive",
       });
     }
@@ -137,24 +164,20 @@ function AddNewCoursePage() {
       const response = await fetchInstructorCourseDetailsService(
         currentEditedCourseId
       );
-
       if (response?.success) {
         const courseData = response?.data?.course || response?.data;
-        const setCourseFormData = Object.keys(
-          courseLandingInitialFormData
-        ).reduce((acc, key) => {
-          acc[key] = courseData[key] || courseLandingInitialFormData[key];
-          return acc;
-        }, {});
-
-        setCourseLandingFormData(setCourseFormData);
+        setCourseLandingFormData({
+          ...courseLandingInitialFormData,
+          ...courseData,
+        });
         setCourseCurriculumFormData(courseData?.curriculum || []);
       }
     } catch (error) {
-      console.error("Error fetching course details:", error);
       toast({
         title: t("common.error"),
-        description: "Failed to load course details. Please try again.",
+        description:
+          t("instructor.loadCourseFailed") ||
+          "بارگذاری اطلاعات دوره با خطا مواجه شد.",
         variant: "destructive",
       });
     }
@@ -168,59 +191,98 @@ function AddNewCoursePage() {
     if (params?.courseId) setCurrentEditedCourseId(params?.courseId);
   }, [params?.courseId]);
 
-
   const isEditMode = currentEditedCourseId !== null;
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      {/* هدر صفحه */}
+      <div className="mb-8 space-y-6">
         <Button
           variant="ghost"
           onClick={() => navigate("/instructor")}
-          className="mb-4"
+          className="hover:bg-muted"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          {t("common.back") || "Back"}
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          {t("common.back")}
         </Button>
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-extrabold">
-            {isEditMode ? t("instructor.editCourse") || "Edit Course" : t("instructor.createCourse") || "Create New Course"}
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <h1 className="text-3xl font-extrabold text-foreground">
+            {isEditMode
+              ? t("instructor.editCourse")
+              : t("instructor.createCourse")}
           </h1>
+
           <Button
+            size="lg"
             disabled={!validateFormData()}
-            className="text-sm tracking-wider font-bold px-8"
             onClick={handleCreateCourse}
+            className="font-bold px-8"
           >
-            {isEditMode ? t("common.update") || "UPDATE" : t("common.submit") || "SUBMIT"}
+            {isEditMode ? t("common.update") : t("common.publish")}
           </Button>
         </div>
       </div>
-      <Card>
-        <CardContent>
-          <div className="p-4">
-            <Tabs defaultValue="course-landing-page" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="course-landing-page">
-                  {t("course.courseDetails") || "Course Landing Page"}
+
+      {/* کارت اصلی */}
+      <Card className="border-0 shadow-xl bg-card">
+        <CardContent className="p-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
+            <TabsList className="mb-8 bg-muted/50 rounded-xl p-1 overflow-x-auto">
+              <div className="flex gap-2 min-w-max">
+                <TabsTrigger
+                  value="course-landing-page"
+                  className="min-w-[100px] px-3 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
+                >
+                  <span className="hidden xs:inline">
+                    {t("course.courseDetails") || "اطلاعات دوره"}
+                  </span>
+                  {t("course.courseDetails") || "اطلاعات"}
                 </TabsTrigger>
-                <TabsTrigger value="curriculum">
-                  {t("course.curriculum") || "Curriculum"}
+
+                <TabsTrigger
+                  value="curriculum"
+                  disabled={!isLandingValid()}
+                  className="min-w-[10px] px-4 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
+                >
+                  <span className="hidden xs:inline">
+                    {t("course.curriculum") || "برنامه درسی"}
+                  </span>
+                  {t("course.curriculum") || "برنامه درسی"}
                 </TabsTrigger>
-                <TabsTrigger value="settings">
-                  {t("course.settings") || "Settings"}
+
+                <TabsTrigger
+                  value="settings"
+                  disabled={!isCurriculumValid()}
+                  className="min-w-[10px] px-3 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
+                >
+                  <span className="hidden xs:inline">
+                    {t("course.courseImage") || "پوستر"}
+                  </span>
+                  {t("course.courseImage") || "پوستر"}
                 </TabsTrigger>
-              </TabsList>
-              <TabsContent value="course-landing-page">
-                <CourseLanding />
-              </TabsContent>
-              <TabsContent value="curriculum">
-                <CourseCurriculum />
-              </TabsContent>
-              <TabsContent value="settings">
-                <CourseSettings />
-              </TabsContent>
-            </Tabs>
-          </div>
+              </div>
+            </TabsList>
+
+            <TabsContent value="course-landing-page" className="mt-0">
+              <CourseLanding onNext={() => setActiveTab("curriculum")} />
+            </TabsContent>
+
+            <TabsContent value="curriculum" className="mt-0">
+              <CourseCurriculum onNext={() => setActiveTab("settings")} />
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-0">
+              <CourseSettings
+                onPublish={handleCreateCourse}
+                isEditMode={isEditMode}
+              />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

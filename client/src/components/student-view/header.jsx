@@ -1,7 +1,9 @@
-import { GraduationCap, TvMinimalPlay, Map } from "lucide-react";
+// components/student/StudentViewCommonHeader.jsx
+import { GraduationCap, TvMinimalPlay, Map, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
-import { useContext } from "react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useContext, useState } from "react";
 import { AuthContext } from "@/context/auth-context";
 import { useLanguage } from "@/context/language-context";
 import LanguageSwitcher from "@/components/language-switcher";
@@ -10,68 +12,160 @@ import ThemeSwitcher from "@/components/theme-switcher";
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
   const { resetCredentials } = useContext(AuthContext);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRTL = language === "fa";
+  const [open, setOpen] = useState(false);
 
   function handleLogout() {
     resetCredentials();
     sessionStorage.clear();
-    window.location.href = "/auth";
+    navigate("/auth");
   }
 
+  const navItems = [
+    {
+      label: t("common.exploreCourses"),
+      onClick: () => {
+        navigate("/courses");
+        setOpen(false);
+      },
+    },
+    {
+      label: t("roadmap.title"),
+      icon: <Map className="w-5 h-5" />,
+      onClick: () => {
+        navigate("/roadmap");
+        setOpen(false);
+      },
+    },
+    {
+      label: t("common.myCourses"),
+      icon: <TvMinimalPlay className="w-6 h-6" />,
+      onClick: () => {
+        navigate("/student-courses");
+        setOpen(false);
+      },
+    },
+  ];
+
   return (
-    <header className="flex items-center justify-between p-4 border-b relative">
-      <div className="flex items-center space-x-4">
-        <Link
-          to="/home"
-          className="flex items-center px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4">
+        {/* لوگو و اسم - همیشه وسط یا چپ/راست بسته به زبان */}
+        <div
+          className={`flex items-center ${
+            isRTL ? "ml-auto" : "mr-auto"
+          } absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`}
         >
-          <img 
-            src="/favicon.png" 
-            alt="logo" 
-            className="h-8 w-8 mr-4 object-contain" 
-          />
-          <span className="font-extrabold md:text-xl text-[14px]" style={{ color: '#002F60' }}>
-            Nedayar
-          </span>
-        </Link>
-        <div className="flex items-center space-x-1">
+          <Link
+            to="/home"
+            className="flex items-center gap-3 hover:opacity-80 transition"
+          >
+            <img
+              src="/favicon.png"
+              alt="logo"
+              className="h-9 w-9 object-contain"
+            />
+            <span
+              className="font-black text-xl tracking-tighter"
+              style={{ color: "#002F60" }}
+            >
+              Nedayar
+            </span>
+          </Link>
+        </div>
+
+        {/* منوی دسکتاپ - فقط تو lg نشون بده */}
+        <nav className="hidden lg:flex items-center gap-6">
           <Button
             variant="ghost"
-            onClick={() => {
-              location.pathname.includes("/courses")
-                ? null
-                : navigate("/courses");
-            }}
-            className="text-[14px] md:text-[16px] font-medium"
+            onClick={() => navigate("/courses")}
+            className="font-medium hover:bg-accent"
           >
             {t("common.exploreCourses")}
           </Button>
-          {/* دکمه Roadmap */}
           <Button
             variant="ghost"
             onClick={() => navigate("/roadmap")}
-            className="text-[14px] md:text-[16px] font-medium flex items-center gap-1"
+            className="font-medium hover:bg-accent flex items-center gap-2"
           >
             <Map className="w-5 h-5" />
             {t("roadmap.title")}
           </Button>
-        </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        <div className="flex gap-4 items-center">
-          <div
+          <Button
+            variant="ghost"
             onClick={() => navigate("/student-courses")}
-            className="flex cursor-pointer items-center gap-3"
+            className="font-medium hover:bg-accent flex items-center gap-3"
           >
-            <span className="font-extrabold md:text-xl text-[14px]">
-              {t("common.myCourses")}
-            </span>
-            <TvMinimalPlay className="w-8 h-8 cursor-pointer" />
-          </div>
+            <TvMinimalPlay className="w-6 h-6" />
+            {t("common.myCourses")}
+          </Button>
+        </nav>
+
+        {/* دکمه‌های راست - دسکتاپ */}
+        <div className="hidden lg:flex items-center gap-3">
           <ThemeSwitcher />
           <LanguageSwitcher />
-          <Button onClick={handleLogout}>{t("common.signOut")}</Button>
+          <Button onClick={handleLogout} variant="destructive" size="sm">
+            {t("common.signOut")}
+          </Button>
         </div>
+
+        {/* منوی موبایل - همبرگری خفن */}
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="lg:hidden">
+              {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <span className="sr-only">منو</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side={isRTL ? "right" : "left"} className="w-80 pt-12">
+            <div className="flex flex-col space-y-6">
+              <div className="space-y-4">
+                {navItems.map((item, index) => (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    className="w-full justify-start text-lg font-medium h-14"
+                    onClick={item.onClick}
+                  >
+                    <div
+                      className={`flex items-center gap-4 ${
+                        isRTL ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+
+              <div className="border-t pt-6 space-y-4">
+                <div className="flex items-center justify-between px-4">
+                  <span className="text-sm text-muted-foreground">
+                    {t("common.theme")}
+                  </span>
+                  <ThemeSwitcher />
+                </div>
+                <div className="flex items-center justify-between px-4">
+                  <span className="text-sm text-muted-foreground">
+                    {t("common.language")}
+                  </span>
+                  <LanguageSwitcher />
+                </div>
+              </div>
+
+              <Button
+                onClick={handleLogout}
+                variant="destructive"
+                className="w-full mt-8"
+              >
+                {t("common.signOut")}
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );

@@ -1,3 +1,4 @@
+// server/controllers/student-controller/course-controller.js
 const Course = require("../../models/Course");
 const StudentCourses = require("../../models/StudentCourses");
 const { asyncHandler } = require("../../middleware/error-handler");
@@ -22,13 +23,23 @@ const getAllPublishedCourses = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const query = { isPublished: true, status: "published" };
 
-  // Filters
-  if (category) query.category = category;
-  if (level) query.level = level;
-  if (minPrice !== undefined) query.pricing = { ...query.pricing, $gte: parseFloat(minPrice) };
-  if (maxPrice !== undefined) {
-    query.pricing = { ...query.pricing, $lte: parseFloat(maxPrice) };
+  // فیلترهای درست شده (اینجا مهم!)
+  if (category) {
+    const categories = category.split(",").map((c) => c.trim());
+    query.category = { $in: categories };
   }
+
+  if (level) {
+    const levels = level.split(",").map((l) => l.trim());
+    query.level = { $in: levels };
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    query.pricing = {};
+    if (minPrice !== undefined) query.pricing.$gte = parseFloat(minPrice);
+    if (maxPrice !== undefined) query.pricing.$lte = parseFloat(maxPrice);
+  }
+
   if (search) {
     query.$or = [
       { title: { $regex: search, $options: "i" } },
@@ -51,7 +62,6 @@ const getAllPublishedCourses = asyncHandler(async (req, res) => {
 
   const total = await Course.countDocuments(query);
 
-  // Get unique categories and levels for filters
   const categories = await Course.distinct("category", { isPublished: true });
   const levels = await Course.distinct("level", { isPublished: true });
 

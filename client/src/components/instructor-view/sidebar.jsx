@@ -18,8 +18,10 @@ function InstructorSidebar() {
 
   // Update active tab based on current route
   useEffect(() => {
-    if (location.pathname.includes("/instructor/create-new-course") || 
-        location.pathname.includes("/instructor/edit-course")) {
+    if (
+      location.pathname.includes("/instructor/create-new-course") ||
+      location.pathname.includes("/instructor/edit-course")
+    ) {
       setActiveTab("");
     } else if (location.pathname === "/instructor") {
       setActiveTab("dashboard");
@@ -81,39 +83,49 @@ function InstructorSidebar() {
     }
   }
 
-  return (
-    <aside className="w-64 bg-white shadow-md hidden md:block border-r">
-      <div className="p-4 h-full flex flex-col">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold">{t("instructor.instructorDashboard")}</h2>
-        </div>
-        <nav className="flex-1">
-          {menuItems.map((menuItem) => (
-            <Button
-              className="w-full justify-start mb-2"
-              key={menuItem.value}
-              variant={activeTab === menuItem.value ? "secondary" : "ghost"}
-              onClick={() => handleMenuClick(menuItem)}
-            >
-              <menuItem.icon className="mr-2 h-4 w-4" />
-              {menuItem.label}
-            </Button>
-          ))}
-        </nav>
-        <div className="mt-auto pt-4 border-t">
-          <Button
-            className="w-full justify-start"
-            variant="ghost"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            {t("common.logout")}
-          </Button>
-        </div>
+return (
+<aside className="w-64 bg-background border-r-4 border-l-4 border-border/30 dark:border-border/70 shadow-2xl hidden md:flex flex-col">
+    <div className="p-6 h-full flex flex-col">
+      <div className="mb-8">
+        <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
+          {t("instructor.instructorDashboard")}
+        </h2>
       </div>
-    </aside>
-  );
+
+      <nav className="flex-1 space-y-2">
+        {menuItems.map((menuItem) => (
+          <Button
+            key={menuItem.value}
+            variant={activeTab === menuItem.value ? "secondary" : "ghost"}
+            className={`
+              w-full justify-start h-12 px-4 text-base font-medium rounded-xl
+              transition-all duration-200
+              ${activeTab === menuItem.value 
+                ? "bg-primary text-primary-foreground shadow-lg" 
+                : "hover:bg-muted hover:text-foreground"
+              }
+            `}
+            onClick={() => handleMenuClick(menuItem)}
+          >
+            <menuItem.icon className="h-5 w-5 mr-3" />
+            <span>{menuItem.label}</span>
+          </Button>
+        ))}
+      </nav>
+
+      <div className="mt-auto pt-6 border-t border-border">
+        <Button
+          variant="ghost"
+          className="w-full justify-start h-12 px-4 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive rounded-xl transition-all"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5 mr-3" />
+          <span>{t("common.logout")}</span>
+        </Button>
+      </div>
+    </div>
+  </aside>
+);
 }
 
 export default InstructorSidebar;
-

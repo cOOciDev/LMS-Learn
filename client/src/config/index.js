@@ -98,6 +98,7 @@ export const courseLandingPageFormControls = ({
     componentType: "input",
     type: "text",
     placeholder: t?.("course.title") || "Enter course title",
+    required: true   // اینو بذار برای فیلدهای اجباری
   },
   {
     name: "category",
@@ -106,6 +107,7 @@ export const courseLandingPageFormControls = ({
     type: "text",
     placeholder: "",
     options: categoryOptions,
+    required: true,
   },
   {
     name: "level",
@@ -114,6 +116,7 @@ export const courseLandingPageFormControls = ({
     type: "text",
     placeholder: "",
     options: courseLevelOptions,
+    required: true,
   },
   {
     name: "primaryLanguage",
@@ -122,6 +125,7 @@ export const courseLandingPageFormControls = ({
     type: "text",
     placeholder: "",
     options: languageOptions,
+    required: true,
   },
   {
     name: "subtitle",
@@ -129,6 +133,7 @@ export const courseLandingPageFormControls = ({
     componentType: "input",
     type: "text",
     placeholder: t?.("course.subtitle") || "Enter course subtitle",
+    required: true,
   },
   {
     name: "description",
@@ -136,6 +141,7 @@ export const courseLandingPageFormControls = ({
     componentType: "textarea",
     type: "text",
     placeholder: t?.("course.description") || "Enter course description",
+    required: true,
   },
   {
     name: "pricing",
@@ -143,6 +149,8 @@ export const courseLandingPageFormControls = ({
     componentType: "input",
     type: "number",
     placeholder: t?.("course.price") || "Enter course pricing",
+    required: true,
+
   },
   {
     name: "objectives",
@@ -150,12 +158,14 @@ export const courseLandingPageFormControls = ({
     componentType: "textarea",
     type: "text",
     placeholder: t?.("course.objectives") || "Enter course objectives",
+    required: true,
   },
   {
     name: "welcomeMessage",
     label: t?.("course.welcomeMessage") || "Welcome Message",
     componentType: "textarea",
     placeholder: t?.("course.welcomeMessage") || "Welcome message for students",
+    required: true,
   },
 ];
 

@@ -1,5 +1,7 @@
+// client/src/components/common-form/index.jsx
 import { Button } from "../ui/button";
 import FormControls from "./form-controls";
+import { useLanguage } from "@/context/language-context";
 
 function CommonForm({
   handleSubmit,
@@ -9,16 +11,24 @@ function CommonForm({
   setFormData,
   isButtonDisabled = false,
 }) {
+  const { language } = useLanguage();
+  const isRTL = language === "fa";
+
   return (
-    <form onSubmit={handleSubmit}>
-      {/* render form controls here */}
+    <form onSubmit={handleSubmit} dir={isRTL ? "rtl" : "ltr"}>
       <FormControls
         formControls={formControls}
         formData={formData}
         setFormData={setFormData}
+        isRTL={isRTL}   // خودش می‌فهمه فارسیه یا نه
       />
-      <Button disabled={isButtonDisabled} type="submit" className="mt-5 w-full">
-        {buttonText || "Submit"}
+
+      <Button
+        type="submit"
+        disabled={isButtonDisabled}
+        className="mt-6 w-full text-lg font-semibold"
+      >
+        {buttonText || (isRTL ? "ذخیره و ادامه" : "Save & Continue")}
       </Button>
     </form>
   );

@@ -77,7 +77,7 @@ function InstructorDashboardpage() {
         <TabsList className="mb-6">
           {menuItems.map((menuItem) => (
             <TabsTrigger key={menuItem.value} value={menuItem.value}>
-              <menuItem.icon className="mr-2 h-4 w-4" />
+              <menuItem.icon/>
               {menuItem.label}
             </TabsTrigger>
           ))}

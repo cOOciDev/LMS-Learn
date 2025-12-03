@@ -28,6 +28,7 @@
     "myCourses": "دوره‌های من",
     "exploreCourses": "مشاهده دوره‌ها",
     "language": "زبان",
+    "theme": "تم",
     "user": "کاربر",
     "instructor": "مدرس",
     "admin": "ادمین",
@@ -41,8 +42,17 @@
     "price": "قیمت",
     "course": "دوره",
     "actions": "اقدامات",
-    "view": "مشاهده"
+    "view": "مشاهده",
+    "support": "پشتیبانی",
+    "currency": "تومان",
+    "free": "رایگان",
+    "new": "جدید",
+    "saveAndContinue": "ذخیره و ادامه",
+    "publish": "انتشار"
+
+
   },
+
   "auth": {
     "signInToAccount": "ورود به حساب کاربری",
     "enterEmailPassword": "ایمیل و رمز عبور خود را وارد کنید",
@@ -58,6 +68,7 @@
     "loginFailed": "ورود ناموفق. لطفاً اطلاعات را بررسی کنید.",
     "pleaseFillAllFields": "لطفاً تمام فیلدها را تکمیل کنید"
   },
+
   "admin": {
     "adminPanel": "پنل مدیریت",
     "panelSubtitle": "همه چیز را از یکجا مدیریت کنید",
@@ -93,7 +104,7 @@
     "showing": "نمایش",
     "of": "از",
     "activeUsers": "کاربران فعال",
-    "newUsers": "کاربران جدید",
+    "newUsers": "کاربران جدید این ماه",
     "instructorManagement": "مدیریت مدرس‌ها",
     "instructorsList": "لیست مدرس‌ها",
     "instructorDetails": "جزئیات مدرس",
@@ -131,63 +142,100 @@
     "siteAnnouncement": "اعلان سایت",
     "announcementPlaceholder": "اعلان اختیاری برای نمایش به کاربران",
     "settings": "تنظیمات",
-    "categoryManagement": "مدیریت دسته بندی",
-    "categoryManagementDescription": "ایجاد، ترجمه و سازماندهی دسته بندی دوره ها.",
-    "addCategory": "اضافه کردن دسته بندی",
-    "categoryName": "نام دسته",
-    "categoryNameFa": "نام دسته (فارسی)",
-    "categoryDescription": "توضیحات آگهی",
-    "saveCategory": "ذخیره دسته بندی",
-    "categoryTips": "دستورالعمل‌های دسته‌بندی",
-    "categoryTipsBody": "دسته‌بندی‌ها به دانش‌آموزان کمک می‌کنند تا محتوای مناسب را سریع‌تر پیدا کنند. نامگذاری را ثابت نگه دارید و عناوین محلی ارائه دهید.",
-    "categoryTipOne": "از نام‌های مختصر و توصیفی استفاده کنید.",
-    "categoryTipTwo": "فقط زمانی دسته‌ها را حذف کنید که هیچ دوره‌ای از آنها استفاده نکند.",
-    "categoryTipThree": "نام‌های محلی‌شده را اضافه کنید تا افراد غیرانگلیسی‌زبان بتوانند دسته‌بندی را درک کنند.",
-    "categoriesList": "دسته بندی از قبل موجود می باشد",
-    "noCategories": "بدون دسته بندی.",
+    "roadmapManagement": "مدیریت مسیر یادگیری",
+    "roadmapManagementDescription": "مسیرهای یادگیری دسته‌بندی‌شده بسازید و هر مرحله را به یک دوره متصل کنید.",
+    "createRoadmap": "ایجاد مسیر یادگیری",
+    "roadmapTitle": "عنوان مسیر",
+    "roadmapTitlePlaceholder": "مثلاً: مسیر شغلی فرانت‌اند",
+    "selectCategory": "انتخاب دسته‌بندی",
+    "roadmapSteps": "مراحل",
+    "addStep": "افزودن مرحله",
+    "stepLabel": "مرحله {number}",
+    "removeStep": "حذف",
+    "stepTitlePlaceholder": "عنوان مرحله",
+    "stepDescriptionPlaceholder": "توضیح تمرکز این مرحله",
+    "stepSelectCourse": "انتخاب دوره",
+    "saveRoadmap": "ذخیره مسیر",
+    "roadmapMissingFields": "عنوان و دسته‌بندی را تکمیل کنید",
+    "roadmapStepValidation": "هر مرحله باید عنوان، توضیح و دوره داشته باشد.",
+    "roadmapCreated": "مسیر یادگیری با موفقیت ذخیره شد.",
+    "roadmapCreateFailed": "ذخیره مسیر ناموفق بود.",
+    "existingRoadmaps": "مسیرهای موجود",
+    "noRoadmaps": "هنوز مسیری تعریف نشده است.",
+    "stepsCountLabel": "مرحله",
+    "categoryManagement": "مدیریت دسته‌بندی",
+    "categoryManagementDescription": "ایجاد، ترجمه و سازماندهی دسته‌بندی دوره‌ها.",
+    "addCategory": "افزودن دسته‌بندی",
+    "categoryName": "نام دسته‌بندی",
+    "categoryNameFa": "نام دسته‌بندی (فارسی)",
+    "categoryDescription": "توضیحات",
+    "saveCategory": "ذخیره دسته‌بندی",
+    "categoryTips": "راهنمای دسته‌بندی",
+    "categoryTipsBody": "دسته‌بندی‌ها به دانش‌آموزان کمک می‌کنند محتوای مناسب را سریع‌تر پیدا کنند.",
+    "categoryTipOne": "از نام‌های کوتاه و توصیفی استفاده کنید.",
+    "categoryTipTwo": "فقط وقتی هیچ دوره‌ای از دسته استفاده نمی‌کند آن را حذف کنید.",
+    "categoryTipThree": "نام‌های فارسی اضافه کنید تا کاربران فارسی‌زبان هم متوجه شوند.",
+    "categoriesList": "دسته‌بندی‌های موجود",
+    "noCategories": "هنوز دسته‌بندی‌ای وجود ندارد.",
     "categorySlug": "نامک",
-    "categoryCourses": "دوره های آموزشی",
-    "categoryCreated": "دسته بندی با موفقیت ایجاد شد",
-    "categoryDeleted": "دسته بندی با موفقیت حذف شدند.",
-    "failedToCreateCategory": "ایجاد دسته بندی ناموفق بود.",
-    "failedToDeleteCategory": "حذف دسته ناموفق بود.",
-    "failedToLoadCategories": "بارگیری دسته‌ها ناموفق بود.",
-    "categoryNameRequired": "نام دسته الزامی است",
-    "deleteCategoryConfirm": "این دسته را حذف کنید؟ قابل بازیابی نیست.",
-    "roadmapManagement": "?????? ???? ???",
-    "roadmapManagementDescription": "???? ?? ????????? ???? ??????? ????? ?? ? ????? ?? ?? ???????? ????? ???? ??.",
-    "createRoadmap": "????? ???? ???",
-    "roadmapTitle": "????? ???? ???",
-    "roadmapTitlePlaceholder": "????? ???? ????? ?????????",
-    "selectCategory": "?????? ?????????",
-    "roadmapSteps": "?????",
-    "addStep": "?????? ?????",
-    "stepLabel": "????? {number}",
-    "removeStep": "???",
-    "stepTitlePlaceholder": "????? ?????",
-    "stepDescriptionPlaceholder": "????? ?????",
-    "stepSelectCourse": "?????? ????",
-    "saveRoadmap": "????? ???? ???",
-    "roadmapMissingFields": "????? ? ????????? ?? ???? ??",
-    "roadmapStepValidation": "?? ????? ???? ?????? ????? ? ???? ????? ????.",
-    "roadmapCreated": "???? ??? ?? ?????? ????? ??.",
-    "roadmapCreateFailed": "??? ???? ??? ????? ???.",
-    "existingRoadmaps": "???????? ??? ?????",
-    "noRoadmaps": "???? ???? ???? ???? ?????.",
-    "stepsCountLabel": "?????"
+    "categoryCourses": "دوره‌ها",
+    "categoryCreated": "دسته‌بندی با موفقیت ایجاد شد.",
+    "categoryDeleted": "دسته‌بندی با موفقیت حذف شد.",
+    "failedToCreateCategory": "ایجاد دسته‌بندی ناموفق بود.",
+    "failedToDeleteCategory": "حذف دسته‌بندی ناموفق بود.",
+    "failedToLoadCategories": "بارگذاری دسته‌بندی‌ها ناموفق بود.",
+    "categoryNameRequired": "نام دسته‌بندی الزامی است.",
+    "deleteCategoryConfirm": "این دسته‌بندی حذف شود؟ قابل بازگشت نیست."
   },
+
   "instructor": {
     "instructorDashboard": "داشبورد مدرس",
     "myCourses": "دوره‌های من",
     "createCourse": "ایجاد دوره",
     "editCourse": "ویرایش دوره"
   },
+
   "student": {
     "studentDashboard": "داشبورد دانشجو",
     "enrolledCourses": "دوره‌های ثبت‌نام شده",
     "courseProgress": "پیشرفت دوره",
     "purchaseCourse": "خرید دوره"
   },
+
+  "filters": {
+    "title": "فیلترها",
+    "clearAll": "پاک کردن همه",
+    "category": "دسته‌بندی",
+    "level": {
+      "title": "سطح",
+      "beginner": "مبتدی",
+      "intermediate": "متوسط",
+      "advanced": "پیشرفته"
+    },
+    "language": {
+      "title": "زبان دوره",
+      "persian": "فارسی",
+      "english": "انگلیسی"
+    }
+  },
+
+  "sort": {
+    "newest": "جدیدترین",
+    "priceLowToHigh": "ارزان‌ترین",
+    "priceHighToLow": "گران‌ترین",
+    "titleAtoZ": "الف تا ی"
+  },
+
+  "coursesPage": {
+    "title": "همه دوره‌ها",
+    "searchPlaceholder": "جستجوی دوره...",
+    "results": "{{count}} دوره یافت شد",
+    "noCoursesFound": "دوره‌ای یافت نشد"
+  },
+  "app":{
+    "name" : "ندایار"
+  },
+
   "course": {
     "title": "عنوان",
     "description": "توضیحات",
@@ -202,30 +250,61 @@
     "lectures": "جلسات",
     "curriculum": "سرفصل‌ها",
     "settings": "تنظیمات",
+    "courseImage": "پوستر",
     "rateCourse": "امتیازدهی به این دوره",
     "leaveReview": "نوشتن نظر (اختیاری)",
     "submitFeedback": "ثبت بازخورد",
     "ratingSuccess": "از امتیازدهی شما سپاسگزاریم!",
     "ratingRange": "امتیاز باید بین ۱ تا ۵ باشد.",
-    "ratingError": "امکان ثبت امتیاز وجود ندارد. دوباره تلاش کنید."
+    "ratingError": "امکان ثبت امتیاز وجود ندارد. دوباره تلاش کنید.",
+    "instructor": "مدرس",
+    "students": "دانشجو",
+    "lastUpdated": "آخرین به‌روزرسانی",
+    "duration": "مدت زمان",
+    "whatYouWillLearn": "چه چیزهایی یاد می‌گیرید",
+    "requirements": "پیش‌نیازها",
+    "whoThisCourseFor": "این دوره برای چه کسانی مناسب است؟",
+    "buyNow": "همین الان خریداری کنید",
+    "addToCart": "افزودن به سبد خرید",
+    "alreadyEnrolled": "شما در این دوره ثبت‌نام کرده‌اید",
+    "startLearning": "شروع یادگیری",
+    "includes": "این دوره شامل",
+    "lifetimeAccess": "دسترسی مادام‌العمر",
+    "certificate": "گواهی پایان دوره",
+    "moneyBack": "ضمانت بازگشت وجه ۳۰ روزه",
+    "welcomeMessage": "پیام خوش آمد گویی دوره",
+    "objectives": "سر فصل های دوره",
+    "primaryLanguage": "زبان",
+    "subtitle": "زیر نویس دوره در زیر عنوان"
   },
-  "validation": {
-    "required": "این فیلد الزامی است",
-    "invalidEmail": "ایمیل نامعتبر است",
-    "passwordTooShort": "رمز عبور باید حداقل ۶ حرف باشد"
+
+  "pagination": {
+    "previous": "قبلی",
+    "next": "بعدی",
+    "pageOf": "صفحه {current} از {total}"
   },
-  "categories": {
-    "Web_Development": "توسعه وب",
-    "Backend_Development": "برنامه نویس سمت سرور",
-    "Data_Science": "مدیریت داده",
-    "Machine_Learning": "هوش ماشین",
-    "Artificial_Intelligence": "هوش مصنوعی",
-    "Cloud_Computing": "رایانش ابری",
-    "Cyber_Security": "امنیت سایبری",
-    "Mobile_Development": "توسعه موبایل",
-    "Game_Development": "توسعه بازی",
-    "Software_Engineering": "مهندسی نرم‌افزار"
+
+  "studentCourses": {
+    "title": "دوره‌های من",
+    "loading": "در حال بارگذاری دوره‌ها...",
+    "startWatching": "شروع تماشا",
+    "noCourses": "هنوز دوره‌ای خریداری نکرده‌ای."
   },
+
+  "home": {
+    "heroTitle": "آینده‌ات را با یادگیری بساز",
+    "heroDescription": "مهارت‌هایی یاد بگیر که امروز و فردای شغلی‌ات را تضمین می‌کنند. با بهترین مدرس‌ها، سریع و کاربردی یاد بگیر.",
+    "exploreCoursesButton": "مشاهده دوره‌ها",
+    "heroImageAlt": "بنر سایت",
+    "categoriesTitle": "دسته‌بندی دوره‌ها",
+    "categoriesDescription": "دوره‌ها بر اساس موضوعات مختلف دسته‌بندی شده‌اند تا راحت‌تر مهارت مورد نظرت را پیدا کنی.",
+    "featuredCoursesTitle": "دوره‌های ویژه",
+    "featuredCoursesDescription": "این دوره‌ها توسط مدرسین حرفه‌ای و با بالاترین استانداردها انتخاب شده‌اند.",
+    "featuredBadge": "ویژه",
+    "noCoursesMessage": "دوره‌ای یافت نشد",
+    "currency": "تومان"
+  },
+
   "roadmap": {
     "title": "مسیر یادگیری",
     "description": "یک مسیر ساده و گام‌به‌گام برای یادگیری دوره‌ها",
@@ -240,71 +319,78 @@
     "certificateTitle": "دریافت مدرک",
     "certificateDescription": "پس از اتمام دوره، گواهی دریافت کنید.",
     "customTitle": "نقشه راه شخصی‌سازی‌شده بسازید",
-    "customDescription": "با جستجوی هر دسته‌بندی، مسیر یادگیری، مهارت‌ها و پیشنهادهای دوره‌ مرتبط با آن مسیر را مشاهده کنید.",
+    "customDescription": "با جستجوی هر دسته‌بندی، مسیر یادگیری، مهارت‌ها و پیشنهادهای دوره‌ مرتبط را مشاهده کنید.",
     "customSearchPlaceholder": "جستجوی دسته‌بندی‌ها",
     "customCardDescription": "جریان کامل و مرحله‌به‌مرحله یادگیری این دسته‌بندی را مشاهده کنید.",
     "customViewButton": "مشاهده نقشه راه",
     "customEmptyState": "هیچ دسته‌بندی مطابق جستجو پیدا نشد."
   },
-  "home": {
-    "heroTitle": "آینده‌ات را با یادگیری بساز 🚀",
-    "heroDescription": "مهارت‌هایی یاد بگیر که امروز و فردای شغلی‌ات را تضمین می‌کنند. با بهترین مدرس‌ها، یادگیری راحت، سریع و کاربردی را تجربه کن.",
-    "exploreCoursesButton": "مشاهده دوره‌ها",
-    "heroImageAlt": "بنر سایت",
-    "categoriesTitle": "دسته‌بندی دوره‌ها",
-    "categoriesDescription": "دوره‌ها بر اساس موضوعات مختلف دسته‌بندی شده‌اند تا راحت‌تر مهارت مورد نظرت را پیدا کنی. از برنامه‌نویسی و طراحی تا مدیریت و بازاریابی، همه چیز آماده یادگیری است.",
-    "featuredCoursesTitle": "دوره‌های ویژه",
-    "featuredCoursesDescription": "این دوره‌ها توسط مدرسین حرفه‌ای و با بهترین استانداردها انتخاب شده‌اند. مناسب برای دانشجویانی که می‌خواهند سریع مهارت عملی کسب کنند و در مسیر شغلی موفق شوند.",
-    "featuredBadge": "ویژه",
-    "noCoursesMessage": "دوره‌ای یافت نشد",
-    "currency": "تومان"
-  },
-  "studentCourses": {
-    "title": "دوره‌های من",
-    "loading": "در حال بارگذاری دوره‌ها...",
-    "startWatching": "شروع تماشا",
-    "noCourses": "هنوز دوره‌ای خریداری نکرده‌ای."
-  },
-  "coursesPage": {
-    "title": "همه دوره‌ها",
-    "searchPlaceholder": "جستجوی دوره‌ها...",
-    "sortBy": "مرتب‌سازی بر اساس",
-    "resultsLabel": "نتایج",
-    "filters": {
-      "category": "دسته‌بندی‌ها",
-      "level": "سطح",
-      "primaryLanguage": "زبان"
-    },
-    "sortLabels": {
-      "priceLowToHigh": "قیمت: از کم به زیاد",
-      "priceHighToLow": "قیمت: از زیاد به کم",
-      "titleAToZ": "عنوان: از A تا Z",
-      "titleZToA": "عنوان: از Z تا A"
-    },
-    "levelOptions": {
-      "beginner": "مقدماتی",
-      "intermediate": "متوسط",
-      "advanced": "پیشرفته"
-    },
-    "languageOptions": {
-      "english": "انگلیسی",
-      "persian": "فارسی"
-    },
-    "createdBy": "ایجاد شده توسط",
-    "lectureSingular": "جلسه",
-    "lecturePlural": "جلسات",
-    "levelLabel": "سطح",
-    "noCourses": "دوره‌ای پیدا نشد"
-  },
+
   "roadmapCategory": {
-    "notFound": "???? ??? ????????? ???? ???? ????? ???? ???.",
-    "subtitle": "?? ????? ?? ???? ?? ?? ????? ???? ???? ????? ???? ???.",
-    "stepLabel": "????? {number}",
-    "completed": "????? ??",
-    "inProgress": "?? ??? ?????",
-    "locked": "??? ???",
-    "viewCourse": "?????? ????",
-    "completeStep": "??? ????? ?? ???? ??",
-    "unlockMessage": "???? ??? ??? ??? ????? ????? ????? ???? ?? ???? ??."
+    "notFound": "هیچ مسیر یادگیری برای این دسته‌بندی تعریف نشده است.",
+    "subtitle": "هر مرحله را کامل کنید تا مرحله بعدی باز شود.",
+    "stepLabel": "مرحله {number}",
+    "completed": "تکمیل شده",
+    "inProgress": "در حال انجام",
+    "locked": "قفل شده",
+    "viewCourse": "مشاهده دوره",
+    "completeStep": "تکمیل این مرحله",
+    "unlockMessage": "مرحله قبلی را کامل کنید تا این مرحله باز شود."
+  },
+
+  "validation": {
+    "required": "این فیلد الزامی است",
+    "invalidEmail": "ایمیل نامعتبر است",
+    "passwordTooShort": "رمز عبور باید حداقل ۶ حرف باشد"
+  },
+
+  "categories": {
+    "Web_Development": "توسعه وب",
+    "Backend_Development": "برنامه‌نویسی سمت سرور",
+    "Data_Science": "علم داده",
+    "Machine_Learning": "یادگیری ماشین",
+    "Artificial_Intelligence": "هوش مصنوعی",
+    "Cloud_Computing": "رایانش ابری",
+    "Cyber_Security": "امنیت سایبری",
+    "Mobile_Development": "توسعه موبایل",
+    "Game_Development": "توسعه بازی",
+    "Software_Engineering": "مهندسی نرم‌افزار"
+  },
+  "courseSettings": {
+    "title": "تصویر دوره",
+    "uploading": "در حال آپلود...",
+    "courseImageAlt": "تصویر دوره",
+    "changeImage": "تغییر عکس",
+    "removeImage": "حذف عکس",
+    "dragDropPrompt": "عکس دوره را اینجا بکشید",
+    "mobilePrompt": "تصویر دوره را انتخاب کنید",
+    "selectFromGallery": "انتخاب از گالری",
+    "supportedFormats": "JPG, PNG, WebP",
+    "maxSize": "حداکثر ۵ مگابایت",
+    "invalidFileType": "لطفاً فقط فایل تصویری آپلود کنید",
+    "fileTooLarge": "حجم عکس نباید بیشتر از ۵ مگابایت باشد",
+    "uploadFailed": "آپلود عکس با خطا مواجه شد"
+  },
+  "curriculum": {
+    "title": "سرفصل‌های دوره",
+    "addLecture": "افزودن جلسه",
+    "bulkUpload": "آپلود گروهی",
+    "uploading": "در حال آپلود ویدیوها...",
+    "dragDropVideos": "ویدیوها را اینجا بکشید",
+    "mobileUploadPrompt": "ویدیوهای دوره را آپلود کنید",
+    "selectFromGallery": "انتخاب از گالری",
+    "noLectures": "هنوز جلسه‌ای اضافه نشده است",
+    "lecture": "جلسه",
+    "lectureTitle": "عنوان جلسه",
+    "titlePlaceholder": "مثلاً: مقدمه‌ای بر ری‌اکت",
+    "freePreview": "پیش‌نمایش رایگان",
+    "replaceVideo": "جایگزینی ویدیو",
+    "uploadLectureVideo": "ویدیوی این جلسه را آپلود کنید",
+    "invalidVideo": "لطفاً فقط فایل ویدیویی انتخاب کنید",
+    "uploadFailed": "آپلود ویدیو با خطا مواجه شد"
+  },
+  "courseLanding": {
+    "title": "صفحه معرفی دوره",
+    "subtitle": "اطلاعات اصلی دوره را وارد کنید تا جذاب‌تر به نظر برسد"
   }
 }
