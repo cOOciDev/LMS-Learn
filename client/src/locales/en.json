@@ -194,8 +194,8 @@
     "totalStudentsIn": "List of enrolled students",
     "noStudentsEnrolled": "No students have enrolled yet",
     "studentsWillAppearHere": "When a student enrolls in your courses, they will appear here",
-    "addNewCourseDesc":"Add new course",
-    "informations":"informations"
+    "addNewCourseDesc": "Add new course",
+    "informations": "informations"
   },
 
   "student": {
@@ -395,5 +395,27 @@
   "courseLanding": {
     "title": "Course Landing Page",
     "subtitle": "Fill in the main course details to make it more attractive"
-  }
+  },
+ "about": {
+  "title": "About Us",
+  "heroDescription": "Our mission is to provide easy and free access to high-quality education for soldiers, as well as advanced professional courses for the public.",
+  
+  "missionTitle": "Our Mission",
+  "missionText1": "This platform is designed to improve the knowledge and skills of Navy soldiers while also offering specialized courses for everyone.",
+  "missionFree": "• Free courses for soldiers",
+  "missionPaid": "• Professional courses for the public",
+  "missionText2": "We aim to keep learning simple, enjoyable, and accessible for all.",
+
+  "teamTitle": "The Team",
+  "parsaName": "Parsa Mohammadi-Far",
+  "parsaRole": "Full-stack developer and main system designer",
+
+  "mehdiName": "Mahdi Ebrahimi",
+  "mehdiRole": "Full-stack developer and platform collaborator",
+
+  "funLine1": "If you find a bug, don't worry!",
+  "funNames": "A job by candy and COOci",
+  "funLine2": "It's probably one of them who messed up 😄"
+}
+
 }

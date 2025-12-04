@@ -1,4 +1,4 @@
-// client/src/App.jsx
+// Updated App.jsx with AboutPage route added
 import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/auth";
 import RouteGuard from "./components/route-guard";
@@ -28,6 +28,7 @@ import AdminInstructorManagement from "./pages/admin/instructors";
 import AdminCategoryManagement from "./pages/admin/categories";
 import AdminRoadmapsPage from "./pages/admin/roadmaps";
 import StudentCategoryRoadmapPage from "./pages/student/roadmap-category";
+import AboutPage from "./pages/student/about"; // ⬅️ Added
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -44,6 +45,8 @@ function App() {
           />
         }
       />
+
+      {/* Instructor */}
       <Route
         path="/instructor"
         element={
@@ -58,6 +61,8 @@ function App() {
         <Route path="create-new-course" element={<AddNewCoursePage />} />
         <Route path="edit-course/:courseId" element={<AddNewCoursePage />} />
       </Route>
+
+      {/* Admin */}
       <Route
         path="/admin"
         element={
@@ -79,6 +84,8 @@ function App() {
         <Route path="messages" element={<AdminMessagesPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
+
+      {/* Student */}
       <Route
         path="/"
         element={
@@ -89,22 +96,18 @@ function App() {
           />
         }
       >
-        <Route path="" element={<StudentHomePage />} />
+        <Route index element={<StudentHomePage />} />
         <Route path="home" element={<StudentHomePage />} />
         <Route path="courses" element={<StudentViewCoursesPage />} />
         <Route path="roadmap" element={<RoadmapPage />} />
         <Route path="roadmap/category/:slug" element={<StudentCategoryRoadmapPage />} />
-        <Route
-          path="course/details/:id"
-          element={<StudentViewCourseDetailsPage />}
-        />
+        <Route path="course/details/:id" element={<StudentViewCourseDetailsPage />} />
         <Route path="payment-return" element={<PaypalPaymentReturnPage />} />
         <Route path="student-courses" element={<StudentCoursesPage />} />
-        <Route
-          path="course-progress/:id"
-          element={<StudentViewCourseProgressPage />}
-        />
+        <Route path="course-progress/:id" element={<StudentViewCourseProgressPage />} />
+        <Route path="about" element={<AboutPage />} /> {/* ⬅️ Added */}
       </Route>
+
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
