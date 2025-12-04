@@ -6,17 +6,10 @@ import CourseSettings from "@/components/instructor-view/courses/add-new-course/
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  courseCurriculumInitialFormData,
-  courseLandingInitialFormData,
-} from "@/config";
+import { courseCurriculumInitialFormData, courseLandingInitialFormData } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
-import {
-  addNewCourseService,
-  fetchInstructorCourseDetailsService,
-  updateCourseByIdService,
-} from "@/services";
+import { addNewCourseService, fetchInstructorCourseDetailsService, updateCourseByIdService } from "@/services";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -39,248 +32,197 @@ function AddNewCoursePage() {
   const { t } = useLanguage();
   const { toast } = useToast();
 
-  // کنترل تب فعلی
   const [activeTab, setActiveTab] = useState("course-landing-page");
 
-  // اعتبارسنجی مرحله Landing
+  // اعتبارسنجی دقیق و شفاف
   const isLandingValid = () => {
-    const required = [
-      "title",
-      "category",
-      "level",
-      "primaryLanguage",
-      "description",
-      "pricing",
-    ];
-    return required.every(
-      (key) =>
-        courseLandingFormData[key] &&
-        courseLandingFormData[key].toString().trim() !== ""
-    );
+    const required = ["title", "category", "level", "primaryLanguage", "description", "pricing"];
+    const result = required.every(key => {
+      const value = courseLandingFormData[key];
+      const isValid = value !== null && value !== undefined && value !== "" && (typeof value !== "number" || value >= 0);
+      console.log(`[Validation] ${key}:`, value, "→", isValid ? "OK" : "MISSING");
+      return isValid;
+    });
+    console.log("[Validation] Landing Valid:", result);
+    return result;
   };
 
-  // اعتبارسنجی مرحله Curriculum
   const isCurriculumValid = () => {
-    if (!courseCurriculumFormData || courseCurriculumFormData.length === 0)
-      return false;
-    return courseCurriculumFormData.every(
-      (item) => item.title?.trim() && item.videoUrl && item.public_id
-    );
+    const hasLectures = courseCurriculumFormData?.length > 0;
+    const allComplete = courseCurriculumFormData?.every(item => 
+      item.title?.trim() && item.videoUrl && item.public_id
+    ) || false;
+    console.log("[Validation] Curriculum → lectures:", courseCurriculumFormData?.length, "all complete:", allComplete);
+    return hasLectures && allComplete;
   };
 
-  // اجازه تغییر تب فقط اگر مرحله قبلی معتبر باشه
-  const handleTabChange = (value) => {
-    if (value === "curriculum" && !isLandingValid()) {
-      toast({
-        title: t("common.error"),
-        description:
-          t("instructor.completeLandingFirst") ||
-          "لطفاً ابتدا اطلاعات صفحه معرفی دوره را کامل کنید.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (value === "settings" && !isCurriculumValid()) {
-      toast({
-        title: t("common.error"),
-        description:
-          t("instructor.completeCurriculumFirst") ||
-          "لطفاً ابتدا برنامه درسی دوره را کامل کنید.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setActiveTab(value);
+  const validateFormData = () => {
+    const landing = isLandingValid();
+    const curriculum = isCurriculumValid();
+    const final = landing && curriculum;
+    console.log("FINAL VALIDATION RESULT:", final ? "READY TO PUBLISH" : "NOT READY");
+    return final;
   };
 
-  const validateFormData = () => isLandingValid() && isCurriculumValid();
-
-  async function handleCreateCourse() {
-    if (!validateFormData()) {
-      toast({
-        title: t("common.error"),
-        description:
-          t("instructor.completeAllSteps") || "لطفاً تمام مراحل را کامل کنید.",
-        variant: "destructive",
-      });
-      if (!isLandingValid()) setActiveTab("course-landing-page");
-      else if (!isCurriculumValid()) setActiveTab("curriculum");
+  const handleNext = (nextTab) => {
+    console.log("دکمه ذخیره و ادامه کلیک شد → می‌خواد بره به:", nextTab);
+    if (nextTab === "curriculum" && !isLandingValid()) {
+      toast({ title: "خطا", description: "اطلاعات دوره کامل نیست", variant: "destructive" });
       return;
     }
-
-    try {
-      const courseFinalFormData = {
-        instructorId: auth?.user?._id,
-        instructorName: auth?.user?.userName,
-        date: new Date(),
-        ...courseLandingFormData,
-        students: [],
-        curriculum: courseCurriculumFormData,
-        status: "published",
-        isPublished: true,
-      };
-
-      const response =
-        currentEditedCourseId !== null
-          ? await updateCourseByIdService(
-              currentEditedCourseId,
-              courseFinalFormData
-            )
-          : await addNewCourseService(courseFinalFormData);
-
-      if (response?.success) {
-        toast({
-          title: t("common.success"),
-          description: currentEditedCourseId
-            ? t("instructor.courseUpdated") || "دوره با موفقیت به‌روزرسانی شد!"
-            : t("instructor.courseCreated") || "دوره با موفقیت ایجاد شد!",
-        });
-        setCourseLandingFormData(courseLandingInitialFormData);
-        setCourseCurriculumFormData(
-          courseCurriculumInitialFormData.map((item) => ({ ...item }))
-        );
-        setCurrentEditedCourseId(null);
-        navigate("/instructor");
-      } else {
-        toast({
-          title: t("common.error"),
-          description:
-            response?.message || t("common.errorOccurred") || "خطایی رخ داد.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: t("common.error"),
-        description:
-          error?.response?.data?.message || t("common.errorOccurred"),
-        variant: "destructive",
-      });
+    if (nextTab === "settings" && !isCurriculumValid()) {
+      toast({ title: "خطا", description: "برنامه درسی کامل نیست", variant: "destructive" });
+      return;
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setActiveTab(nextTab);
+  };
+
+const handleCreateCourse = async () => {
+  console.log("دکمه انتشار کلیک شد!");
+
+  if (!validateFormData()) {
+    toast({ title: "ناتمام", description: "همه فیلدها را کامل کنید.", variant: "destructive" });
+    return;
   }
 
-  async function fetchCurrentCourseDetails() {
-    try {
-      const response = await fetchInstructorCourseDetailsService(
-        currentEditedCourseId
-      );
-      if (response?.success) {
-        const courseData = response?.data?.course || response?.data;
-        setCourseLandingFormData({
-          ...courseLandingInitialFormData,
-          ...courseData,
-        });
-        setCourseCurriculumFormData(courseData?.curriculum || []);
-      }
-    } catch (error) {
-      toast({
-        title: t("common.error"),
-        description:
-          t("instructor.loadCourseFailed") ||
-          "بارگذاری اطلاعات دوره با خطا مواجه شد.",
-        variant: "destructive",
-      });
+  const courseData = {
+    instructorId: auth?.user?._id,
+    instructorName: auth?.user?.userName,
+    title: courseLandingFormData.title?.trim(),
+    category: courseLandingFormData.category,
+    level: courseLandingFormData.level,
+    primaryLanguage: courseLandingFormData.primaryLanguage,
+    description: courseLandingFormData.description?.trim(),
+    pricing: Number(courseLandingFormData.pricing),
+    image: courseLandingFormData.image || "",
+    curriculum: courseCurriculumFormData.map(item => ({
+      title: item.title?.trim(),
+      videoUrl: item.videoUrl,
+      public_id: item.public_id,
+      freePreview: !!item.freePreview,
+    })),
+    students: [],
+    status: "published",
+    isPublished: true,
+  };
+
+  console.log("داده نهایی برای ارسال:", courseData);
+
+  try {
+    const response = currentEditedCourseId
+      ? await updateCourseByIdService(currentEditedCourseId, courseData)
+      : await addNewCourseService(courseData);
+
+    console.log("پاسخ سرور:", response);
+
+    if (response?.success) {
+      toast({ title: "موفقیت‌آمیز", description: "دوره منتشر شد!" });
+      setCourseLandingFormData(courseLandingInitialFormData);
+      setCourseCurriculumFormData(courseCurriculumInitialFormData.map(item => ({ ...item })));
+      setCurrentEditedCourseId(null);
+      navigate("/instructor");
     }
+  } catch (error) {
+    // این خط مهمه! دقیقاً خطای سرور رو نشون میده
+    console.error("خطای کامل سرور:", error.response?.data);
+    console.error("پیام خطا:", error.response?.data?.message);
+    console.error("لیست خطاها:", error.response?.data?.errors);
+
+    toast({ 
+      title: "خطا در انتشار", 
+      description: error.response?.data?.errors?.[0]?.msg || error.response?.data?.message || "خطای ناشناخته", 
+      variant: "destructive" 
+    });
   }
+};
 
   useEffect(() => {
-    if (currentEditedCourseId !== null) fetchCurrentCourseDetails();
-  }, [currentEditedCourseId]);
-
-  useEffect(() => {
-    if (params?.courseId) setCurrentEditedCourseId(params?.courseId);
+    if (params?.courseId) setCurrentEditedCourseId(params.courseId);
   }, [params?.courseId]);
 
-  const isEditMode = currentEditedCourseId !== null;
+  useEffect(() => {
+    if (currentEditedCourseId) {
+      console.log("در حال بارگذاری دوره ویرایشی با آیدی:", currentEditedCourseId);
+      const fetchCourse = async () => {
+        try {
+          const res = await fetchInstructorCourseDetailsService(currentEditedCourseId);
+          console.log("دوره ویرایشی بارگذاری شد:", res);
+          if (res?.success) {
+            const data = res.data?.course || res.data;
+            setCourseLandingFormData({ ...courseLandingInitialFormData, ...data });
+            setCourseCurriculumFormData(data.curriculum || []);
+          }
+        } catch (err) {
+          console.error("خطا در بارگذاری دوره:", err);
+        }
+      };
+      fetchCourse();
+    }
+  }, [currentEditedCourseId]);
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      {/* هدر صفحه */}
       <div className="mb-8 space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/instructor")}
-          className="hover:bg-muted"
-        >
+        <Button variant="ghost" onClick={() => navigate("/instructor")} className="hover:bg-muted">
           <ArrowLeft className="h-5 w-5 mr-2" />
-          {t("common.back")}
+{t("common.back")}
         </Button>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <h1 className="text-3xl font-extrabold text-foreground">
-            {isEditMode
-              ? t("instructor.editCourse")
-              : t("instructor.createCourse")}
+            {t("instructor.addNewCourseDesc")}
           </h1>
 
           <Button
             size="lg"
             disabled={!validateFormData()}
             onClick={handleCreateCourse}
-            className="font-bold px-8"
+            className="font-bold px-10 shadow-lg bg-green-600 hover:bg-green-700 text-white"
           >
-            {isEditMode ? t("common.update") : t("common.publish")}
+            {t("common.submit")}
           </Button>
         </div>
       </div>
 
-      {/* کارت اصلی */}
       <Card className="border-0 shadow-xl bg-card">
         <CardContent className="p-6">
-          <Tabs
-            value={activeTab}
-            onValueChange={handleTabChange}
-            className="w-full"
-          >
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-8 bg-muted/50 rounded-xl p-1 overflow-x-auto">
               <div className="flex gap-2 min-w-max">
                 <TabsTrigger
                   value="course-landing-page"
                   className="min-w-[100px] px-3 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
                 >
-                  <span className="hidden xs:inline">
-                    {t("course.courseDetails") || "اطلاعات دوره"}
-                  </span>
-                  {t("course.courseDetails") || "اطلاعات"}
+                  {t("instructor.informations")}
                 </TabsTrigger>
-
                 <TabsTrigger
                   value="curriculum"
                   disabled={!isLandingValid()}
-                  className="min-w-[10px] px-4 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
+                  className="px-4 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
                 >
-                  <span className="hidden xs:inline">
-                    {t("course.curriculum") || "برنامه درسی"}
-                  </span>
-                  {t("course.curriculum") || "برنامه درسی"}
-                </TabsTrigger>
+                                    {t("course.curriculum")}
 
+                </TabsTrigger>
                 <TabsTrigger
                   value="settings"
                   disabled={!isCurriculumValid()}
-                  className="min-w-[10px] px-3 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
+                  className="px-3 py-2 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap"
                 >
-                  <span className="hidden xs:inline">
-                    {t("course.courseImage") || "پوستر"}
-                  </span>
-                  {t("course.courseImage") || "پوستر"}
+                                                      {t("course.courseImage")}
+
                 </TabsTrigger>
               </div>
             </TabsList>
 
             <TabsContent value="course-landing-page" className="mt-0">
-              <CourseLanding onNext={() => setActiveTab("curriculum")} />
+              <CourseLanding onNext={() => handleNext("curriculum")} />
             </TabsContent>
-
             <TabsContent value="curriculum" className="mt-0">
-              <CourseCurriculum onNext={() => setActiveTab("settings")} />
+              <CourseCurriculum onNext={() => handleNext("settings")} />
             </TabsContent>
-
             <TabsContent value="settings" className="mt-0">
-              <CourseSettings
-                onPublish={handleCreateCourse}
-                isEditMode={isEditMode}
-              />
+              <CourseSettings />
             </TabsContent>
           </Tabs>
         </CardContent>

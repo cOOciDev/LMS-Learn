@@ -83,49 +83,42 @@ function InstructorSidebar() {
     }
   }
 
-return (
-<aside className="w-64 bg-background border-r-4 border-l-4 border-border/30 dark:border-border/70 shadow-2xl hidden md:flex flex-col">
-    <div className="p-6 h-full flex flex-col">
-      <div className="mb-8">
-        <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
-          {t("instructor.instructorDashboard")}
-        </h2>
-      </div>
+  return (
+    <aside className="w-64 bg-background border-r-4 border-l-4 border-border/30 dark:border-border/70 shadow-2xl hidden md:flex flex-col">
+      <div className="p-6 h-full flex flex-col">
+        <div className="mb-8">
+          <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
+            {t("instructor.instructorDashboard")}
+          </h2>
+        </div>
 
-      <nav className="flex-1 space-y-2">
-        {menuItems.map((menuItem) => (
+        <nav className="flex-1 space-y-2">
+          {menuItems.map((menuItem) => (
+            <Button
+              key={menuItem.value}
+              variant={activeTab === menuItem.value ? "default" : "ghost"}
+              className="w-full justify-start h-12 px-4 text-base font-medium rounded-xl"
+              onClick={() => handleMenuClick(menuItem)}
+            >
+              <menuItem.icon className="mr-1" />
+              <span>{menuItem.label}</span>
+            </Button>
+          ))}
+        </nav>
+
+        <div className="mt-auto pt-6 border-t border-border">
           <Button
-            key={menuItem.value}
-            variant={activeTab === menuItem.value ? "secondary" : "ghost"}
-            className={`
-              w-full justify-start h-12 px-4 text-base font-medium rounded-xl
-              transition-all duration-200
-              ${activeTab === menuItem.value 
-                ? "bg-primary text-primary-foreground shadow-lg" 
-                : "hover:bg-muted hover:text-foreground"
-              }
-            `}
-            onClick={() => handleMenuClick(menuItem)}
+            variant="ghost"
+            className="w-full justify-start h-12 px-4 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive rounded-xl transition-all"
+            onClick={handleLogout}
           >
-            <menuItem.icon className="h-5 w-5 mr-3" />
-            <span>{menuItem.label}</span>
+            <LogOut className="h-5 w-5 mr-3" />
+            <span>{t("common.logout")}</span>
           </Button>
-        ))}
-      </nav>
-
-      <div className="mt-auto pt-6 border-t border-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start h-12 px-4 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive rounded-xl transition-all"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5 mr-3" />
-          <span>{t("common.logout")}</span>
-        </Button>
+        </div>
       </div>
-    </div>
-  </aside>
-);
+    </aside>
+  );
 }
 
 export default InstructorSidebar;

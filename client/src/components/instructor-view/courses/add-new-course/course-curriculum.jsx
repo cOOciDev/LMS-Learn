@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import VideoPlayer from "@/components/video-player";
-import { InstructorContext } from "@/context/instructor-context";
 import { useLanguage } from "@/context/language-context";
+import { InstructorContext } from "@/context/instructor-context";
 import { mediaBulkUploadService, mediaDeleteService } from "@/services";
 import {
   Upload,
@@ -38,7 +38,7 @@ function CourseCurriculum({ onNext }) {
 
   const bulkUploadRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
-
+  const { courseLandingFormData } = useContext(InstructorContext);
   const isCurriculumValid = () => {
     if (courseCurriculumFormData.length === 0) return false;
     return courseCurriculumFormData.every(
@@ -328,7 +328,8 @@ function CourseCurriculum({ onNext }) {
                       <VideoPlayer
                         url={lecture.videoUrl}
                         width="100%"
-                        height="200px"
+                        height="320px"
+                        thumbnail={courseLandingFormData?.image || null}
                       />
                     </div>
                     <Button

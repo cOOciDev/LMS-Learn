@@ -41,8 +41,11 @@ const validateAndNext = () => {
     }
   }
 
+  // اضافه شده: چک حداقل ۵ کاراکتر برای عنوان
+
+
   toast.success(isRTL ? "به مرحله بعد رفتید!" : "Moved to next step!");
-  window.scrollTo({ top: 0, behavior: "smooth" }); // ← فقط این خط اضافه شد!
+  window.scrollTo({ top: 0, behavior: "smooth" });
   onNext();
   return true;
 };

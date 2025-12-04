@@ -189,10 +189,15 @@
   },
 
   "instructor": {
-    "instructorDashboard": "داشبورد مدرس",
+    "instructorDashboard": "داشبورد",
     "myCourses": "دوره‌های من",
     "createCourse": "ایجاد دوره",
-    "editCourse": "ویرایش دوره"
+    "editCourse": "ویرایش دوره",
+    "totalStudentsIn":"لیست دانشجویان ثبت‌نام کرده",
+    "noStudentsEnrolled": "هنوز دانشجویی ثبت‌نام نکرده است",
+    "studentsWillAppearHere": "وقتی دانشجویی در دوره‌های شما ثبت‌نام کند، اینجا نمایش داده می‌شود",
+    "addNewCourseDesc":"ایجاد دوره جدید",
+    "informations":"اطلاعات"
   },
 
   "student": {

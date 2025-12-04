@@ -1,5 +1,5 @@
 // components/student/StudentViewCommonHeader.jsx
-import { GraduationCap, TvMinimalPlay, Map, Menu, X } from "lucide-react";
+import { BookOpen, TvMinimalPlay, Map, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -23,8 +23,10 @@ function StudentViewCommonHeader() {
   }
 
   const navItems = [
+
     {
       label: t("common.exploreCourses"),
+      icon: <BookOpen className="w-5 h-5" />,
       onClick: () => {
         navigate("/courses");
         setOpen(false);
@@ -80,8 +82,9 @@ function StudentViewCommonHeader() {
           <Button
             variant="ghost"
             onClick={() => navigate("/courses")}
-            className="font-medium hover:bg-accent"
-          >
+            className="font-medium hover:bg-accent flex items-center gap-2"
+          >  <BookOpen className="w-5 h-5" />
+
             {t("common.exploreCourses")}
           </Button>
           <Button

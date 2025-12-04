@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
-import { Slider } from "../ui/slider";
-import { Button } from "../ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 import {
   Maximize,
   Minimize,
@@ -11,132 +11,134 @@ import {
   RotateCw,
   Volume2,
   VolumeX,
+  RefreshCw,
 } from "lucide-react";
 
 function VideoPlayer({
   width = "100%",
   height = "100%",
   url,
-  onProgressUpdate,
+  onProgressUpdate, // اختیاریه
   progressData,
+  thumbnail,
 }) {
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolume] = useState(0.7);
   const [muted, setMuted] = useState(false);
   const [played, setPlayed] = useState(0);
   const [seeking, setSeeking] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [ended, setEnded] = useState(false);
 
   const playerRef = useRef(null);
   const playerContainerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
 
-  function handlePlayAndPause() {
-    setPlaying(!playing);
-  }
-
-  function handleProgress(state) {
-    if (!seeking) {
-      setPlayed(state.played);
+  // فقط اگه تابع باشه صدا بزن
+  const safeProgressUpdate = (data) => {
+    if (typeof onProgressUpdate === "function") {
+      onProgressUpdate(data);
     }
-  }
+  };
 
-  function handleRewind() {
-    playerRef?.current?.seekTo(playerRef?.current?.getCurrentTime() - 5);
-  }
+  const handleEnded = () => {
+    setEnded(true);
+    setPlaying(false);
+    safeProgressUpdate({
+      ...progressData,
+      progressValue: 1,
+    });
+  };
 
-  function handleForward() {
-    playerRef?.current?.seekTo(playerRef?.current?.getCurrentTime() + 5);
-  }
+  const handleReplay = () => {
+    setEnded(false);
+    setPlaying(true);
+    playerRef.current?.seekTo(0);
+  };
 
-  function handleToggleMute() {
-    setMuted(!muted);
-  }
+  const handlePlayPause = () => {
+    if (ended) handleReplay();
+    else setPlaying(!playing);
+  };
 
-  function handleSeekChange(newValue) {
-    setPlayed(newValue[0]);
+  const handleProgress = (state) => {
+    if (!seeking) setPlayed(state.played);
+
+    // فقط وقتی به 90% رسید علامت بزن
+    if (state.played >= 0.9 && state.played < 1) {
+      safeProgressUpdate({
+        ...progressData,
+        progressValue: state.played,
+      });
+    }
+  };
+
+  const handleRewind = () => playerRef.current?.seekTo(playerRef.current.getCurrentTime() - 10);
+  const handleForward = () => playerRef.current?.seekTo(playerRef.current.getCurrentTime() + 10);
+
+  const handleSeekChange = (val) => {
+    setPlayed(val[0]);
     setSeeking(true);
-  }
+  };
 
-  function handleSeekMouseUp() {
+  const handleSeekMouseUp = () => {
     setSeeking(false);
     playerRef.current?.seekTo(played);
-  }
+  };
 
-  function handleVolumeChange(newValue) {
-    setVolume(newValue[0]);
-  }
+  const handleVolumeChange = (val) => setVolume(val[0]);
 
-  function pad(string) {
-    return ("0" + string).slice(-2);
-  }
-
-  function formatTime(seconds) {
+  const pad = (n) => ("0" + n).slice(-2);
+  const formatTime = (seconds) => {
+    if (!seconds) return "0:00";
     const date = new Date(seconds * 1000);
     const hh = date.getUTCHours();
     const mm = date.getUTCMinutes();
     const ss = pad(date.getUTCSeconds());
-
-    if (hh) {
-      return `${hh}:${pad(mm)}:${ss}`;
-    }
-
-    return `${mm}:${ss}`;
-  }
+    return hh ? `${hh}:${pad(mm)}:${ss}` : `${mm}:${ss}`;
+  };
 
   const handleFullScreen = useCallback(() => {
-    if (!isFullScreen) {
-      if (playerContainerRef?.current.requestFullscreen) {
-        playerContainerRef?.current?.requestFullscreen();
-      }
+    if (!document.fullscreenElement) {
+      playerContainerRef.current?.requestFullscreen?.();
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
+      document.exitFullscreen?.();
     }
-  }, [isFullScreen]);
+  }, []);
 
-  function handleMouseMove() {
+  const handleMouseMove = () => {
     setShowControls(true);
     clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 3000);
-  }
+  };
 
   useEffect(() => {
-    const handleFullScreenChange = () => {
-      setIsFullScreen(document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullScreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullScreenChange);
-    };
+    const handler = () => setIsFullScreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
-
-  useEffect(() => {
-    if (played === 1) {
-      onProgressUpdate({
-        ...progressData,
-        progressValue: played,
-      });
-    }
-  }, [played]);
 
   return (
     <div
       ref={playerContainerRef}
-      className={`relative bg-gray-900 rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ease-in-out 
-      ${isFullScreen ? "w-screen h-screen" : ""}
-      `}
+      className="relative bg-black overflow-hidden group"
       style={{ width, height }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setShowControls(false)}
     >
+      {/* پس‌زمینه محو */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xl scale-110 opacity-30"
+        style={{
+          backgroundImage: thumbnail
+            ? `url(${thumbnail})`
+            : "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+        }}
+      />
+
       <ReactPlayer
         ref={playerRef}
-        className="absolute top-0 left-0"
         width="100%"
         height="100%"
         url={url}
@@ -144,92 +146,73 @@ function VideoPlayer({
         volume={volume}
         muted={muted}
         onProgress={handleProgress}
+        onEnded={handleEnded}
+        progressInterval={1000}
       />
-      {showControls && (
-        <div
-          className={`absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-75 p-4 transition-opacity duration-300 ${
-            showControls ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <Slider
-            value={[played * 100]}
-            max={100}
-            step={0.1}
-            onValueChange={(value) => handleSeekChange([value[0] / 100])}
-            onValueCommit={handleSeekMouseUp}
-            className="w-full mb-4"
-          />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handlePlayAndPause}
-                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
-              >
-                {playing ? (
-                  <Pause className="h-6 w-6" />
-                ) : (
-                  <Play className="h-6 w-6" />
-                )}
-              </Button>
-              <Button
-                onClick={handleRewind}
-                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
-                variant="ghost"
-                size="icon"
-              >
-                <RotateCcw className="h-6 w-6" />
-              </Button>
-              <Button
-                onClick={handleForward}
-                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
-                variant="ghost"
-                size="icon"
-              >
-                <RotateCw className="h-6 w-6" />
-              </Button>
-              <Button
-                onClick={handleToggleMute}
-                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
-                variant="ghost"
-                size="icon"
-              >
-                {muted ? (
-                  <VolumeX className="h-6 w-6" />
-                ) : (
-                  <Volume2 className="h-6 w-6" />
-                )}
-              </Button>
-              <Slider
-                value={[volume * 100]}
-                max={100}
-                step={1}
-                onValueChange={(value) => handleVolumeChange([value[0] / 100])}
-                className="w-24 "
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="text-white">
-                {formatTime(played * (playerRef?.current?.getDuration() || 0))}/{" "}
-                {formatTime(playerRef?.current?.getDuration() || 0)}
-              </div>
-              <Button
-                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
-                variant="ghost"
-                size="icon"
-                onClick={handleFullScreen}
-              >
-                {isFullScreen ? (
-                  <Minimize className="h-6 w-6" />
-                ) : (
-                  <Maximize className="h-6 w-6" />
-                )}
-              </Button>
-            </div>
+
+      {/* صفحه پایان ویدیو */}
+      {ended && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
+          <div className="text-center">
+            <RefreshCw className="h-16 w-16 text-white mx-auto mb-4" />
+            <p className="text-2xl font-bold text-white mb-6">پایان ویدیو</p>
+            <Button onClick={handleReplay} size="lg" className="bg-blue-600 hover:bg-blue-700">
+              <RefreshCw className="h-6 w-6 ml-2" />
+              پخش مجدد
+            </Button>
           </div>
         </div>
       )}
+
+      {/* کنترل‌ها */}
+      <div
+        className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4 transition-all duration-300 ${
+          showControls || ended ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
+        }`}
+      >
+        <Slider
+          value={[played * 100]}
+          max={100}
+          step={0.1}
+          onValueChange={(v) => handleSeekChange([v[0] / 100])}
+          onValueCommit={handleSeekMouseUp}
+          className="mb-4"
+        />
+
+        <div className="flex items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={handlePlayPause}>
+              {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
+            </Button>
+
+            <Button variant="ghost" size="icon" onClick={handleRewind}>
+              <RotateCcw className="h-5 w-5" />
+              <span className="text-xs ml-1">-10</span>
+            </Button>
+
+            <Button variant="ghost" size="icon" onClick={handleForward}>
+              <RotateCw className="h-5 w-5" />
+              <span className="text-xs ml-1">+10</span>
+            </Button>
+
+            <Button variant="ghost" size="icon" onClick={() => setMuted(!muted)}>
+              {muted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            </Button>
+
+            <div className="w-24">
+              <Slider value={[volume * 100]} onValueChange={(v) => handleVolumeChange([v[0] / 100])} />
+            </div>
+
+            <span className="text-sm">
+              {formatTime(played * (playerRef.current?.getDuration() || 0))} / {formatTime(playerRef.current?.getDuration() || 0)}
+            </span>
+          </div>
+
+          <Button variant="ghost" size="icon" onClick={handleFullScreen}>
+            {isFullScreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

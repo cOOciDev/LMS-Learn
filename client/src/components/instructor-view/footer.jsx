@@ -2,13 +2,12 @@ function InstructorFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="px-4 lg:px-6 h-14 flex items-center justify-center border-t bg-white">
-      <div className="text-sm text-muted-foreground">
-        © {currentYear} cOOciDev Nedayar LMS. All rights reserved.
+    <footer className="px-4 lg:px-6 h-14 flex items-center justify-center border-t bg-background text-muted-foreground">
+      <div className="text-sm">
+        © {currentYear} cOOciDev Nedayar LMS. تمامی حقوق محفوظ است.
       </div>
     </footer>
   );
 }
 
 export default InstructorFooter;
-

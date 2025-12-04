@@ -76,7 +76,7 @@ const validateCourse = (req, res, next) => {
   } = req.body;
   const errors = [];
 
-  if (!title || title.trim().length < 5) {
+  if (!title) {
     errors.push("Course title must be at least 5 characters");
   }
 

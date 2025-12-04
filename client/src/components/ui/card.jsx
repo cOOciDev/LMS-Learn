@@ -55,7 +55,7 @@ const CardContent = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "p-6 pt-0 w-full max-w-[700px] break-words",
+      "p-6 pt-0 w-full break-words",
       className
     )}
     {...props}

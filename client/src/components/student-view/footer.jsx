@@ -23,7 +23,7 @@ function StudentViewCommonFooter() {
       invertOnHover: true // یوتیوب قرمز + آیکون سفید
     },
     {
-      icon: "/instagram.png",
+      icon: "/social_15527900.png",
       label: "Instagram",
       href: "https://instagram.com/cOOci.dev",
       hoverColor: "hover:bg-gradient-to-tr hover:from-purple-600 hover:via-pink-500 hover:to-orange-400",

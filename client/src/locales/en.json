@@ -187,10 +187,15 @@
   },
 
   "instructor": {
-    "instructorDashboard": "Instructor Dashboard",
+    "instructorDashboard": "Dashboard",
     "myCourses": "My Courses",
     "createCourse": "Create Course",
-    "editCourse": "Edit Course"
+    "editCourse": "Edit Course",
+    "totalStudentsIn": "List of enrolled students",
+    "noStudentsEnrolled": "No students have enrolled yet",
+    "studentsWillAppearHere": "When a student enrolls in your courses, they will appear here",
+    "addNewCourseDesc":"Add new course",
+    "informations":"informations"
   },
 
   "student": {

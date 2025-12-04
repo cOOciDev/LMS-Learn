@@ -18,6 +18,8 @@ import { InstructorContext } from "@/context/instructor-context";
 import { Delete, Edit, Plus } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/context/language-context";
+
 
 function InstructorCourses({ listOfCourses }) {
   const navigate = useNavigate();
@@ -26,7 +28,9 @@ function InstructorCourses({ listOfCourses }) {
     setCourseLandingFormData,
     setCourseCurriculumFormData,
   } = useContext(InstructorContext);
-
+  const { t, language } = useLanguage();
+  const isRTL = language === "fa";
+  
   const courses = Array.isArray(listOfCourses)
     ? listOfCourses
     : (listOfCourses?.courses || []);
@@ -46,7 +50,7 @@ function InstructorCourses({ listOfCourses }) {
     <Card className="border-0 shadow-2xl bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-muted/40 border-b border-border p-6">
         <CardTitle className="text-2xl sm:text-3xl font-extrabold text-foreground">
-          All Courses
+          {t("common.courses")}
         </CardTitle>
         <Button 
           onClick={handleCreateNewCourse} 
@@ -54,22 +58,22 @@ function InstructorCourses({ listOfCourses }) {
           size="lg"
         >
           <Plus className="h-5 w-5 ml-2" />
-          Create New Course
+          {t("instructor.createCourse")}
         </Button>
       </CardHeader>
 
-      <CardContent className="p-0">
+      <CardContent className="p-2 w-full">
         <div className="overflow-x-auto">
-          <Table>
+          <Table >
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/40">
-                <TableHead className="text-foreground font-bold text-sm sm:text-base">Course</TableHead>
-                <TableHead className="text-foreground font-bold text-sm sm:text-base text-center sm:text-left">Students</TableHead>
-                <TableHead className="text-foreground font-bold text-sm sm:text-base text-center sm:text-left">Revenue</TableHead>
-                <TableHead className="text-right text-foreground font-bold text-sm sm:text-base">Actions</TableHead>
+                <TableHead className="text-foreground font-bold text-sm sm:text-base ">{t("common.courses")}</TableHead>
+                <TableHead className="text-foreground font-bold text-sm sm:text-base text-center sm:text-center">{t("course.students")}</TableHead>
+                <TableHead className="text-foreground font-bold text-sm sm:text-base text-center sm:text-center">{t("admin.totalRevenue")}</TableHead>
+                <TableHead className="text-right text-foreground font-bold text-sm sm:text-base">{t("admin.actions")}</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody >
               {courses.length > 0 ? (
                 courses.map((course) => (
                   <TableRow

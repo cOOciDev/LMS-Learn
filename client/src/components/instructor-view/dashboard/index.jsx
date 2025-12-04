@@ -11,12 +11,15 @@ import {
 } from "@/components/ui/table";
 import { DollarSign, Users, BookOpenText } from "lucide-react";
 import { useMemo } from "react";
+import { useLanguage } from "@/context/language-context";
 
 function InstructorDashboard({ listOfCourses = [] }) {
   // محافظت در برابر undefined یا null
   const courses = Array.isArray(listOfCourses)
     ? listOfCourses
     : listOfCourses?.courses || [];
+  const { t, language } = useLanguage();
+  const isRTL = language === "fa";
 
   const stats = useMemo(() => {
     if (courses.length === 0) {
@@ -57,14 +60,14 @@ function InstructorDashboard({ listOfCourses = [] }) {
   const config = [
     {
       icon: Users,
-      label: "تعداد کل دانشجویان",
+      label: t("admin.totalStudents"),
       value: stats.totalStudents,
       color: "text-blue-600",
       bg: "bg-blue-50 dark:bg-blue-900/20",
     },
     {
       icon: DollarSign,
-      label: "درآمد کل",
+      label: t("admin.totalRevenue"),
       value: `$${stats.totalProfit.toFixed(2)}`,
       color: "text-green-600",
       bg: "bg-green-50 dark:bg-green-900/20",
@@ -99,7 +102,7 @@ function InstructorDashboard({ listOfCourses = [] }) {
         <CardHeader className="border-b border-border bg-muted/30">
           <CardTitle className="text-foreground flex items-center gap-3">
             <BookOpenText className="h-6 w-6" />
-            لیست دانشجویان ثبت‌نام کرده
+            {t("instructor.totalStudentsIn")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -139,10 +142,10 @@ function InstructorDashboard({ listOfCourses = [] }) {
                 <Users className="h-12 w-12 text-muted-foreground" />
               </div>
               <p className="text-xl font-medium text-foreground">
-                هنوز دانشجویی ثبت‌نام نکرده است
+                {t("instructor.noStudentsEnrolled")}
               </p>
-              <p className="text-muted-foreground mt-2">
-                وقتی دانشجویی در دوره‌های شما ثبت‌نام کند، اینجا نمایش داده می‌شود.
+              <p className="text-muted-foreground mt-2 ">
+                {t("instructor.studentsWillAppearHere")}
               </p>
             </div>
           )}

@@ -68,8 +68,7 @@ function StudentHomePage() {
     <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
 
       {/* 🔥 HERO / Banner */}
-      <section className="relative flex flex-col lg:flex-row items-center justify-between py-16 px-6 lg:px-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-b-[60px] overflow-hidden shadow-xl">
-        <div className="lg:w-1/2 z-10 space-y-6">
+<section className="relative flex flex-col lg:flex-row items-center justify-between py-16 px-6 lg:px-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white rounded-b-[60px] overflow-hidden shadow-xl">        <div className="lg:w-1/2 z-10 space-y-6">
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight drop-shadow-lg animate-fade-in">
             {t("home.heroTitle")}
           </h1>
@@ -77,13 +76,14 @@ function StudentHomePage() {
             {t("home.heroDescription")}
           </p>
 
-          <Button
-            size="lg"
-            className="mt-4 font-semibold bg-white text-indigo-600 hover:bg-gray-200 hover:scale-105 transform transition-all shadow-lg"
-            onClick={() => navigate("/courses")}
-          >
-            {t("home.exploreCoursesButton")}
-          </Button>
+   {/* دکمه اصلی هیرو */}
+<Button
+  size="lg"
+  className="mt-4 font-semibold bg-white text-blue-700 hover:bg-gray-100 hover:scale-105 transform transition-all shadow-lg"
+  onClick={() => navigate("/courses")}
+>
+  {t("home.exploreCoursesButton")}
+</Button>
         </div>
 
         <div className="lg:w-[500px] mt-10 lg:mt-0 z-10 flex justify-center">
@@ -109,7 +109,7 @@ function StudentHomePage() {
             {t("home.categoriesDescription")}
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categoryOptions.map((categoryItem) => (
             <Button
               key={categoryItem.id}
