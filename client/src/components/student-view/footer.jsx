@@ -25,7 +25,7 @@ function StudentViewCommonFooter() {
     {
       icon: "/social_15527900.png",
       label: "Instagram",
-      href: "https://instagram.com/cOOci.dev",
+      href: "https://instagram.com/cOOcidev",
       hoverColor: "hover:bg-gradient-to-tr hover:from-purple-600 hover:via-pink-500 hover:to-orange-400",
       invertOnHover: true // اینستاگرام گرادیان + آیکون سفید
     },
@@ -109,7 +109,7 @@ function StudentViewCommonFooter() {
             <ul className="mt-4 space-y-3">
               <li><a href="/courses" className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition">{t("coursesPage.title")}</a></li>
               <li><a href="/roadmap" className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition">{t("roadmap.title")}</a></li>
-              <li><a href="/instructors" className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition">{t("common.instructor")}s</a></li>
+              {/* <li><a href="/instructors" className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition">{t("common.instructor")}s</a></li> */}
             </ul>
           </div>
 
@@ -120,9 +120,9 @@ function StudentViewCommonFooter() {
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-400">
               <li><a href="/about" className="hover:text-blue-600 dark:hover:text-blue-400 transition">{isRTL ? "درباره ما" : "About Us"}</a></li>
-              <li><a href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400 transition">{isRTL ? "تماس با ما" : "Contact"}</a></li>
-              <li><a href="/blog" className="hover:text-blue-600 dark:hover:text-blue-400 transition">{isRTL ? "وبلاگ" : "Blog"}</a></li>
-              <li><a href="/careers" className="hover:text-blue-600 dark:hover:text-blue-400 transition">{isRTL ? "فرصت‌های شغلی" : "Careers"}</a></li>
+              {/* <li><a href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400 transition">{isRTL ? "تماس با ما" : "Contact"}</a></li> */}
+              {/* <li><a href="/blog" className="hover:text-blue-600 dark:hover:text-blue-400 transition">{isRTL ? "وبلاگ" : "Blog"}</a></li> */}
+              {/* <li><a href="/careers" className="hover:text-blue-600 dark:hover:text-blue-400 transition">{isRTL ? "فرصت‌های شغلی" : "Careers"}</a></li> */}
             </ul>
           </div>
 
@@ -132,8 +132,8 @@ function StudentViewCommonFooter() {
               {t("common.support") || (isRTL ? "پشتیبانی" : "Support")}
             </h3>
             <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li>Email: support@cOOcidev.ir</li>
-              <li>{isRTL ? "تلگرام" : "Telegram"}: @cOOciSupport</li>
+              {/* <li>Email: support@cOOcidev.ir</li> */}
+              {/* <li>{isRTL ? "تلگرام" : "Telegram"}: @cOOciSupport</li> */}
               <li>{isRTL ? "ساعات پاسخگویی" : "Response Time"}: 9AM - 9PM</li>
             </ul>
           </div>
@@ -143,7 +143,7 @@ function StudentViewCommonFooter() {
         <div className="mt-12 border-t border-gray-200 pt-8 dark:border-gray-800">
           <div className="flex flex-col items-center justify-between gap-4 text-center text-sm text-gray-600 dark:text-gray-400 md:flex-row">
             <p>
-              © {currentYear} cOOciDev Nedayar LMS. {isRTL ? "تمامی حقوق محفوظ است." : "All rights reserved."}
+              © {currentYear} cOOciDev Fajrane LMS. {isRTL ? "تمامی حقوق محفوظ است." : "All rights reserved."}
             </p>
           </div>
         </div>

@@ -229,7 +229,7 @@
     "titleAtoZ": "Title: A to Z"
   },
   "app": {
-    "name": "Nedayar"
+    "name": "Fajrane"
   },
 
   "coursesPage": {
@@ -249,6 +249,7 @@
     "enrolled": "Enrolled",
     "viewCourse": "View Course",
     "courseDetails": "Course Details",
+    "viewDetails": "Course Details",
     "courseContent": "Course Content",
     "lectures": "Lectures",
     "curriculum": "Curriculum",

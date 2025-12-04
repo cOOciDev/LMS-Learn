@@ -72,7 +72,7 @@ function StudentViewCommonHeader() {
               className="font-black text-xl tracking-tighter"
               style={{ color: "#002F60" }}
             >
-              Nedayar
+              Fajrane
             </span>
           </Link>
         </div>

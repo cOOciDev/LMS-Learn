@@ -404,7 +404,7 @@ function StudentViewCoursesPage() {
                         >
                           {bought?.isEnrolled
                             ? t("courses.continue")
-                            : t("courses.viewDetails")}
+                            : t("course.viewDetails")}
                         </Button>
                       </div>
                     </CardContent>
