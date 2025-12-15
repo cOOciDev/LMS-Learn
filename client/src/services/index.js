@@ -107,6 +107,14 @@ export async function startInstructorLiveClassService(planId) {
   return data;
 }
 
+export async function fetchInstructorLiveClassByIdService(planId) {
+  const { data } = await axiosInstance.get(
+    `/instructor/live-classes/${planId}`
+  );
+
+  return data;
+}
+
 export async function fetchStudentLiveClassPlansService(params = {}) {
   const query = new URLSearchParams(params).toString();
   const endpoint = query

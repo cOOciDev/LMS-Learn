@@ -7,6 +7,7 @@ import { AuthContext } from "./context/auth-context";
 import InstructorDashboardPage from "./pages/instructor";
 import InstructorCommonLayout from "./components/instructor-view/common-layout";
 import InstructorLiveClassesPage from "./pages/instructor/live-classes";
+import LiveClassHostPage from "./pages/instructor/live-class-host";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
 import StudentHomePage from "./pages/student/home";
 import NotFoundPage from "./pages/not-found";
@@ -63,6 +64,7 @@ function App() {
         <Route path="create-new-course" element={<AddNewCoursePage />} />
         <Route path="edit-course/:courseId" element={<AddNewCoursePage />} />
         <Route path="live-classes" element={<InstructorLiveClassesPage />} />
+        <Route path="live-classes/:id/host" element={<LiveClassHostPage />} />
       </Route>
 
       {/* Admin */}
