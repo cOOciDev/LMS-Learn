@@ -71,6 +71,56 @@ export async function updateCourseByIdService(id, formData) {
   return data;
 }
 
+export async function createLiveClassPlanService(payload) {
+  const { data } = await axiosInstance.post(
+    "/instructor/live-class-plans",
+    payload
+  );
+
+  return data;
+}
+
+export async function fetchInstructorLiveClassPlansService() {
+  const { data } = await axiosInstance.get("/instructor/live-class-plans");
+  return data;
+}
+
+export async function publishLiveClassPlanService(planId) {
+  const { data } = await axiosInstance.patch(
+    `/instructor/live-class-plans/${planId}/publish`
+  );
+  return data;
+}
+
+export async function archiveLiveClassPlanService(planId) {
+  const { data } = await axiosInstance.delete(
+    `/instructor/live-class-plans/${planId}`
+  );
+  return data;
+}
+
+export async function startInstructorLiveClassService(planId) {
+  const { data } = await axiosInstance.post(
+    `/instructor/live-classes/${planId}/start`
+  );
+
+  return data;
+}
+
+export async function fetchStudentLiveClassPlansService(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const endpoint = query
+    ? `/student/live-class-plans?${query}`
+    : "/student/live-class-plans";
+  const { data } = await axiosInstance.get(endpoint);
+  return data;
+}
+
+export async function fetchStudentLiveClassPlanByIdService(planId) {
+  const { data } = await axiosInstance.get(`/student/live-class-plans/${planId}`);
+  return data;
+}
+
 export async function mediaBulkUploadService(formData, onProgressCallback) {
   const { data } = await axiosInstance.post("/media/bulk-upload", formData, {
     onUploadProgress: (progressEvent) => {
