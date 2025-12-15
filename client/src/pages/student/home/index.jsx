@@ -5,16 +5,22 @@ import { StudentContext } from "@/context/student-context";
 import {
   checkCoursePurchaseInfoService,
   fetchStudentViewCourseListService,
+  fetchStudentLiveClassPlansService,
 } from "@/services";
 import { AuthContext } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/language-context";
 import { useCategories } from "@/context/category-context";
 import { buildCategoryOptions } from "@/utils/category";
+import { Radio } from "lucide-react";
 
 function StudentHomePage() {
-  const { studentViewCoursesList, setStudentViewCoursesList } =
-    useContext(StudentContext);
+  const {
+    studentViewCoursesList,
+    setStudentViewCoursesList,
+    studentLiveClassPlans,
+    setStudentLiveClassPlans,
+  } = useContext(StudentContext);
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -44,6 +50,17 @@ function StudentHomePage() {
     }
   }
 
+  async function fetchLiveClassPlans() {
+    try {
+      const response = await fetchStudentLiveClassPlansService({ limit: 6 });
+      if (response?.success) {
+        setStudentLiveClassPlans(response.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching live class plans:", error);
+    }
+  }
+
   async function handleCourseNavigate(getCurrentCourseId) {
     try {
       const response = await checkCoursePurchaseInfoService(
@@ -60,9 +77,34 @@ function StudentHomePage() {
     }
   }
 
+  function handleLivePlanNavigate(plan) {
+    if (plan.courseId) {
+      navigate(`/course/details/${plan.courseId}`);
+    } else {
+      navigate(`/live-plan/${plan._id}`);
+    }
+  }
+
   useEffect(() => {
     fetchAllStudentViewCourses();
+    fetchLiveClassPlans();
   }, []);
+
+  const livePlansPreview = studentLiveClassPlans.slice(0, 4);
+  const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const formatDate = (value) => {
+    try {
+      return new Date(value).toLocaleDateString();
+    } catch {
+      return value;
+    }
+  };
+
+  const formatWeekdays = (values = []) => {
+    if (!values.length) return "Flexible schedule";
+    return values.map((day) => weekdayShort[day] || day).join(", ");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -124,6 +166,67 @@ function StudentHomePage() {
       </section>
 
       {/* 📌 دوره‌های ویژه */}
+      {livePlansPreview.length > 0 && (
+        <section className="py-16 px-6 lg:px-16 bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 text-white">
+          <div className="flex flex-col gap-4 text-center mb-10">
+            <div className="mx-auto flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm uppercase tracking-wide">
+              <Radio className="h-4 w-4" />
+              Live Online
+            </div>
+            <h2 className="text-3xl font-bold">Live &amp; Time-Bound Classes</h2>
+            <p className="text-white/70 max-w-2xl mx-auto">
+              Join immersive live cohorts with instructors in real time. Limited seats,
+              curated schedules, and attendance tracking keep you engaged.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {livePlansPreview.map((plan) => (
+              <div
+                key={plan._id}
+                className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-rose-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
+                    Live
+                  </span>
+                  <span className="text-xs text-white/70">
+                    {formatDate(plan.startDate)} ↦ {formatDate(plan.endDate)}
+                  </span>
+                </div>
+
+                <h3 className="mt-4 text-xl font-semibold">{plan.title}</h3>
+                <p className="mt-1 text-sm text-white/70">
+                  {plan.courseId ? "Linked course" : "Standalone live program"}
+                </p>
+
+                <div className="mt-4 space-y-1 text-sm text-white/80">
+                  <p>
+                    <span className="font-semibold">Schedule:</span>{" "}
+                    {plan.dailyStartTime} – {plan.dailyEndTime} ({plan.timezone})
+                  </p>
+                  <p className="text-xs text-white/60">
+                    Weekdays: {formatWeekdays(plan.weekdays)}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Attendance:</span>{" "}
+                    {plan.minAttendanceMinutes} min required
+                  </p>
+                </div>
+
+                <Button
+                  variant="secondary"
+                  className="mt-6 w-full bg-white text-purple-900 hover:bg-white/90"
+                  onClick={() => handleLivePlanNavigate(plan)}
+                >
+                  {plan.courseId ? "View course details" : "See live plan"}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="py-16 px-6 lg:px-16 bg-gray-50 transition-colors dark:bg-slate-950">
         <div className="mb-10 text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-3">

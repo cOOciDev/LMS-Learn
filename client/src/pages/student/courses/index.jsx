@@ -18,8 +18,9 @@ import { StudentContext } from "@/context/student-context";
 import {
   checkCoursePurchaseInfoService,
   fetchStudentViewCourseListService,
+  fetchStudentLiveClassPlansService,
 } from "@/services";
-import { ArrowUpDown, Search, Clock, Users, PlayCircle } from "lucide-react";
+import { ArrowUpDown, Search, Clock, Users, PlayCircle, Radio } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCategories } from "@/context/category-context";
@@ -40,6 +41,8 @@ function StudentViewCoursesPage() {
     setStudentViewCoursesList,
     loadingState,
     setLoadingState,
+    studentLiveClassPlans,
+    setStudentLiveClassPlans,
   } = useContext(StudentContext);
   const [resultsTotal, setResultsTotal] = useState(0);
   const [purchasedCourses, setPurchasedCourses] = useState({});
@@ -164,6 +167,25 @@ function StudentViewCoursesPage() {
 
   const totalPages = Math.ceil(resultsTotal / ITEMS_PER_PAGE);
 
+  const weekdayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const fetchLivePlans = async () => {
+    if (studentLiveClassPlans.length) return;
+    try {
+      const response = await fetchStudentLiveClassPlansService({ limit: 6 });
+      if (response?.success) {
+        setStudentLiveClassPlans(response.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to load live plans:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLivePlans();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const getDuration = (curriculum) => {
     if (!curriculum || curriculum.length === 0) {
       return language === "fa" ? "۰ دقیقه" : "0 min";
@@ -192,11 +214,96 @@ function StudentViewCoursesPage() {
     }
   };
 
+  const goToLivePlan = (plan) => {
+    if (plan.courseId) {
+      navigate(`/course/details/${plan.courseId}`);
+    } else {
+      navigate(`/live-plan/${plan._id}`);
+    }
+  };
+
+  const livePlansHighlight = studentLiveClassPlans.slice(0, 3);
+
+  const formatPlanDates = (plan) => {
+    try {
+      const start = new Date(plan.startDate).toLocaleDateString();
+      const end = new Date(plan.endDate).toLocaleDateString();
+      return `${start} → ${end}`;
+    } catch {
+      return `${plan.startDate} → ${plan.endDate}`;
+    }
+  };
+
+  const formatPlanWeekdays = (plan) => {
+    if (!plan.weekdays?.length) return "Flexible schedule";
+    return plan.weekdays.map((day) => weekdayShort[day] || day).join(", ");
+  };
+
   return (
     <div className="container mx-auto p-4 py-8 max-w-7xl">
       <h1 className="text-4xl font-bold mb-8 text-center lg:text-start">
         {t("coursesPage.title")}
       </h1>
+
+      {livePlansHighlight.length > 0 && (
+        <div className="mb-10 rounded-3xl border border-purple-200 bg-gradient-to-r from-purple-50 via-white to-indigo-50 p-6 dark:border-purple-500/40 dark:from-purple-900/40 dark:via-slate-900 dark:to-indigo-900/40">
+          <div className="flex flex-col gap-3 mb-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-purple-600/10 px-4 py-1 text-sm font-medium text-purple-700 dark:text-purple-200">
+              <Radio className="h-4 w-4" />
+              {t("courses.liveBadge") || "Live Cohorts"}
+            </div>
+            <h2 className="text-2xl font-semibold">
+              Premium Live Programs — limited seats
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-2xl">
+              Experience real-time instruction, daily schedules, and attendance-based
+              accountability.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {livePlansHighlight.map((plan) => (
+              <div
+                key={plan._id}
+                className="rounded-2xl border border-purple-200 bg-white/80 p-4 shadow-lg dark:border-purple-500/30 dark:bg-slate-900"
+              >
+                <div className="flex items-center justify-between text-xs font-semibold text-purple-700 dark:text-purple-300">
+                  <span>LIVE</span>
+                  <span>{formatPlanDates(plan)}</span>
+                </div>
+                <h3 className="mt-3 text-lg font-semibold text-gray-900 dark:text-white">
+                  {plan.title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {plan.courseId ? "Linked course" : "Standalone session"}
+                </p>
+                <dl className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex justify-between">
+                    <dt>Time</dt>
+                    <dd>
+                      {plan.dailyStartTime} – {plan.dailyEndTime}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt>Timezone</dt>
+                    <dd>{plan.timezone}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt>Days</dt>
+                    <dd>{formatPlanWeekdays(plan)}</dd>
+                  </div>
+                </dl>
+                <Button
+                  size="sm"
+                  className="mt-4 w-full bg-purple-600 text-white hover:bg-purple-700"
+                  onClick={() => goToLivePlan(plan)}
+                >
+                  {plan.courseId ? "View course" : "Explore live plan"}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-4 gap-8">
         {/* فیلترها */}
