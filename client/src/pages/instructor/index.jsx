@@ -1,10 +1,11 @@
 import InstructorCourses from "@/components/instructor-view/courses";
 import InstructorDashboard from "@/components/instructor-view/dashboard";
+import LiveClassesManager from "@/components/instructor-view/live-classes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InstructorContext } from "@/context/instructor-context";
 import { useLanguage } from "@/context/language-context";
 import { fetchInstructorCourseListService } from "@/services";
-import { BarChart, Book } from "lucide-react";
+import { BarChart, Book, Video } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
 
@@ -62,6 +63,12 @@ function InstructorDashboardpage() {
       label: t("common.courses"),
       value: "courses",
       component: <InstructorCourses listOfCourses={instructorCoursesList} />,
+    },
+    {
+      icon: Video,
+      label: "Live Classes",
+      value: "live-classes",
+      component: <LiveClassesManager compact />,
     },
   ];
 
