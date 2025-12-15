@@ -6,6 +6,7 @@ import { useContext } from "react";
 import { AuthContext } from "./context/auth-context";
 import InstructorDashboardPage from "./pages/instructor";
 import InstructorCommonLayout from "./components/instructor-view/common-layout";
+import InstructorLiveClassesPage from "./pages/instructor/live-classes";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
 import StudentHomePage from "./pages/student/home";
 import NotFoundPage from "./pages/not-found";
@@ -16,6 +17,7 @@ import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import RoadmapPage from "./pages/student/roadmap";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
+import LivePlanDetailsPage from "./pages/student/live-plan-details";
 import AdminRegisterUserPage from "./pages/admin/register-user";
 import AdminCommonLayout from "./components/admin-view/common-layout";
 import AdminDashboard from "./pages/admin/dashboard";
@@ -60,6 +62,7 @@ function App() {
         <Route index element={<InstructorDashboardPage />} />
         <Route path="create-new-course" element={<AddNewCoursePage />} />
         <Route path="edit-course/:courseId" element={<AddNewCoursePage />} />
+        <Route path="live-classes" element={<InstructorLiveClassesPage />} />
       </Route>
 
       {/* Admin */}
@@ -105,6 +108,7 @@ function App() {
         <Route path="payment-return" element={<PaypalPaymentReturnPage />} />
         <Route path="student-courses" element={<StudentCoursesPage />} />
         <Route path="course-progress/:id" element={<StudentViewCourseProgressPage />} />
+        <Route path="live-plan/:planId" element={<LivePlanDetailsPage />} />
         <Route path="about" element={<AboutPage />} /> {/* ⬅️ Added */}
       </Route>
 

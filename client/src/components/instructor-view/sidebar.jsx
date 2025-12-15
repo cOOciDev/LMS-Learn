@@ -1,4 +1,4 @@
-import { BarChart, Book, LogOut } from "lucide-react";
+import { BarChart, Book, LogOut, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -23,6 +23,8 @@ function InstructorSidebar() {
       location.pathname.includes("/instructor/edit-course")
     ) {
       setActiveTab("");
+    } else if (location.pathname.startsWith("/instructor/live-classes")) {
+      setActiveTab("live-plans");
     } else if (location.pathname === "/instructor") {
       setActiveTab("dashboard");
     }
@@ -64,6 +66,12 @@ function InstructorSidebar() {
       label: t("common.courses"),
       value: "courses",
     },
+    {
+      icon: Video,
+      label: "Live Plans",
+      value: "live-plans",
+      routePath: "/instructor/live-classes",
+    },
   ];
 
   function handleLogout() {
@@ -73,6 +81,12 @@ function InstructorSidebar() {
   }
 
   function handleMenuClick(item) {
+    if (item.routePath) {
+      navigate(item.routePath);
+      setActiveTab(item.value);
+      return;
+    }
+
     if (location.pathname === "/instructor") {
       // If already on instructor page, update URL with tab
       navigate(`/instructor?tab=${item.value}`);
