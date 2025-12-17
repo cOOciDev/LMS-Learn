@@ -66,7 +66,7 @@ function InstructorDashboardpage() {
     },
     {
       icon: Video,
-      label: "Live Classes",
+      label: t("instructor.liveClasses"),
       value: "live-classes",
       component: <LiveClassesManager compact />,
     },
