@@ -63,9 +63,11 @@ const registerUser = asyncHandler(async (req, res) => {
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
   const { userEmail, password } = req.body;
-
+  // console.log('Login attempt:', { userEmail, password });
+  // console.log('Password type:', typeof password);
   // Check if user exists and get password
   const user = await User.findOne({ userEmail }).select("+password");
+  // console.log(user);
 
   if (!user) {
     return res.status(401).json({
@@ -82,8 +84,13 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   }
 
+  // console.log('Password entered:', password);
+  // console.log('Stored hash:', user.password);
+
   // Verify password
   const isPasswordValid = await user.comparePassword(password);
+  // console.log("is password Valid :", isPasswordValid);
+  
 
   if (!isPasswordValid) {
     return res.status(401).json({
@@ -91,6 +98,11 @@ const loginUser = asyncHandler(async (req, res) => {
       message: "Invalid credentials",
     });
   }
+
+  
+  // console.log('Password entered:', password);
+  // console.log('Stored hash:', user.password);
+  
 
   // Generate tokens
   const accessToken = generateToken(user._id);
