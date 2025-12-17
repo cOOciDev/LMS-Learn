@@ -68,7 +68,7 @@ function InstructorSidebar() {
     },
     {
       icon: Video,
-      label: "Live Plans",
+      label: t("instructor.liveClasses"),
       value: "live-plans",
       routePath: "/instructor/live-classes",
     },
