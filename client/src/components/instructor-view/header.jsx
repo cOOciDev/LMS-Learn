@@ -33,7 +33,7 @@ function InstructorHeader() {
           <div className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full animate-pulse" />
         </div>
         <span className="font-extrabold text-2xl tracking-tight text-foreground">
-          {t("app.name") || "ندایار"}
+          {t("app.name") || "فجرانه"}
         </span>
       </Link>
 
