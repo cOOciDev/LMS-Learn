@@ -74,6 +74,20 @@ function AboutPage() {
                 Github: cOOciDev
               </a>
             </div>
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+              <h3 className="text-xl font-bold mb-2">{t("about.JAName")}</h3>
+              <p className="text-gray-600 dark:text-slate-300 mb-4">
+                {t("about.JARole")}
+              </p>
+              <a
+                href="/tickets"
+                className="text-blue-600 dark:text-blue-400 underline"
+                // target="_blank"
+              >
+                {t("about.contactAdminCTA")}
+              </a>
+            </div>
+
           </div>
         </div>
 
