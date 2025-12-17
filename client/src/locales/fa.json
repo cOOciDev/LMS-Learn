@@ -44,6 +44,7 @@
     "actions": "اقدامات",
     "view": "مشاهده",
     "support": "پشتیبانی",
+    "tickets": "تیکت‌ها",
     "currency": "تومان",
     "free": "رایگان",
     "new": "جدید",
@@ -143,6 +144,7 @@
     "announcementPlaceholder": "اعلان اختیاری برای نمایش به کاربران",
     "settings": "تنظیمات",
     "roadmapManagement": "مدیریت مسیر یادگیری",
+    "helpCenter": "مرکز پشتیبانی",
     "roadmapManagementDescription": "مسیرهای یادگیری دسته‌بندی‌شده بسازید و هر مرحله را به یک دوره متصل کنید.",
     "createRoadmap": "ایجاد مسیر یادگیری",
     "roadmapTitle": "عنوان مسیر",
@@ -150,7 +152,7 @@
     "selectCategory": "انتخاب دسته‌بندی",
     "roadmapSteps": "مراحل",
     "addStep": "افزودن مرحله",
-    "stepLabel": "مرحله {number}",
+    "stepLabel": "مرحله {{number}}",
     "removeStep": "حذف",
     "stepTitlePlaceholder": "عنوان مرحله",
     "stepDescriptionPlaceholder": "توضیح تمرکز این مرحله",
@@ -197,7 +199,106 @@
     "noStudentsEnrolled": "هنوز دانشجویی ثبت‌نام نکرده است",
     "studentsWillAppearHere": "وقتی دانشجویی در دوره‌های شما ثبت‌نام کند، اینجا نمایش داده می‌شود",
     "addNewCourseDesc":"ایجاد دوره جدید",
-    "informations":"اطلاعات"
+    "informations":"اطلاعات",
+    "liveClasses":"کلاس زنده"
+  },
+
+  "createLiveEventCard": {
+    "title": "ایجاد رویداد درس زنده",
+    "description": "یک درس زنده یک‌بار برگزار کنید، دانشجویان منتخب را دعوت کنید و ارائه‌های تعاملی را همگام‌سازی کنید.",
+    "button": "ایجاد رویداد زنده"
+  },
+
+  "weekDays":{
+    "Mon": "2 شنبه ",
+    "Tue": "3 شنبه ",
+    "Wed": "4 شنبه ",
+    "Thu": "5 شنبه ",
+    "Fri": "جمعه ",
+    "Sat": "شنبه ",
+    "Sun": "1 شنبه "
+  },
+
+  "createLivePlan": {
+    "header": {
+      "title": "ایجاد برنامه زنده",
+      "description": "یک برنامه کلاس زنده دوره‌ای مرتبط با یکی از دوره‌های شما تعریف کنید."
+    },
+    "description": "کلاس‌های زنده دوره‌ای را مدیریت کنید، برنامه‌ها را منتشر کنید و قوانین حضور و غیاب را دنبال کنید.",
+    "tabs": {
+      "manage": "مدیریت برنامه‌ها",
+      "create": "ایجاد برنامه"
+    },
+    "form": {
+      "title": "عنوان برنامه",
+      "titlePlaceholder": "مثال: دوره زنده الگوریتم‌های پیشرفته",
+      "course": "دوره مرتبط (اختیاری)",
+      "courseDescription": "به یک دوره موجود لینک دهید یا خالی بگذارید تا یک برنامه زنده مستقل ایجاد شود.",
+      "timezone": "منطقه زمانی",
+      "startDate": "تاریخ شروع",
+      "endDate": "تاریخ پایان",
+      "weekdays": "روزهای هفته",
+      "dailyStartTime": "زمان شروع روزانه",
+      "dailyEndTime": "زمان پایان روزانه",
+      "minAttendance": "حداقل حضور (دقیقه)",
+      "minAttendancePlaceholder": "مثال: 45"
+    },
+    "buttons": {
+      "saveDraft": "ذخیره به عنوان پیش‌نویس",
+      "savingDraft": "در حال ذخیره...",
+      "publishPlan": "انتشار برنامه",
+      "publishingPlan": "در حال انتشار..."
+    },
+    "errors": {
+      "titleRequired": "عنوان برنامه الزامی است",
+      "startDateRequired": "تاریخ شروع الزامی است",
+      "endDateRequired": "تاریخ پایان الزامی است",
+      "endDateAfterStart": "تاریخ پایان باید بعد از تاریخ شروع باشد",
+      "weekdaysRequired": "حداقل یک روز هفته را انتخاب کنید",
+      "startTimeRequired": "زمان شروع الزامی است",
+      "endTimeRequired": "زمان پایان الزامی است",
+      "endTimeAfterStart": "زمان پایان باید بعد از زمان شروع باشد",
+      "minAttendanceRequired": "حداقل حضور الزامی است"
+    }
+  },
+
+  "liveClassesManager": {
+    "header": {
+      "title": "کلاس‌های زنده",
+      "description": "برنامه‌های زنده تکرارشونده، قوانین حضور و جلسات را مدیریت کنید."
+    },
+    "buttons": {
+      "refresh": "بارگذاری مجدد",
+      "newLivePlan": "برنامه زنده جدید",
+      "publish": "انتشار",
+      "archive": "آرشیو",
+      "startClass": "شروع کلاس",
+      "viewAll": "مشاهده همه کلاس‌ها →"
+    },
+    "tabs": {
+      "all": "همه",
+      "draft": "پیش‌نویس",
+      "published": "منتشر شده",
+      "archived": "آرشیو شده"
+    },
+    "plan": {
+      "course": "دوره",
+      "standalone": "برنامه زنده مستقل",
+      "courseUnavailable": "دوره مرتبط در دسترس نیست",
+      "timezone": "منطقه زمانی",
+      "weekdays": "روزهای هفته",
+      "attendance": "حداقل زمان حضور لازم"
+    },
+    "emptyState": {
+      "title": "هنوز کلاس زنده‌ای وجود ندارد",
+      "description": "اولین برنامه زنده خود را ایجاد کنید تا جلسات به‌صورت خودکار زمان‌بندی شوند و دانش‌آموزان مطلع شوند."
+    },
+    "statusBadge": {
+      "draft": "پیش‌نویس",
+      "published": "منتشر شده",
+      "archived": "آرشیو شده"
+    },
+    "starting": "در حال شروع..."
   },
 
   "student": {
@@ -238,7 +339,7 @@
     "noCoursesFound": "دوره‌ای یافت نشد"
   },
   "app":{
-    "name" : "ندایار"
+    "name" : "فجرانه"
   },
 
   "course": {
@@ -335,7 +436,7 @@
   "roadmapCategory": {
     "notFound": "هیچ مسیر یادگیری برای این دسته‌بندی تعریف نشده است.",
     "subtitle": "هر مرحله را کامل کنید تا مرحله بعدی باز شود.",
-    "stepLabel": "مرحله {number}",
+    "stepLabel": "مرحله {{number}}",
     "completed": "تکمیل شده",
     "inProgress": "در حال انجام",
     "locked": "قفل شده",
@@ -401,26 +502,99 @@
   },
 "about": {
   "title": "درباره ما",
-  "heroDescription": "هدف ما ایجاد دسترسی آسان و رایگان به آموزش‌های باکیفیت برای سربازان و همچنین ارائه دوره‌های حرفه‌ای برای عموم جامعه است.",
+  "heroDescription": "هدف ما ایجاد دسترسی آسان و رایگان به آموزش‌های باکیفیت برای علاقه مندان و همچنین ارائه دوره‌های حرفه‌ای برای عموم جامعه است.",
   
   "missionTitle": "ماموریت ما",
-  "missionText1": "این سامانه با هدف ارتقای سطح دانش و مهارت سربازان نیروی دریایی و همچنین ارائه آموزش‌های تخصصی به عموم طراحی شده است.",
-  "missionFree": "• دوره‌های رایگان برای سربازان",
+  "missionText1": "این سامانه با هدف ارتقای سطح دانش و مهارت علاقه مندان و همچنین ارائه آموزش‌های تخصصی به عموم طراحی شده است.",
+  "missionFree": "• دوره‌های رایگان برای علاقه مندان",
   "missionPaid": "• دوره‌های حرفه‌ای برای عموم",
   "missionText2": "ما تلاش می‌کنیم یادگیری را ساده، جذاب و در دسترس نگه داریم.",
 
   "teamTitle": "تیم سازنده",
   "parsaName": "پارسا محمدی‌فر",
-  "parsaRole": "توسعه‌دهنده فول‌استک و همکار در توسعه پلتفرم",
+  "parsaRole": "توسعه‌دهنده فول‌استک و  توسعه دهنده پلتفرم",
 
   "mehdiName": "مهدی ابراهیمی",
-  "mehdiRole": "توسعه‌دهنده فول‌استک و همکار در توسعه پلتفرم",
+  "mehdiRole": "توسعه‌دهنده فول‌استک و طراح و توسعه دهنده پلتفرم",
+
+  "JAName": "مسعود عبدالهی",
+  "JARole": "پشتیبان و ادمین پلتفرم",
+  
+  "contactAdminCTA":"ارسال پیام",
 
 "funLine1": "اگر مشکلی دیدید،",
-"funNames": "کاری از candy و COOci",
+"funNames": "کاری از candy و cOOci",
 "funLine2": "هست، تمام شد!"
 
+},
+"tickets": {
+  "myTickets": "تیکت‌های من",
+  "description": "مدیریت تیکت‌های پشتیبانی",
+  "createNew": "ایجاد تیکت جدید",
+  "create": "ایجاد تیکت",
+  "subject": "موضوع",
+  "subjectPlaceholder": "موضوع تیکت را وارد کنید",
+  "message": "پیام",
+  "messagePlaceholder": "مشکل خود را شرح دهید...",
+  "reply": "پاسخ",
+  "replyPlaceholder": "پیام خود را بنویسید...",
+  "send": "ارسال پیام",
+  "view": "مشاهده",
+  "close": "بستن تیکت",
+  "confirmClose": "آیا از بستن این تیکت مطمئن هستید؟",
+  "all": "همه",
+  "statusOpen": "باز",
+  "statusInProgress": "در حال بررسی",
+  "statusResolved": "حل شده",
+  "statusClosed": "بسته",
+  "createdAt": "تاریخ ایجاد",
+  "lastMessage": "آخرین پیام",
+  "noTickets": "تیکتی یافت نشد",
+  "createdSuccess": "تیکت با موفقیت ایجاد شد",
+  "closedSuccess": "تیکت با موفقیت بسته شد",
+  "messageSent": "پیام با موفقیت ارسال شد",
+  "errorLoading": "خطا در بارگذاری تیکت‌ها",
+  "errorCreating": "خطا در ایجاد تیکت",
+  "errorSending": "خطا در ارسال پیام",
+  "errorClosing": "خطا در بستن تیکت",
+  "fillAllFields": "لطفاً تمام فیلدها را تکمیل کنید"
+},
+"helpCenter": {
+  "title": "مرکز پشتیبانی",
+  "description": "مدیریت و پاسخ به تیکت‌های پشتیبانی کاربران",
+  "tickets": "تیکت‌ها",
+  "totalTickets": "کل تیکت‌ها",
+  "open": "باز",
+  "inProgress": "در حال بررسی",
+  "urgent": "فوری",
+  "filterByStatus": "فیلتر بر اساس وضعیت",
+  "filterByPriority": "فیلتر بر اساس اولویت",
+  "all": "همه",
+  "statusOpen": "باز",
+  "statusInProgress": "در حال بررسی",
+  "statusResolved": "حل شده",
+  "statusClosed": "بسته",
+  "priorityLow": "کم",
+  "priorityMedium": "متوسط",
+  "priorityHigh": "زیاد",
+  "priorityUrgent": "فوری",
+  "noTickets": "تیکتی یافت نشد",
+  "selectTicket": "یک تیکت را برای مشاهده جزئیات انتخاب کنید",
+  "user": "کاربر",
+  "createdAt": "تاریخ ایجاد",
+  "reply": "پاسخ",
+  "replyPlaceholder": "پاسخ خود را بنویسید...",
+  "sendReply": "ارسال پاسخ",
+  "updateStatus": "به‌روزرسانی وضعیت",
+  "updatePriority": "به‌روزرسانی اولویت",
+  "assignToMe": "اختصاص به من",
+  "replySent": "پاسخ با موفقیت ارسال شد",
+  "statusUpdated": "وضعیت با موفقیت به‌روزرسانی شد",
+  "assigned": "تیکت با موفقیت اختصاص داده شد",
+  "errorLoading": "خطا در بارگذاری تیکت‌ها",
+  "errorSending": "خطا در ارسال پاسخ",
+  "errorUpdating": "خطا در به‌روزرسانی وضعیت",
+  "errorAssigning": "خطا در اختصاص تیکت"
 }
-
 
 }

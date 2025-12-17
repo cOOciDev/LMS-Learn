@@ -30,8 +30,10 @@ import AdminSettingsPage from "./pages/admin/settings";
 import AdminInstructorManagement from "./pages/admin/instructors";
 import AdminCategoryManagement from "./pages/admin/categories";
 import AdminRoadmapsPage from "./pages/admin/roadmaps";
+import AdminHelpCenterPage from "./pages/admin/help-center";
 import StudentCategoryRoadmapPage from "./pages/student/roadmap-category";
-import AboutPage from "./pages/student/about"; // ⬅️ Added
+import AboutPage from "./pages/student/about";
+import StudentTicketsPage from "./pages/student/tickets";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -87,6 +89,7 @@ function App() {
         <Route path="roadmaps" element={<AdminRoadmapsPage />} />
         <Route path="financial" element={<AdminFinancialReportsPage />} />
         <Route path="messages" element={<AdminMessagesPage />} />
+        <Route path="help-center" element={<AdminHelpCenterPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
 
@@ -111,7 +114,8 @@ function App() {
         <Route path="student-courses" element={<StudentCoursesPage />} />
         <Route path="course-progress/:id" element={<StudentViewCourseProgressPage />} />
         <Route path="live-plan/:planId" element={<LivePlanDetailsPage />} />
-        <Route path="about" element={<AboutPage />} /> {/* ⬅️ Added */}
+        <Route path="about" element={<AboutPage />} />
+        <Route path="tickets" element={<StudentTicketsPage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

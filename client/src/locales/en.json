@@ -44,6 +44,7 @@
     "actions": "Actions",
     "view": "View",
     "support": "Support",
+    "tickets": "Tickets",
     "currency": "Toman",
     "free": "Free",
     "new": "New",
@@ -141,6 +142,7 @@
     "announcementPlaceholder": "Optional announcement to show users.",
     "settings": "Settings",
     "roadmapManagement": "Roadmap Management",
+    "helpCenter": "Help Center",
     "roadmapManagementDescription": "Design category-based learning journeys and connect each milestone to a course.",
     "createRoadmap": "Create Roadmap",
     "roadmapTitle": "Roadmap Title",
@@ -195,7 +197,108 @@
     "noStudentsEnrolled": "No students have enrolled yet",
     "studentsWillAppearHere": "When a student enrolls in your courses, they will appear here",
     "addNewCourseDesc": "Add new course",
-    "informations": "informations"
+    "informations": "informations",
+    "liveClasses":"Live Classes"
+
+  },
+  
+    "liveClassesManager": {
+      "header": {
+        "title": "Live Classes",
+        "description": "Manage recurring live schedules, attendance rules, and session plans."
+      },
+      "buttons": {
+        "refresh": "Refresh",
+        "newLivePlan": "New Live Plan",
+        "publish": "Publish",
+        "archive": "Archive",
+        "startClass": "Start Class",
+        "viewAll": "View all live classes →"
+      },
+      "tabs": {
+        "all": "All",
+        "draft": "Draft",
+        "published": "Published",
+        "archived": "Archived"
+      },
+      "plan": {
+        "course": "Course",
+        "standalone": "Standalone live plan",
+        "courseUnavailable": "Linked course unavailable",
+        "timezone": "Timezone",
+        "weekdays": "Weekdays",
+        "attendance": "Attendance requirement"
+      },
+      "emptyState": {
+        "title": "No live classes yet",
+        "description": "Create your first live plan to automatically schedule sessions and notify students."
+      },
+      "statusBadge": {
+        "draft": "Draft",
+        "published": "Published",
+        "archived": "Archived"
+      },
+      "starting": "Starting..."
+    },  
+
+    "createLiveEventCard": {
+      "title": "Create a live lesson event",
+      "description": "Schedule a one-off live lesson, invite selected students, and sync interactive presentations.",
+      "button": "Create Live Event"
+    },
+
+    "weekDays":{
+    "Mon": "Monday",
+    "Tue": "Tuesday",
+    "Wed": "Wednesday",
+    "Thu": "Thusday",
+    "Fri": "Friday",
+    "Sat": "Saturday",
+    "Sun": "Sunday"
+  },
+
+
+    "createLivePlan": {
+    "header": {
+      "title": "Create Live Plan",
+      "description": "Define a recurring live class schedule linked to one of your courses."
+    },
+    "description": "Organize recurring live classes, publish plans, and track attendance requirements.",
+    "tabs": {
+      "manage": "Manage Plans",
+      "create": "Create Plan"
+    },
+    "form": {
+      "title": "Plan title",
+      "titlePlaceholder": "e.g., Advanced Algorithms Live Cohort",
+      "course": "Linked course (optional)",
+      "courseDescription": "Link to an existing course or leave empty to create a standalone live plan.",
+      "timezone": "Timezone",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "weekdays": "Weekdays",
+      "dailyStartTime": "Daily start time",
+      "dailyEndTime": "Daily end time",
+      "minAttendance": "Minimum attendance (minutes)",
+      "minAttendancePlaceholder": "e.g., 45"
+    },
+    "buttons": {
+      "saveDraft": "Save as Draft",
+      "savingDraft": "Saving...",
+      "publishPlan": "Publish Plan",
+      "publishingPlan": "Publishing..."
+    },
+    "errors": {
+      "titleRequired": "Plan title is required",
+      "startDateRequired": "Start date is required",
+      "endDateRequired": "End date is required",
+      "endDateAfterStart": "End date must be after start date",
+      "weekdaysRequired": "Select at least one weekday",
+      "startTimeRequired": "Start time is required",
+      "endTimeRequired": "End time is required",
+      "endTimeAfterStart": "End time must be after start time",
+      "minAttendanceRequired": "Minimum attendance is required"
+    }
   },
 
   "student": {
@@ -399,24 +502,97 @@
   },
  "about": {
   "title": "About Us",
-  "heroDescription": "Our mission is to provide easy and free access to high-quality education for soldiers, as well as advanced professional courses for the public.",
+  "heroDescription": "Our mission is to provide easy and free access to high-quality education for Enthusiasts, as well as advanced professional courses for the public.",
   
   "missionTitle": "Our Mission",
-  "missionText1": "This platform is designed to improve the knowledge and skills of Navy soldiers while also offering specialized courses for everyone.",
-  "missionFree": "• Free courses for soldiers",
+  "missionText1": "This platform is designed to improve the knowledge and skills of Navy Enthusiasts while also offering specialized courses for everyone.",
+  "missionFree": "• Free courses for Enthusiasts",
   "missionPaid": "• Professional courses for the public",
   "missionText2": "We aim to keep learning simple, enjoyable, and accessible for all.",
 
   "teamTitle": "The Team",
   "parsaName": "Parsa Mohammadi-Far",
-  "parsaRole": "Full-stack developer and platform designer",
+  "parsaRole": "Full-stack developer and platform collaborator",
 
   "mehdiName": "Mahdi Ebrahimi",
-  "mehdiRole": "Full-stack developer and platform collaborator",
+  "mehdiRole": "Full-stack developer and platform designer ",
+
+  "JAName": "Massoud Abdollahi",
+  "JARole": "Support and platform admin",
+  "contactAdminCTA":"Send Message",
 
   "funLine1": "If you find a bug, don't worry!",
-  "funNames": "A job by candy and COOci",
+  "funNames": "A job by candy and cOOci",
   "funLine2": "It's probably one of them who messed up 😄"
+},
+"tickets": {
+  "myTickets": "My Tickets",
+  "description": "Manage your support tickets",
+  "createNew": "Create New Ticket",
+  "create": "Create Ticket",
+  "subject": "Subject",
+  "subjectPlaceholder": "Enter ticket subject",
+  "message": "Message",
+  "messagePlaceholder": "Describe your issue...",
+  "reply": "Reply",
+  "replyPlaceholder": "Type your message...",
+  "send": "Send Message",
+  "view": "View",
+  "close": "Close Ticket",
+  "confirmClose": "Are you sure you want to close this ticket?",
+  "all": "All",
+  "statusOpen": "Open",
+  "statusInProgress": "In Progress",
+  "statusResolved": "Resolved",
+  "statusClosed": "Closed",
+  "createdAt": "Created",
+  "lastMessage": "Last message",
+  "noTickets": "No tickets found",
+  "createdSuccess": "Ticket created successfully",
+  "closedSuccess": "Ticket closed successfully",
+  "messageSent": "Message sent successfully",
+  "errorLoading": "Error loading tickets",
+  "errorCreating": "Error creating ticket",
+  "errorSending": "Error sending message",
+  "errorClosing": "Error closing ticket",
+  "fillAllFields": "Please fill all fields"
+},
+"helpCenter": {
+  "title": "Help Center",
+  "description": "Manage and respond to user support tickets",
+  "tickets": "Tickets",
+  "totalTickets": "Total Tickets",
+  "open": "Open",
+  "inProgress": "In Progress",
+  "urgent": "Urgent",
+  "filterByStatus": "Filter by Status",
+  "filterByPriority": "Filter by Priority",
+  "all": "All",
+  "statusOpen": "Open",
+  "statusInProgress": "In Progress",
+  "statusResolved": "Resolved",
+  "statusClosed": "Closed",
+  "priorityLow": "Low",
+  "priorityMedium": "Medium",
+  "priorityHigh": "High",
+  "priorityUrgent": "Urgent",
+  "noTickets": "No tickets found",
+  "selectTicket": "Select a ticket to view details",
+  "user": "User",
+  "createdAt": "Created",
+  "reply": "Reply",
+  "replyPlaceholder": "Type your reply...",
+  "sendReply": "Send Reply",
+  "updateStatus": "Update Status",
+  "updatePriority": "Update Priority",
+  "assignToMe": "Assign to Me",
+  "replySent": "Reply sent successfully",
+  "statusUpdated": "Status updated successfully",
+  "assigned": "Ticket assigned successfully",
+  "errorLoading": "Error loading tickets",
+  "errorSending": "Error sending reply",
+  "errorUpdating": "Error updating status",
+  "errorAssigning": "Error assigning ticket"
 }
 
 }
