@@ -11,6 +11,7 @@ import {
   Tags,
   ShieldCheck,
   Map,
+  HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -77,6 +78,11 @@ const NAV_SECTIONS = (t) => [
         icon: MessageCircle,
         label: t("admin.messages") || "Messages",
         path: "/admin/messages",
+      },
+      {
+        icon: HelpCircle,
+        label: t("admin.helpCenter") || "Help Center",
+        path: "/admin/help-center",
       },
     ],
   },
