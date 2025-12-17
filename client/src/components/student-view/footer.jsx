@@ -46,7 +46,7 @@ function StudentViewCommonFooter() {
           {/* لوگو + شبکه‌های اجتماعی */}
           <div className={isRTL ? "md:col-start-4" : ""}>
             <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {t("home.heroTitle").split(" ")[0]} LMS
+              {t("home.heroTitle").split(" ")[0]}  {t("app.name")}
             </h2>
             <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               {t("home.heroDescription")}
