@@ -13,12 +13,12 @@ const translations = {
 export default function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
     const saved = localStorage.getItem("language");
-    return saved || "en";
+    return saved || "fa"; // Default to Persian
   });
   const [translationsData, setTranslationsData] = useState(() => {
     const saved = localStorage.getItem("language");
-    const lang = saved || "en";
-    return translations[lang] || translations.en;
+    const lang = saved || "fa"; // Default to Persian
+    return translations[lang] || translations.fa;
   });
   const [loading, setLoading] = useState(false);
 
