@@ -3,24 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, Globe, Layers, ListChecks } from "lucide-react";
 import { createLiveClassPlanService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/language-context";
 
-const weekdays = [
-  { label: "Mon", value: 1 },
-  { label: "Tue", value: 2 },
-  { label: "Wed", value: 3 },
-  { label: "Thu", value: 4 },
-  { label: "Fri", value: 5 },
-  { label: "Sat", value: 6 },
-  { label: "Sun", value: 0 },
-];
+
 
 function CreateLivePlan({ instructorCoursesList = [] }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
   const defaultTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitAction, setSubmitAction] = useState(null);
 
+  const weekdays = [
+    { label: t("weekDays.Mon"), value: 1 },
+    { label: t("weekDays.Tue"), value: 2 },
+    { label: t("weekDays.Wed"), value: 3 },
+    { label: t("weekDays.Thu"), value: 4 },
+    { label: t("weekDays.Fri"), value: 5 },
+    { label: t("weekDays.Sat"), value: 6 },
+    { label: t("weekDays.Sun"), value: 0 },
+  ];
+  
   const initialFormState = useMemo(
     () => ({
       title: "",
@@ -66,21 +70,22 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
   const validate = () => {
     const nextErrors = {};
 
-    if (!form.title.trim()) nextErrors.title = "Plan title is required";
-    if (!form.startDate) nextErrors.startDate = "Start date is required";
-    if (!form.endDate) nextErrors.endDate = "End date is required";
+    if (!form.title.trim()) nextErrors.title = t("createLivePlan.errors.titleRequired");
+    if (!form.startDate) nextErrors.startDate = t("createLivePlan.errors.startDateRequired");
+    if (!form.endDate) nextErrors.endDate = t("createLivePlan.errors.endDateRequired");
     if (form.startDate && form.endDate && form.endDate < form.startDate) {
-      nextErrors.endDate = "End date must be after start date";
+      nextErrors.endDate = t("createLivePlan.errors.endDateAfterStart");
     }
-    if (!form.weekdays.length) nextErrors.weekdays = "Select at least one weekday";
-    if (!form.startTime) nextErrors.startTime = "Start time is required";
-    if (!form.endTime) nextErrors.endTime = "End time is required";
+    if (!form.weekdays.length) nextErrors.weekdays = t("createLivePlan.errors.weekdaysRequired");
+    if (!form.startTime) nextErrors.startTime = t("createLivePlan.errors.startTimeRequired");
+    if (!form.endTime) nextErrors.endTime = t("createLivePlan.errors.endTimeRequired");
     if (form.startTime && form.endTime && form.endTime <= form.startTime) {
-      nextErrors.endTime = "End time must be after start time";
+      nextErrors.endTime = t("createLivePlan.errors.endTimeAfterStart");
     }
     if (form.minAttendance === "") {
-      nextErrors.minAttendance = "Minimum attendance is required";
+      nextErrors.minAttendance = t("createLivePlan.errors.minAttendanceRequired");
     }
+
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -113,20 +118,21 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
       await createLiveClassPlanService(payload);
       toast({
-        title: status === "published" ? "Live plan published" : "Live plan saved",
-        description:
-          status === "published"
-            ? "Your live plan is now active."
-            : "Draft saved. You can publish it later.",
+        title: status === "published" 
+          ? t("createLivePlan.buttons.publishPlan")
+          : t("createLivePlan.buttons.saveDraft"),
+        description: status === "published"
+          ? t("createLivePlan.header.description")
+          : t("createLivePlan.buttons.saveDraft"),
       });
       setForm(initialFormState);
       navigate("/instructor/live-classes");
     } catch (error) {
       const message =
         error?.response?.data?.message ||
-        "Unable to save live plan. Please try again.";
+        t("createLivePlan.errors.minAttendanceRequired")
       toast({
-        title: "Error",
+        title: t("createLivePlan.errors.minAttendanceRequired"),
         description: message,
         variant: "destructive",
       });
@@ -141,24 +147,24 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
       <header className="space-y-2">
         <h2 className="flex items-center gap-2 text-2xl font-semibold">
           <Layers className="h-6 w-6 text-primary" />
-          Create Live Plan
+          {t("createLivePlan.header.title")}
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Define a recurring live class schedule linked to one of your courses.
+        {t("createLivePlan.header.description")}
         </p>
       </header>
 
       <form className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Plan title
+            {t("createLivePlan.form.title")}
           </label>
           <input
             type="text"
             value={form.title}
             onChange={handleChange("title")}
             className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm outline-none transition focus:border-primary/70 dark:border-slate-700 dark:bg-slate-900/80"
-            placeholder="e.g., Advanced Algorithms Live Cohort"
+            placeholder={t("createLivePlan.form.titlePlaceholder")}
             disabled={isSubmitting}
           />
           {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
@@ -166,7 +172,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Linked course (optional)
+            {t("createLivePlan.form.course")}
           </label>
           <div className="flex items-center rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900/80">
             <ListChecks className="mr-2 h-4 w-4 text-slate-400" />
@@ -176,7 +182,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
               className="w-full border-none bg-transparent py-2 text-sm outline-none"
               disabled={isSubmitting}
             >
-              <option value="">Select course</option>
+              <option value="">{t("createLivePlan.form.course")}</option>
               {instructorCoursesList.map((course) => (
                 <option key={course._id} value={course._id}>
                   {course.title}
@@ -185,13 +191,13 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
             </select>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Link to an existing course or leave empty to create a standalone live plan.
+          {t("createLivePlan.form.courseDescription")}
           </p>
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Timezone
+            {t("createLivePlan.form.timezone")}
           </label>
           <div className="flex items-center rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900/80">
             <Globe className="mr-2 h-4 w-4 text-slate-400" />
@@ -212,7 +218,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Start date
+          {t("createLivePlan.form.startDate")}
           </label>
           <div className="flex items-center rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900/80">
             <Calendar className="mr-2 h-4 w-4 text-slate-400" />
@@ -229,7 +235,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            End date
+          {t("createLivePlan.form.endDate")}
           </label>
           <div className="flex items-center rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900/80">
             <Calendar className="mr-2 h-4 w-4 text-slate-400" />
@@ -247,7 +253,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
         <div className="space-y-2 md:col-span-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Weekdays
+          {t("createLivePlan.form.weekdays")}
           </label>
           <div className="flex flex-wrap gap-2">
             {weekdays.map((day) => {
@@ -274,7 +280,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Daily start time
+          {t("createLivePlan.form.dailyStartTime")}
           </label>
           <div className="flex items-center rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900/80">
             <Clock className="mr-2 h-4 w-4 text-slate-400" />
@@ -291,7 +297,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Daily end time
+          {t("createLivePlan.form.dailyEndTime")}
           </label>
           <div className="flex items-center rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900/80">
             <Clock className="mr-2 h-4 w-4 text-slate-400" />
@@ -308,7 +314,7 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Minimum attendance (minutes)
+          {t("createLivePlan.form.minAttendance")}
           </label>
           <input
             type="number"
@@ -316,11 +322,11 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
             value={form.minAttendance}
             onChange={handleChange("minAttendance")}
             className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm outline-none transition focus:border-primary/70 dark:border-slate-700 dark:bg-slate-900/80"
-            placeholder="e.g., 45"
+            placeholder={t("createLivePlan.form.minAttendancePlaceholder")}
             disabled={isSubmitting}
           />
           {errors.minAttendance && (
-            <p className="text-xs text-red-500">{errors.minAttendance}</p>
+            <p className="text-xs text-red-500">{t("createLivePlan.errors.minAttendanceRequired")}</p>
           )}
         </div>
       </form>
@@ -334,7 +340,9 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
             isSubmitting && submitAction === "draft" ? "opacity-60" : ""
           }`}
         >
-          {isSubmitting && submitAction === "draft" ? "Saving..." : "Save as Draft"}
+          {isSubmitting && submitAction === "draft" 
+            ? t("createLivePlan.buttons.savingDraft")
+            : t("createLivePlan.buttons.saveDraft")}
         </button>
         <button
           type="button"
@@ -345,8 +353,8 @@ function CreateLivePlan({ instructorCoursesList = [] }) {
           }`}
         >
           {isSubmitting && submitAction === "published"
-            ? "Publishing..."
-            : "Publish Plan"}
+            ? t("createLivePlan.buttons.publishingPlan")
+            : t("createLivePlan.buttons.publishPlan")}
         </button>
       </div>
     </div>

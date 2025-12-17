@@ -1,13 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  CalendarClock,
-  CheckCircle2,
-  Info,
-  Loader2,
-  RefreshCcw,
-  Video,
-} from "lucide-react";
+import { CalendarClock, CheckCircle2, Info, Loader2, RefreshCcw, Video } from "lucide-react";
 import {
   archiveLiveClassPlanService,
   fetchInstructorLiveClassPlansService,
@@ -17,6 +10,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { InstructorContext } from "@/context/instructor-context";
 import CreateLiveEventCard from "./create-live-event-card";
+import { useLanguage } from "@/context/language-context";
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -30,6 +24,7 @@ const statusBadgeStyles = {
 };
 
 function LiveClassesManager({ compact = false }) {
+  const { t } = useLanguage();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -48,29 +43,22 @@ function LiveClassesManager({ compact = false }) {
   }, [instructorCoursesList]);
 
   const resolveCourseTitle = (plan) => {
-    if (!plan.courseId) {
-      return "Standalone live plan";
-    }
-    const id =
-      typeof plan.courseId === "string" ? plan.courseId : plan.courseId?._id;
-    if (!id) return "Standalone live plan";
-    return courseMap[id] || "Linked course unavailable";
+    if (!plan.courseId) return t("liveClassesManager.plan.standalone");
+    const id = typeof plan.courseId === "string" ? plan.courseId : plan.courseId?._id;
+    if (!id) return t("liveClassesManager.plan.standalone");
+    return courseMap[id] || t("liveClassesManager.plan.courseUnavailable");
   };
 
   const fetchPlans = async () => {
     setLoading(true);
     try {
       const response = await fetchInstructorLiveClassPlansService();
-      if (response?.success) {
-        setPlans(response.data || []);
-      } else {
-        setPlans([]);
-      }
+      setPlans(response?.success ? response.data || [] : []);
     } catch (error) {
       console.error("Failed to load live class plans", error);
       toast({
-        title: "Unable to load live classes",
-        description: error?.response?.data?.message || "Please try again.",
+        title: t("liveClassesManager.toast.loadFailed.title"),
+        description: error?.response?.data?.message || t("liveClassesManager.toast.loadFailed.description"),
         variant: "destructive",
       });
     } finally {
@@ -80,21 +68,20 @@ function LiveClassesManager({ compact = false }) {
 
   useEffect(() => {
     fetchPlans();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePublish = async (planId) => {
     try {
       await publishLiveClassPlanService(planId);
       toast({
-        title: "Plan published",
-        description: "Students will now see this live plan.",
+        title: t("liveClassesManager.toast.publishSuccess.title"),
+        description: t("liveClassesManager.toast.publishSuccess.description"),
       });
       fetchPlans();
     } catch (error) {
       toast({
-        title: "Publish failed",
-        description: error?.response?.data?.message || "Try again later.",
+        title: t("liveClassesManager.toast.publishFailed.title"),
+        description: error?.response?.data?.message || t("liveClassesManager.toast.publishFailed.description"),
         variant: "destructive",
       });
     }
@@ -104,14 +91,14 @@ function LiveClassesManager({ compact = false }) {
     try {
       await archiveLiveClassPlanService(planId);
       toast({
-        title: "Plan archived",
-        description: "This plan is no longer active.",
+        title: t("liveClassesManager.toast.archiveSuccess.title"),
+        description: t("liveClassesManager.toast.archiveSuccess.description"),
       });
       fetchPlans();
     } catch (error) {
       toast({
-        title: "Unable to archive",
-        description: error?.response?.data?.message || "Try again later.",
+        title: t("liveClassesManager.toast.archiveFailed.title"),
+        description: error?.response?.data?.message || t("liveClassesManager.toast.archiveFailed.description"),
         variant: "destructive",
       });
     }
@@ -124,8 +111,8 @@ function LiveClassesManager({ compact = false }) {
       navigate(`/instructor/live-classes/${planId}/host`);
     } catch (error) {
       toast({
-        title: "Unable to start class",
-        description: error?.response?.data?.message || "Please try again.",
+        title: t("liveClassesManager.toast.startFailed.title"),
+        description: error?.response?.data?.message || t("liveClassesManager.toast.startFailed.description"),
         variant: "destructive",
       });
     } finally {
@@ -134,7 +121,7 @@ function LiveClassesManager({ compact = false }) {
   };
 
   const formatWeekdays = (weekdayValues = []) => {
-    if (!weekdayValues.length) return "No days selected";
+    if (!weekdayValues.length) return t("liveClassesManager.plan.noDays");
     const sorted = [...weekdayValues].sort();
     return sorted.map((day) => weekdayLabels[day] || day).join(", ");
   };
@@ -147,10 +134,10 @@ function LiveClassesManager({ compact = false }) {
   const visiblePlans = compact ? filteredPlans.slice(0, 3) : filteredPlans;
 
   const tabOptions = [
-    { label: "All", value: "all" },
-    { label: "Draft", value: "draft" },
-    { label: "Published", value: "published" },
-    { label: "Archived", value: "archived" },
+    { label: t("liveClassesManager.tabs.all"), value: "all" },
+    { label: t("liveClassesManager.tabs.draft"), value: "draft" },
+    { label: t("liveClassesManager.tabs.published"), value: "published" },
+    { label: t("liveClassesManager.tabs.archived"), value: "archived" },
   ];
 
   return (
@@ -159,10 +146,10 @@ function LiveClassesManager({ compact = false }) {
         <div>
           <h2 className="flex items-center gap-2 text-2xl font-semibold">
             <Video className="h-6 w-6 text-primary" />
-            Live Classes
+            {t("liveClassesManager.header.title")}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage recurring live schedules, attendance rules, and session plans.
+            {t("liveClassesManager.header.description")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -172,12 +159,8 @@ function LiveClassesManager({ compact = false }) {
             disabled={loading}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
           >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCcw className="h-4 w-4" />
-            )}
-            Refresh
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+            {t("liveClassesManager.buttons.refresh")}
           </button>
           <button
             type="button"
@@ -185,7 +168,7 @@ function LiveClassesManager({ compact = false }) {
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
           >
             <CalendarClock className="h-4 w-4" />
-            New Live Plan
+            {t("liveClassesManager.buttons.newLivePlan")}
           </button>
         </div>
       </header>
@@ -217,8 +200,7 @@ function LiveClassesManager({ compact = false }) {
       ) : visiblePlans.length ? (
         <div className="space-y-4">
           {visiblePlans.map((plan) => {
-            const badgeClass =
-              statusBadgeStyles[plan.status] || statusBadgeStyles.draft;
+            const badgeClass = statusBadgeStyles[plan.status] || statusBadgeStyles.draft;
 
             return (
               <div
@@ -236,17 +218,16 @@ function LiveClassesManager({ compact = false }) {
                     {plan.title}
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Course: {resolveCourseTitle(plan)}
+                    {t("liveClassesManager.plan.course")}: {resolveCourseTitle(plan)}
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Timezone: {plan.timezone}
+                    {t("liveClassesManager.plan.timezone")}: {plan.timezone}
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {formatWeekdays(plan.weekdays)} · {plan.dailyStartTime} -{" "}
-                    {plan.dailyEndTime}
+                    {formatWeekdays(plan.weekdays)} · {plan.dailyStartTime} - {plan.dailyEndTime}
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Attendance requirement: {plan.minAttendanceMinutes} minutes
+                    {t("liveClassesManager.plan.attendance")}: {plan.minAttendanceMinutes} {t("liveClassesManager.plan.minutes")}
                   </p>
                 </div>
 
@@ -258,14 +239,14 @@ function LiveClassesManager({ compact = false }) {
                         onClick={() => handlePublish(plan._id)}
                         className="rounded-lg border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 dark:border-emerald-500/40 dark:text-emerald-300"
                       >
-                        Publish
+                        {t("liveClassesManager.buttons.publish")}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleArchive(plan._id)}
                         className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:border-red-500/40 dark:text-red-300"
                       >
-                        Archive
+                        {t("liveClassesManager.buttons.archive")}
                       </button>
                     </>
                   )}
@@ -279,22 +260,22 @@ function LiveClassesManager({ compact = false }) {
                         className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         {startingPlanId === plan._id
-                          ? "Starting..."
-                          : "Start Class"}
+                          ? t("liveClassesManager.starting")
+                          : t("liveClassesManager.buttons.startClass")}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleArchive(plan._id)}
                         className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:border-red-500/40 dark:text-red-300"
                       >
-                        Archive
+                        {t("liveClassesManager.buttons.archive")}
                       </button>
                     </>
                   )}
 
                   {plan.status === "archived" && (
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Archived plans cannot be modified.
+                      {t("liveClassesManager.plan.archivedNotice")}
                     </p>
                   )}
                 </div>
@@ -308,11 +289,10 @@ function LiveClassesManager({ compact = false }) {
             <Info className="h-6 w-6" />
           </div>
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-            No live classes yet
+            {t("liveClassesManager.emptyState.title")}
           </h3>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Create your first live plan to automatically schedule sessions and notify
-            students.
+            {t("liveClassesManager.emptyState.description")}
           </p>
         </div>
       )}
@@ -323,7 +303,7 @@ function LiveClassesManager({ compact = false }) {
           onClick={() => navigate("/instructor/live-classes")}
           className="text-sm font-medium text-primary hover:underline"
         >
-          View all live classes →
+          {t("liveClassesManager.buttons.viewAll")}
         </button>
       )}
 
@@ -337,4 +317,3 @@ function LiveClassesManager({ compact = false }) {
 }
 
 export default LiveClassesManager;
-
