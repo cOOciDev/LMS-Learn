@@ -1,4 +1,4 @@
-import banner from "../../../../public/hero.webp";
+import banner from "../../../../public/hero.png";
 import { Button } from "@/components/ui/button";
 import { useContext, useEffect, useMemo } from "react";
 import { StudentContext } from "@/context/student-context";

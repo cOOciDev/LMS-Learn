@@ -325,6 +325,75 @@ export async function createCategoryService(payload) {
   return data;
 }
 
+// Ticket services - Student
+export async function createTicketService(formData) {
+  const { data } = await axiosInstance.post("/student/tickets/create", formData);
+  return data;
+}
+
+export async function getUserTicketsService(status) {
+  const url = status ? `/student/tickets?status=${status}` : "/student/tickets";
+  const { data } = await axiosInstance.get(url);
+  return data;
+}
+
+export async function getTicketByIdService(ticketId) {
+  const { data } = await axiosInstance.get(`/student/tickets/${ticketId}`);
+  return data;
+}
+
+export async function addMessageToTicketService(ticketId, message) {
+  const { data } = await axiosInstance.post(`/student/tickets/${ticketId}/message`, {
+    message,
+  });
+  return data;
+}
+
+export async function closeTicketService(ticketId) {
+  const { data } = await axiosInstance.patch(`/student/tickets/${ticketId}/close`);
+  return data;
+}
+
+// Ticket services - Admin
+export async function getAllTicketsService(params = {}) {
+  const queryParams = new URLSearchParams(params).toString();
+  const url = queryParams ? `/admin/tickets?${queryParams}` : "/admin/tickets";
+  const { data } = await axiosInstance.get(url);
+  return data;
+}
+
+export async function getTicketStatsService() {
+  const { data } = await axiosInstance.get("/admin/tickets/stats");
+  return data;
+}
+
+export async function getAdminTicketByIdService(ticketId) {
+  const { data } = await axiosInstance.get(`/admin/tickets/${ticketId}`);
+  return data;
+}
+
+export async function addAdminReplyService(ticketId, message) {
+  const { data } = await axiosInstance.post(`/admin/tickets/${ticketId}/reply`, {
+    message,
+  });
+  return data;
+}
+
+export async function updateTicketStatusService(ticketId, status, priority) {
+  const { data } = await axiosInstance.patch(`/admin/tickets/${ticketId}/status`, {
+    status,
+    priority,
+  });
+  return data;
+}
+
+export async function assignTicketService(ticketId, adminId) {
+  const { data } = await axiosInstance.patch(`/admin/tickets/${ticketId}/assign`, {
+    adminId,
+  });
+  return data;
+}
+
 export async function deleteCategoryService(categoryId) {
   const { data } = await axiosInstance.delete(
     `/admin/categories/${categoryId}`
