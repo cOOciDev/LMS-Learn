@@ -24,6 +24,14 @@ const {
   createRoadmap,
   getAdminRoadmaps,
 } = require("../../controllers/roadmap-controller");
+const {
+  getAllTickets,
+  getTicketById,
+  addReply,
+  updateTicketStatus,
+  assignTicket,
+  getTicketStats,
+} = require("../../controllers/admin-controller/ticket-controller");
 const router = express.Router();
 
 // All routes require admin authentication
@@ -59,6 +67,14 @@ router.get("/financial/reports", getFinancialReports);
 router.get("/instructors", validatePagination, getAllInstructors);
 router.get("/instructors/:id", getInstructorDetails);
 router.put("/instructors/:id", updateInstructor);
+
+// Ticket/Help Center management
+router.get("/tickets", validatePagination, getAllTickets);
+router.get("/tickets/stats", getTicketStats);
+router.get("/tickets/:ticketId", getTicketById);
+router.post("/tickets/:ticketId/reply", addReply);
+router.patch("/tickets/:ticketId/status", updateTicketStatus);
+router.patch("/tickets/:ticketId/assign", assignTicket);
 
 module.exports = router;
 

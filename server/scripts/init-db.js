@@ -14,7 +14,7 @@ async function initDatabase() {
       console.log("Admin user already exists. Skipping admin creation.");
     } else {
       // Create admin user
-      const adminPassword = await bcrypt.hash("admin123", 10);
+      const adminPassword = await bcrypt.hash("admin123", 12);
       const admin = new User({
         userName: "admin",
         userEmail: "admin@lms.com",
@@ -33,7 +33,7 @@ async function initDatabase() {
       console.log("Test user already exists. Skipping test user creation.");
     } else {
       // Create test user
-      const userPassword = await bcrypt.hash("user123", 10);
+      const userPassword = await bcrypt.hash("user123", 12);
       const testUser = new User({
         userName: "testuser",
         userEmail: "user@test.com",
@@ -54,7 +54,7 @@ async function initDatabase() {
       console.log("Test instructor already exists. Skipping instructor creation.");
     } else {
       // Create test instructor
-      const instructorPassword = await bcrypt.hash("instructor123", 10);
+      const instructorPassword = await bcrypt.hash("instructor123", 12);
       const testInstructor = new User({
         userName: "testinstructor",
         userEmail: "instructor@test.com",
