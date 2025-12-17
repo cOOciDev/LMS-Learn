@@ -1,5 +1,5 @@
 // components/student/StudentViewCommonHeader.jsx
-import { BookOpen, TvMinimalPlay, Map, Menu, X } from "lucide-react";
+import { BookOpen, TvMinimalPlay, Map, Menu, X, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -48,6 +48,14 @@ function StudentViewCommonHeader() {
         setOpen(false);
       },
     },
+    {
+      label: t("common.tickets") || t("common.support"),
+      icon: <MessageSquare className="w-5 h-5" />,
+      onClick: () => {
+        navigate("/tickets");
+        setOpen(false);
+      },
+    },
   ];
 
   return (
@@ -59,7 +67,10 @@ function StudentViewCommonHeader() {
             isRTL ? "ml-auto" : "mr-auto"
           } absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`}
         >
-          <Link
+          
+        </div>
+
+        <Link
             to="/home"
             className="flex items-center gap-3 hover:opacity-80 transition"
           >
@@ -75,8 +86,6 @@ function StudentViewCommonHeader() {
               Fajrane
             </span>
           </Link>
-        </div>
-
         {/* منوی دسکتاپ - فقط تو lg نشون بده */}
         <nav className="hidden lg:flex items-center gap-6">
           <Button
@@ -102,6 +111,14 @@ function StudentViewCommonHeader() {
           >
             <TvMinimalPlay className="w-6 h-6" />
             {t("common.myCourses")}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/tickets")}
+            className="font-medium hover:bg-accent flex items-center gap-2"
+          >
+            <MessageSquare className="w-5 h-5" />
+            {t("common.tickets") || t("common.support")}
           </Button>
         </nav>
 
