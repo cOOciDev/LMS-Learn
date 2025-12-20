@@ -92,7 +92,7 @@ const validateCourse = (req, res, next) => {
     errors.push("Primary language is required");
   }
 
-  if (!description || description.trim().length < 20) {
+  if (!description) {
     errors.push("Description must be at least 20 characters");
   }
 

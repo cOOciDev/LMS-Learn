@@ -154,23 +154,13 @@ export async function mediaBulkUploadService(formData, onProgressCallback) {
   return data;
 }
 
-export async function fetchStudentViewCourseListService(query) {
-  let queryString = "";
-
-  if (query) {
-    if (typeof query === "string") {
-      queryString = query;
-    } else if (typeof query.toString === "function") {
-      queryString = query.toString();
-    }
-  }
-
-  const endpoint = queryString
-    ? `/student/course/get?${queryString}`
-    : `/student/course/get`;
+// client/src/services/index.js — فقط این تابع رو عوض کن
+export async function fetchStudentViewCourseListService(queryParams = {}) {
+  // اگر queryParams یه شیء بود، به string تبدیل کن
+  const queryString = new URLSearchParams(queryParams).toString();
+  const endpoint = queryString ? `/get?${queryString}` : "/get";
 
   const { data } = await axiosInstance.get(endpoint);
-
   return data;
 }
 

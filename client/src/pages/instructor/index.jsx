@@ -79,16 +79,19 @@ function InstructorDashboardpage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">{t("instructor.instructorDashboard")}</h1>
-      <Tabs className="m-2"  value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="mb-6 min-w-[5px] px-1 py-1 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap">
+      <h1 className="text-3xl font-bold mb-8">
+        {t("instructor.instructorDashboard")}
+      </h1>
+      <Tabs className="m-2" value={activeTab} onValueChange={handleTabChange}>
+        {/* منو سابق */}
+        {/* <TabsList className="mb-6 min-w-[5px] px-1 py-1 text-xs sm:text-sm font-medium rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all whitespace-nowrap">  
           {menuItems.map((menuItem) => (
             <TabsTrigger key={menuItem.value} value={menuItem.value}>
               <menuItem.icon/>
               {menuItem.label}
             </TabsTrigger>
           ))}
-        </TabsList>
+        </TabsList> */}
         {menuItems.map((menuItem) => (
           <TabsContent key={menuItem.value} value={menuItem.value}>
             {menuItem.component}
