@@ -1,4 +1,6 @@
 const express = require("express");
+const path = require("path");
+const fs = require("fs");
 const multer = require("multer");
 const {
   uploadMediaToCloudinary,
@@ -7,11 +9,33 @@ const {
 
 const router = express.Router();
 
-const upload = multer({ dest: "uploads/" });
+const uploadDir = path.join(__dirname, "../../uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
+const storage = multer.diskStorage({
+  destination: uploadDir,
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+    cb(null, safeName);
+  },
+});
+
+const upload = multer({ storage });
+
+const cleanupFile = async (filePath) => {
+  try {
+    await fs.promises.unlink(filePath);
+  } catch (error) {
+    console.warn("Failed to remove temp file:", filePath, error.message);
+  }
+};
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const result = await uploadMediaToCloudinary(req.file.path);
+    cleanupFile(req.file.path);
     res.status(200).json({
       success: true,
       data: result,
@@ -54,6 +78,7 @@ router.post("/bulk-upload", upload.array("files", 10), async (req, res) => {
     );
 
     const results = await Promise.all(uploadPromises);
+    await Promise.all(req.files.map((fileItem) => cleanupFile(fileItem.path)));
 
     res.status(200).json({
       success: true,

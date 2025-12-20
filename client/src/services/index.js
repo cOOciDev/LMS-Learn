@@ -25,9 +25,14 @@ export async function checkAuthService() {
 
 export async function mediaUploadService(formData, onProgressCallback) {
   const { data } = await axiosInstance.post("/media/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
     onUploadProgress: (progressEvent) => {
       const percentCompleted = Math.round(
-        (progressEvent.loaded * 100) / progressEvent.total
+        (progressEvent.loaded * 100) / Math.max(progressEvent.total, 1)
       );
       onProgressCallback(percentCompleted);
     },
@@ -131,11 +136,18 @@ export async function fetchStudentLiveClassPlanByIdService(planId) {
 
 export async function mediaBulkUploadService(formData, onProgressCallback) {
   const { data } = await axiosInstance.post("/media/bulk-upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
     onUploadProgress: (progressEvent) => {
-      const percentCompleted = Math.round(
-        (progressEvent.loaded * 100) / progressEvent.total
-      );
-      onProgressCallback(percentCompleted);
+      if (typeof onProgressCallback === "function") {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / Math.max(progressEvent.total, 1)
+        );
+        onProgressCallback(percentCompleted);
+      }
     },
   });
 

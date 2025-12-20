@@ -19,8 +19,42 @@ import {
   AlertCircle,
   GripVertical,
 } from "lucide-react";
-import { useContext, useRef, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+
+const LECTURES_PER_GROUP = 5;
+
+const chunkLectures = (lectures, size) => {
+  if (!lectures || lectures.length === 0) return [];
+  const grouped = [];
+  for (let i = 0; i < lectures.length; i += size) {
+    grouped.push(lectures.slice(i, i + size));
+  }
+  return grouped;
+};
+
+const VIDEO_EXTENSIONS = new Set([
+  ".mp4",
+  ".mov",
+  ".avi",
+  ".mkv",
+  ".webm",
+  ".flv",
+  ".wmv",
+  ".mpeg",
+  ".mpg",
+  ".m4v",
+  ".3gp",
+  ".ogg",
+]);
+
+const isVideoFile = (file) => {
+  if (!file) return false;
+  if (file.type && file.type.startsWith("video/")) return true;
+  const ext = file.name?.split(".").pop()?.toLowerCase();
+  if (!ext) return false;
+  return VIDEO_EXTENSIONS.has(`.${ext}`);
+};
 
 function CourseCurriculum({ onNext }) {
   const {
@@ -39,6 +73,15 @@ function CourseCurriculum({ onNext }) {
   const bulkUploadRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const { courseLandingFormData } = useContext(InstructorContext);
+  const groupedLectures = useMemo(
+    () => chunkLectures(courseCurriculumFormData, LECTURES_PER_GROUP),
+    [courseCurriculumFormData]
+  );
+  const uploadedCount = courseCurriculumFormData.filter(
+    (lecture) => lecture.videoUrl
+  ).length;
+  const pendingCount = courseCurriculumFormData.length - uploadedCount;
+  const moduleCount = groupedLectures.length;
   const isCurriculumValid = () => {
     if (courseCurriculumFormData.length === 0) return false;
     return courseCurriculumFormData.every(
@@ -74,14 +117,12 @@ function CourseCurriculum({ onNext }) {
   const processVideoFiles = async (files, replaceIndex = null) => {
     if (!files || files.length === 0) return;
 
-    const validFiles = Array.from(files).filter((f) =>
-      f.type.startsWith("video/")
-    );
+    const validFiles = Array.from(files).filter((f) => isVideoFile(f));
     if (validFiles.length === 0) {
       toast({
-        title: t("common.error") || "خطا",
+        title: t("common.error") || "???",
         description:
-          t("curriculum.invalidVideo") || "فقط فایل ویدیویی مجاز است",
+          t("curriculum.invalidVideo") || "???? ??????? ??????? ???",
         variant: "destructive",
       });
       return;
@@ -98,45 +139,50 @@ function CourseCurriculum({ onNext }) {
         formData,
         setMediaUploadProgressPercentage
       );
-      if (response?.success) {
-        const newLectures = response.data.map((item, i) => ({
-          title:
-            replaceIndex !== null
-              ? courseCurriculumFormData[replaceIndex]?.title ||
-                `${t("curriculum.lecture") || "Lecture"} ${replaceIndex + 1}`
-              : `${t("curriculum.lecture") || "Lecture"} ${
-                  courseCurriculumFormData.length + i + 1
-                }`,
-          videoUrl: item.url,
-          public_id: item.public_id,
-          freePreview:
-            replaceIndex !== null
-              ? courseCurriculumFormData[replaceIndex]?.freePreview
-              : false,
-        }));
-
-        setCourseCurriculumFormData((prev) =>
-          replaceIndex !== null
-            ? prev.map((l, idx) => (idx === replaceIndex ? newLectures[0] : l))
-            : [...prev, ...newLectures]
-        );
-
-        setMediaUploadProgress(false);
-        setMediaUploadProgressPercentage(0);
-        toast({
-          title: t("common.success") || "موفق",
-          description: `${validFiles.length} ${
-            t("curriculum.videosUploaded") || "ویدیو آپلود شد"
-          }`,
-        });
+      if (!response?.success) {
+        throw new Error("Bulk upload failed");
       }
+
+      const newLectures = response.data.map((item, i) => ({
+        title:
+          replaceIndex !== null
+            ? courseCurriculumFormData[replaceIndex]?.title ||
+              `${t("curriculum.lecture") || "Lecture"} ${replaceIndex + 1}`
+            : `${t("curriculum.lecture") || "Lecture"} ${
+                courseCurriculumFormData.length + i + 1
+              }`,
+        videoUrl: item.url,
+        public_id: item.public_id,
+        freePreview:
+          replaceIndex !== null
+            ? courseCurriculumFormData[replaceIndex]?.freePreview
+            : false,
+      }));
+
+      setCourseCurriculumFormData((prev) =>
+        replaceIndex !== null
+          ? prev.map((l, idx) => (idx === replaceIndex ? newLectures[0] : l))
+          : [...prev, ...newLectures]
+      );
+
+      toast({
+        title: t("common.success") || "??????",
+        description: `${validFiles.length} ${t("curriculum.videosUploaded") || "????? ????? ??"}`,
+      });
     } catch (err) {
+      const errMessage =
+        err?.response?.data?.message ||
+        t("curriculum.uploadFailed") ||
+        (isRTL ? "بارگذاری با مشکل مواجه شد" : "Failed to upload video");
       toast({
         title: t("common.error"),
-        description: t("curriculum.uploadFailed"),
+        description: errMessage,
         variant: "destructive",
       });
+      console.error("Bulk upload failed:", errMessage, err);
+    } finally {
       setMediaUploadProgress(false);
+      setMediaUploadProgressPercentage(0);
     }
   };
 
@@ -190,6 +236,96 @@ function CourseCurriculum({ onNext }) {
       },
     ]);
   };
+
+  const renderLectureCard = (lecture, index) => (
+    <div
+      key={`lecture-${index}`}
+      className="border border-border rounded-xl overflow-hidden bg-card shadow-md"
+    >
+      <div className="bg-muted/50 px-4 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+          <span className="font-bold text-foreground">
+            {t("curriculum.lecture")} {index + 1}
+          </span>
+        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:bg-destructive/10"
+          onClick={() => handleDelete(index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="p-5 space-y-5">
+        <div>
+          <Label className="text-foreground">
+            {t("curriculum.lectureTitle")}
+          </Label>
+          <Input
+            value={lecture.title}
+            onChange={(e) => handleTitleChange(e.target.value, index)}
+            placeholder={t("curriculum.titlePlaceholder")}
+            className="mt-2 bg-background border-border"
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label className="text-sm text-foreground">
+            {t("curriculum.freePreview")}
+          </Label>
+          <Switch
+            checked={lecture.freePreview}
+            onCheckedChange={(c) => handleFreePreview(c, index)}
+          />
+        </div>
+
+        {lecture.videoUrl ? (
+          <div className="space-y-3">
+            <div className="rounded-lg overflow-hidden bg-black">
+              <VideoPlayer
+                url={lecture.videoUrl}
+                width="100%"
+                height="320px"
+                thumbnail={courseLandingFormData?.image || null}
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => handleReplace(index)}
+            >
+              <Replace className="h-4 w-4 ml-2" />{" "}
+              {t("curriculum.replaceVideo")}
+            </Button>
+            <Input
+              id={`replace-${index}`}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => processVideoFiles(e.target.files, index)}
+            />
+          </div>
+        ) : (
+          <div className="border-2 border-dashed rounded-lg p-8 text-center bg-muted/50">
+            <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground mb-4">
+              {t("curriculum.uploadLectureVideo")}
+            </p>
+            <Input
+              type="file"
+              accept="video/*"
+              className="mx-auto max-w-xs"
+              onChange={(e) => processVideoFiles(e.target.files, index)}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <Card className="border-0 shadow-xl">
@@ -276,98 +412,71 @@ function CourseCurriculum({ onNext }) {
           </div>
         )}
 
-        <div className="space-y-6">
-          {courseCurriculumFormData.map((lecture, i) => (
-            <div
-              key={i}
-              className="border border-border rounded-xl overflow-hidden bg-card shadow-md"
-            >
-              <div className="bg-muted/50 px-4 py-3 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <GripVertical className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-bold text-foreground">
-                    {t("curriculum.lecture")} {i + 1}
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDelete(i)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="p-5 space-y-5">
-                <div>
-                  <Label className="text-foreground">
-                    {t("curriculum.lectureTitle")}
-                  </Label>
-                  <Input
-                    value={lecture.title}
-                    onChange={(e) => handleTitleChange(e.target.value, i)}
-                    placeholder={t("curriculum.titlePlaceholder")}
-                    className="mt-2 bg-background border-border"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm text-foreground">
-                    {t("curriculum.freePreview")}
-                  </Label>
-                  <Switch
-                    checked={lecture.freePreview}
-                    onCheckedChange={(c) => handleFreePreview(c, i)}
-                  />
-                </div>
-
-                {lecture.videoUrl ? (
-                  <div className="space-y-3">
-                    <div className="rounded-lg overflow-hidden bg-black">
-                      <VideoPlayer
-                        url={lecture.videoUrl}
-                        width="100%"
-                        height="320px"
-                        thumbnail={courseLandingFormData?.image || null}
-                      />
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleReplace(i)}
-                    >
-                      <Replace className="h-4 w-4 ml-2" />{" "}
-                      {t("curriculum.replaceVideo")}
-                    </Button>
-                    <Input
-                      id={`replace-${i}`}
-                      type="file"
-                      accept="video/*"
-                      className="hidden"
-                      onChange={(e) => processVideoFiles(e.target.files, i)}
-                    />
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed rounded-lg p-8 text-center bg-muted/50">
-                    <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {t("curriculum.uploadLectureVideo")}
-                    </p>
-                    <Input
-                      type="file"
-                      accept="video/*"
-                      className="mx-auto max-w-xs"
-                      onChange={(e) => processVideoFiles(e.target.files, i)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-3xl border border-border/40 bg-card/70 p-4 text-center shadow-inner">
+            <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+              {t("curriculum.uploadedLectures") || "Uploaded Lectures"}
+            </p>
+            <p className="text-3xl font-semibold text-foreground">{uploadedCount}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("curriculum.totalLectures") || "Total lectures"}: {courseCurriculumFormData.length}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-border/40 bg-card/70 p-4 text-center shadow-inner">
+            <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+              {t("curriculum.pendingUploads") || "Pending"}
+            </p>
+            <p className="text-3xl font-semibold text-foreground">{pendingCount}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("curriculum.fillDetails") || "Need video or title"}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-border/40 bg-card/70 p-4 text-center shadow-inner">
+            <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+              {t("curriculum.moduleCount") || "Modules"}
+            </p>
+            <p className="text-3xl font-semibold text-foreground">
+              {moduleCount}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("curriculum.chunkSizeDescription") || `${LECTURES_PER_GROUP} ${t("curriculum.perModule") || "per module"}`}
+            </p>
+          </div>
         </div>
 
+        {courseCurriculumFormData.length > 0 && (
+          <div className="space-y-6">
+            {groupedLectures.map((group, groupIndex) => (
+              <details
+                key={`module-${groupIndex}`}
+                open
+                className="overflow-hidden rounded-2xl border border-border/30 bg-card/60 shadow-sm"
+              >
+                <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-foreground">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+                      {t("curriculum.module") || "Module"} {groupIndex + 1}
+                    </p>
+                    <p className="text-lg font-bold">
+                      {group.length} {t("curriculum.lectures") || "Lectures"}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {group.filter((lecture) => lecture.videoUrl).length} {t("curriculum.uploadedShort") || "Uploaded"}
+                  </span>
+                </summary>
+                <div className="space-y-5 px-5 pb-5 pt-0">
+                  {group.map((lecture, idx) =>
+                    renderLectureCard(
+                      lecture,
+                      groupIndex * LECTURES_PER_GROUP + idx
+                    )
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        )}
         <div className="pt-6 border-t border-border">
           <Button
             onClick={handleSaveAndContinue}

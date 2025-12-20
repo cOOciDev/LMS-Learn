@@ -1,14 +1,44 @@
 import { BarChart, Book, LogOut, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import { useLanguage } from "@/context/language-context";
 import { fetchInstructorCourseListService } from "@/services";
 
+export const INSTRUCTOR_MENU_ITEMS = (t) => [
+  {
+    icon: BarChart,
+    label: t("instructor.instructorDashboard"),
+    value: "dashboard",
+  },
+  {
+    icon: Book,
+    label: t("common.courses"),
+    value: "courses",
+  },
+  {
+    icon: Video,
+    label: t("instructor.liveClasses"),
+    value: "live-plans",
+    routePath: "/instructor/live-classes",
+  },
+];
+
+export function getInstructorActiveTab(pathname, search = "") {
+  const params = new URLSearchParams(search);
+  const tabFromQuery = params.get("tab");
+
+  if (tabFromQuery) return tabFromQuery;
+  if (pathname.includes("/instructor/create-new-course")) return "";
+  if (pathname.includes("/instructor/edit-course")) return "";
+  if (pathname.startsWith("/instructor/live-classes")) return "live-plans";
+  if (pathname === "/instructor") return "dashboard";
+  return "";
+}
+
 function InstructorSidebar() {
-  const [activeTab, setActiveTab] = useState("dashboard");
   const { resetCredentials } = useContext(AuthContext);
   const { instructorCoursesList, setInstructorCoursesList } =
     useContext(InstructorContext);
@@ -16,19 +46,11 @@ function InstructorSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Update active tab based on current route
-  useEffect(() => {
-    if (
-      location.pathname.includes("/instructor/create-new-course") ||
-      location.pathname.includes("/instructor/edit-course")
-    ) {
-      setActiveTab("");
-    } else if (location.pathname.startsWith("/instructor/live-classes")) {
-      setActiveTab("live-plans");
-    } else if (location.pathname === "/instructor") {
-      setActiveTab("dashboard");
-    }
-  }, [location.pathname]);
+  const activeTab = getInstructorActiveTab(
+    location.pathname,
+    location.search
+  );
+  const menuItems = INSTRUCTOR_MENU_ITEMS(t);
 
   async function fetchAllCourses() {
     try {
@@ -55,25 +77,6 @@ function InstructorSidebar() {
     fetchAllCourses();
   }, []);
 
-  const menuItems = [
-    {
-      icon: BarChart,
-      label: t("instructor.instructorDashboard"),
-      value: "dashboard",
-    },
-    {
-      icon: Book,
-      label: t("common.courses"),
-      value: "courses",
-    },
-    {
-      icon: Video,
-      label: t("instructor.liveClasses"),
-      value: "live-plans",
-      routePath: "/instructor/live-classes",
-    },
-  ];
-
   function handleLogout() {
     resetCredentials();
     sessionStorage.clear();
@@ -83,14 +86,12 @@ function InstructorSidebar() {
   function handleMenuClick(item) {
     if (item.routePath) {
       navigate(item.routePath);
-      setActiveTab(item.value);
       return;
     }
 
     if (location.pathname === "/instructor") {
       // If already on instructor page, update URL with tab
       navigate(`/instructor?tab=${item.value}`);
-      setActiveTab(item.value);
     } else {
       // Navigate to instructor page with tab
       navigate(`/instructor?tab=${item.value}`);

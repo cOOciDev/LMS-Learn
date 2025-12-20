@@ -20,6 +20,7 @@ export const signUpFormControls = [
     placeholder: "Enter your password",
     type: "password",
     componentType: "input",
+    showPasswordToggle: true,
   },
   {
     name: "role",

@@ -1,10 +1,10 @@
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/language-context";
 import LanguageSwitcher from "@/components/language-switcher";
 import ThemeSwitcher from "@/components/theme-switcher";
 
-function AdminHeader() {
+function AdminHeader({ onMenuToggle }) {
   const { t } = useLanguage();
 
   return (
@@ -24,6 +24,14 @@ function AdminHeader() {
         </div>
       </Link>
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/70 text-slate-600 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200 lg:hidden"
+          onClick={() => onMenuToggle?.()}
+          aria-label={t("common.openMenu") || "Open admin menu"}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
         <ThemeSwitcher />
         <LanguageSwitcher />
       </div>
@@ -32,4 +40,3 @@ function AdminHeader() {
 }
 
 export default AdminHeader;
-

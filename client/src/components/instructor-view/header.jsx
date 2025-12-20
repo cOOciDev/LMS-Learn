@@ -1,12 +1,12 @@
 // client/src/components/instructor-view/header/index.jsx
 
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/language-context";
 import LanguageSwitcher from "@/components/language-switcher";
 import ThemeSwitcher from "@/components/theme-switcher";
 
-function InstructorHeader() {
+function InstructorHeader({ onMenuToggle }) {
   const { t, language } = useLanguage();
   const isRTL = language === "fa";
 
@@ -42,6 +42,14 @@ function InstructorHeader() {
         flex items-center gap-4
         ${isRTL ? "flex-row-reverse" : ""}
       `}>
+        <button
+          type="button"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card/80 text-foreground shadow-sm transition hover:border-border/70 hover:bg-card dark:border-border/80 lg:hidden"
+          onClick={() => onMenuToggle?.()}
+          aria-label={t("common.openMenu") || "Open instructor menu"}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
         <ThemeSwitcher />
         <LanguageSwitcher />
       </div>
