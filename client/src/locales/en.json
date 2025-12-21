@@ -493,6 +493,12 @@
     "freePreview": "Free Preview",
     "replaceVideo": "Replace Video",
     "uploadLectureVideo": "Upload video for this lecture",
+    "uploadStartTitle": "Uploading videos",
+    "uploadStartDescription": "Streaming your files to the cloud. Keep this tab open until it finishes.",
+    "uploadSuccessTitle": "Videos uploaded",
+    "uploadSuccessDescription": "All videos are processed and ready in the curriculum.",
+    "uploadFailedTitle": "Video upload failed",
+    "largeFilesHint": "Large uploads can take a few minutes. Keep this tab open until completion.",
     "invalidVideo": "Please select video files only",
     "uploadFailed": "Video upload failed"
   },

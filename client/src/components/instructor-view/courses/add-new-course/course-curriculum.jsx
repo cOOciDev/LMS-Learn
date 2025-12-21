@@ -134,6 +134,13 @@ function CourseCurriculum({ onNext }) {
     setMediaUploadProgress(true);
     setMediaUploadProgressPercentage(0);
 
+    toast({
+      title: t("curriculum.uploadStartTitle") || "Uploading videos",
+      description:
+        t("curriculum.uploadStartDescription") ||
+        "Uploading your files. Large uploads may take a few minutes, please keep this tab open.",
+    });
+
     try {
       const response = await mediaBulkUploadService(
         formData,
@@ -166,8 +173,10 @@ function CourseCurriculum({ onNext }) {
       );
 
       toast({
-        title: t("common.success") || "??????",
-        description: `${validFiles.length} ${t("curriculum.videosUploaded") || "????? ????? ??"}`,
+        title: t("curriculum.uploadSuccessTitle") || "Videos uploaded",
+        description:
+          t("curriculum.uploadSuccessDescription") ||
+          `${validFiles.length} video(s) are processed and ready.`,
       });
     } catch (err) {
       const errMessage =
@@ -175,7 +184,7 @@ function CourseCurriculum({ onNext }) {
         t("curriculum.uploadFailed") ||
         (isRTL ? "بارگذاری با مشکل مواجه شد" : "Failed to upload video");
       toast({
-        title: t("common.error"),
+        title: t("curriculum.uploadFailedTitle") || t("common.error"),
         description: errMessage,
         variant: "destructive",
       });
@@ -367,6 +376,10 @@ function CourseCurriculum({ onNext }) {
               isMediaUploading={mediaUploadProgress}
               progress={mediaUploadProgressPercentage}
             />
+            <p className="text-xs text-muted-foreground max-w-xl mx-auto">
+              {t("curriculum.largeFilesHint") ||
+                "Large uploads can take a few minutes. Please keep this tab open until the bar reaches 100%."}
+            </p>
           </div>
         )}
 

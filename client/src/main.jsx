@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "./styles/main.scss";
-import { Toaster } from "sonner";
+import { Toaster as SonnerToaster } from "sonner";
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "./context/auth-context/index.jsx";
 import InstructorProvider from "./context/instructor-context/index.jsx";
@@ -10,6 +10,7 @@ import StudentProvider from "./context/student-context/index.jsx";
 import LanguageProvider from "./context/language-context/index.jsx";
 import ThemeProvider from "./context/theme-context/index.jsx";
 import CategoryProvider from "./context/category-context";
+import { Toaster as CustomToaster } from "@/components/ui/toaster";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -20,7 +21,8 @@ createRoot(document.getElementById("root")).render(
             <InstructorProvider>
               <StudentProvider>
                 <App />
-                <Toaster
+                <CustomToaster />
+                <SonnerToaster
                   position="top-center"
                   richColors
                   closeButton
