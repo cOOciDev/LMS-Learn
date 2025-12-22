@@ -5,6 +5,12 @@ const verifyToken = (token, secretKey) => {
   return jwt.verify(token, secretKey);
 };
 
+const applyNoCacheHeaders = (res) => {
+  res.set("Cache-Control", "no-store");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+};
+
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -54,6 +60,7 @@ const authenticate = async (req, res, next) => {
         userEmail: user.userEmail,
         role: user.role,
       };
+      applyNoCacheHeaders(res);
 
       next();
     } catch (tokenError) {
