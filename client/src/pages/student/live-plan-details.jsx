@@ -50,10 +50,7 @@ function LivePlanDetailsPage() {
     }
 
     try {
-      const response = await checkCoursePurchaseInfoService(
-        plan.courseId,
-        auth.user._id
-      );
+      const response = await checkCoursePurchaseInfoService(plan.courseId);
       if (response?.success && response?.data?.isEnrolled) {
         navigate(`/course-progress/${plan.courseId}`);
       } else {

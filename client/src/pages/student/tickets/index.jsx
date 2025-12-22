@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -179,6 +180,10 @@ function StudentTicketsPage() {
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>{t("tickets.createNew") || "Create New Ticket"}</DialogTitle>
+              <DialogDescription>
+                {t("tickets.createNewDescription") ||
+                  "Fill out the form below to open a new support request."}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateTicket} className="space-y-4">
               <div>
@@ -304,85 +309,99 @@ function StudentTicketsPage() {
       {/* Ticket Detail Dialog */}
       <Dialog open={isTicketDialogOpen} onOpenChange={setIsTicketDialogOpen}>
         <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
-          {selectedTicket && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="flex items-center gap-2">
-                    {selectedTicket.subject}
-                    <Badge variant={getStatusBadge(selectedTicket.status).variant}>
-                      {getStatusBadge(selectedTicket.status).label}
-                    </Badge>
-                  </DialogTitle>
-                  {selectedTicket.status !== "closed" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCloseTicket(selectedTicket._id)}
-                    >
-                      <X className="w-4 h-4 mr-2" />
-                      {t("tickets.close") || "Close Ticket"}
-                    </Button>
-                  )}
-                </div>
-              </DialogHeader>
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                {selectedTicket?.subject ||
+                  t("tickets.detailsTitle") ||
+                  "Ticket details"}
+                {selectedTicket && (
+                  <Badge variant={getStatusBadge(selectedTicket.status).variant}>
+                    {getStatusBadge(selectedTicket.status).label}
+                  </Badge>
+                )}
+              </DialogTitle>
+              {selectedTicket?.status && selectedTicket.status !== "closed" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectedTicket && handleCloseTicket(selectedTicket._id)}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  {t("tickets.close") || "Close Ticket"}
+                </Button>
+              )}
+            </div>
+            <DialogDescription>
+              {selectedTicket
+                ? t("tickets.detailsDescription") ||
+                  "Review your conversation and send replies."
+                : t("tickets.detailsPlaceholder") ||
+                  "Select a ticket to view its conversation."}
+            </DialogDescription>
+          </DialogHeader>
 
-              <div className="space-y-4 mt-4">
-                <div className="space-y-3">
-                  {selectedTicket.messages?.map((msg, idx) => (
+          {selectedTicket ? (
+            <div className="space-y-4 mt-4">
+              <div className="space-y-3">
+                {selectedTicket.messages?.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex ${msg.senderRole === "admin" ? "justify-start" : "justify-end"}`}
+                  >
                     <div
-                      key={idx}
-                      className={`flex ${msg.senderRole === "admin" ? "justify-start" : "justify-end"}`}
+                      className={`max-w-[80%] rounded-lg p-3 ${
+                        msg.senderRole === "admin"
+                          ? "bg-muted"
+                          : "bg-primary text-primary-foreground"
+                      }`}
                     >
-                      <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          msg.senderRole === "admin"
-                            ? "bg-muted"
-                            : "bg-primary text-primary-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-sm">{msg.senderName}</span>
-                          {msg.senderRole === "admin" && (
-                            <Badge variant="outline" className="text-xs">
-                              {t("common.admin")}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        <p className="text-xs opacity-70 mt-1">
-                          {formatDate(msg.createdAt)}
-                        </p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm">{msg.senderName}</span>
+                        {msg.senderRole === "admin" && (
+                          <Badge variant="outline" className="text-xs">
+                            {t("common.admin")}
+                          </Badge>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {selectedTicket.status !== "closed" && (
-                  <div className="border-t pt-4">
-                    <div className="space-y-2">
-                      <Label>{t("tickets.reply") || "Reply"}</Label>
-                      <Textarea
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder={t("tickets.replyPlaceholder") || "Type your message..."}
-                        rows={4}
-                      />
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={!newMessage.trim() || sendingMessage}
-                        className="w-full"
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        {sendingMessage
-                          ? t("common.loading") || "Sending..."
-                          : t("tickets.send") || "Send Message"}
-                      </Button>
+                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {formatDate(msg.createdAt)}
+                      </p>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
-            </>
+
+              {selectedTicket.status !== "closed" && (
+                <div className="border-t pt-4">
+                  <div className="space-y-2">
+                    <Label>{t("tickets.reply") || "Reply"}</Label>
+                    <Textarea
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder={t("tickets.replyPlaceholder") || "Type your message..."}
+                      rows={4}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim() || sendingMessage}
+                      className="w-full"
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      {sendingMessage
+                        ? t("common.loading") || "Sending..."
+                        : t("tickets.send") || "Send Message"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mt-6 text-center text-muted-foreground">
+              {t("tickets.noTicketSelected") ||
+                "Open a ticket from the list to read or reply."}
+            </div>
           )}
         </DialogContent>
       </Dialog>
