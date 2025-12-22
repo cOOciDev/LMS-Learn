@@ -48,12 +48,10 @@
     "currency": "تومان",
     "free": "رایگان",
     "new": "جدید",
+    "continue":"ادامه",
     "saveAndContinue": "ذخیره و ادامه",
     "publish": "انتشار"
-
-
   },
-
   "auth": {
     "signInToAccount": "ورود به حساب کاربری",
     "enterEmailPassword": "ایمیل و رمز عبور خود را وارد کنید",
@@ -67,9 +65,9 @@
     "failedToRegister": "ثبت کاربر انجام نشد",
     "loginSuccessful": "ورود موفق! در حال انتقال...",
     "loginFailed": "ورود ناموفق. لطفاً اطلاعات را بررسی کنید.",
-    "pleaseFillAllFields": "لطفاً تمام فیلدها را تکمیل کنید"
+    "pleaseFillAllFields": "لطفاً تمام فیلدها را تکمیل کنید",
+    "GUID": "ثبت‌نام عمومی فعال نیست. حساب‌ها توسط ادمین ساخته می‌شوند. برای دریافت دسترسی با پشتیبانی تماس بگیرید."
   },
-
   "admin": {
     "adminPanel": "پنل مدیریت",
     "panelSubtitle": "همه چیز را از یکجا مدیریت کنید",
@@ -189,27 +187,24 @@
     "categoryNameRequired": "نام دسته‌بندی الزامی است.",
     "deleteCategoryConfirm": "این دسته‌بندی حذف شود؟ قابل بازگشت نیست."
   },
-
   "instructor": {
     "instructorDashboard": "داشبورد",
     "myCourses": "دوره‌های من",
     "createCourse": "ایجاد دوره",
     "editCourse": "ویرایش دوره",
-    "totalStudentsIn":"لیست دانشجویان ثبت‌نام کرده",
+    "totalStudentsIn": "لیست دانشجویان ثبت‌نام کرده",
     "noStudentsEnrolled": "هنوز دانشجویی ثبت‌نام نکرده است",
     "studentsWillAppearHere": "وقتی دانشجویی در دوره‌های شما ثبت‌نام کند، اینجا نمایش داده می‌شود",
-    "addNewCourseDesc":"ایجاد دوره جدید",
-    "informations":"اطلاعات",
-    "liveClasses":"کلاس زنده"
+    "addNewCourseDesc": "ایجاد دوره جدید",
+    "informations": "اطلاعات",
+    "liveClasses": "کلاس زنده"
   },
-
   "createLiveEventCard": {
     "title": "ایجاد رویداد درس زنده",
     "description": "یک درس زنده یک‌بار برگزار کنید، دانشجویان منتخب را دعوت کنید و ارائه‌های تعاملی را همگام‌سازی کنید.",
     "button": "ایجاد رویداد زنده"
   },
-
-  "weekDays":{
+  "weekDays": {
     "Mon": "2 شنبه ",
     "Tue": "3 شنبه ",
     "Wed": "4 شنبه ",
@@ -218,7 +213,6 @@
     "Sat": "شنبه ",
     "Sun": "1 شنبه "
   },
-
   "createLivePlan": {
     "header": {
       "title": "ایجاد برنامه زنده",
@@ -261,7 +255,6 @@
       "minAttendanceRequired": "حداقل حضور الزامی است"
     }
   },
-
   "liveClassesManager": {
     "header": {
       "title": "کلاس‌های زنده",
@@ -300,14 +293,59 @@
     },
     "starting": "در حال شروع..."
   },
-
   "student": {
     "studentDashboard": "داشبورد دانشجو",
-    "enrolledCourses": "دوره‌های ثبت‌نام شده",
+    "enrolledCourses": "دوره‌های ثبت‌نام‌شده",
     "courseProgress": "پیشرفت دوره",
-    "purchaseCourse": "خرید دوره"
+    "purchaseCourse": "خرید دوره",
+    "backToCourses": "بازگشت به دوره‌های من",
+    "loadingCourse": "در حال بارگذاری دوره...",
+    "coursePath": "مسیر دوره",
+    "complete": "تکمیل",
+    "completed": "تکمیل شده",
+    "currentLecture": "در حال مشاهده",
+    "upNext": "بعدی",
+    "allLectures": "همه جلسات",
+    "courseOverview": "نمای کلی دوره",
+    "courseOverviewTitle": "نمای کلی و اهداف دوره",
+    "rateCourse": "امتیازدهی به دوره",
+    "rateHint": "با یک امتیاز و نظر کوتاه به دیگران کمک کنید.",
+    "ratePlaceholder": "بگویید چه چیزهایی خوب بود یا کجا می‌توانیم بهتر شویم.",
+    "ratingPoor": "نیاز به بهبود",
+    "ratingFair": "متوسط",
+    "ratingGood": "خوب",
+    "ratingStrong": "خیلی خوب",
+    "ratingExcellent": "عالی",
+    "stars": "ستاره",
+    "submitRating": "ثبت امتیاز",
+    "ratingSubmitting": "در حال ذخیره...",
+    "ratingSubmitted": "امتیاز ثبت شد",
+    "thanksForRating": "ممنون! نظر شما انگیزه‌ی مدرس‌ها را بیشتر می‌کند.",
+    "ratingThanksDialog": "ممنون که بازخوردتان را از طریق بخش امتیازدهی ثبت کردید.",
+    "ratePromptDialog": "از کارت امتیازدهی سمت راست، تجربه‌تان را ثبت کنید.",
+    "purchaseToContinue": "برای ادامه‌ی مشاهده‌ی جلسات، این دوره را خریداری کنید.",
+    "goToCourse": "رفتن به صفحه دوره",
+    "myCourses": "دوره‌های من",
+    "rewatchCourse": "مشاهده مجدد دوره",
+    "congrats": "تبریک!",
+    "courseFinished": "شما با موفقیت این دوره را به پایان رساندید.",
+    "exerciseTitle": "چالش تمرینی",
+    "exerciseInstructions": "این تمرین را انجام دهید و پاسخ خود را برای بررسی ارسال کنید.",
+    "exerciseAnswerPlaceholder": "راه‌حل، یادداشت‌ها یا لینک کارتان را اینجا بنویسید.",
+    "exerciseAttachmentPlaceholder": "لینک اختیاری (گیت‌هاب، گوگل‌درایو و ...)",
+    "exerciseSubmit": "ارسال تمرین",
+    "exerciseStatusPending": "در انتظار بررسی",
+    "exerciseStatusApproved": "تایید شد",
+    "exerciseStatusRejected": "نیاز به اصلاح",
+    "exerciseFeedbackLabel": "بازخورد بررسی‌کننده",
+    "certificatePending": "درخواست گواهی شما در انتظار تایید ادمین است.",
+    "certificateNotRequested": "برای درخواست گواهی، همه تمرین‌ها را ارسال کنید.",
+    "certificateRejected": "گواهی شما رد شد. لطفاً بازخورد را بررسی کنید.",
+    "certificateApprovedMessage": "گواهی صادر شد! تبریک بابت تکمیل این دوره.",
+    "completeCourseToRate": "دوره را تمام کنید تا امتیاز دهی فعال شود.",
+    "accessLoading": "درحال برسی دسترسی ...",
+    "accessDenied": "شما به محتویات این دوره دسترسی ندارید."
   },
-
   "filters": {
     "title": "فیلترها",
     "clearAll": "پاک کردن همه",
@@ -324,24 +362,21 @@
       "english": "انگلیسی"
     }
   },
-
   "sort": {
     "newest": "جدیدترین",
     "priceLowToHigh": "ارزان‌ترین",
     "priceHighToLow": "گران‌ترین",
     "titleAtoZ": "الف تا ی"
   },
-
   "coursesPage": {
     "title": "همه دوره‌ها",
     "searchPlaceholder": "جستجوی دوره...",
     "results": "{{count}} دوره یافت شد",
     "noCoursesFound": "دوره‌ای یافت نشد"
   },
-  "app":{
-    "name" : "فجرانه"
+  "app": {
+    "name": "فجرانه"
   },
-
   "course": {
     "title": "عنوان",
     "description": "توضیحات",
@@ -382,22 +417,23 @@
     "welcomeMessage": "پیام خوش آمد گویی دوره",
     "objectives": "سر فصل های دوره",
     "primaryLanguage": "زبان",
-    "subtitle": "زیر نویس دوره در زیر عنوان"
-  },
+    "subtitle": "زیر نویس دوره در زیر عنوان",
+    "accessDenied":"شما به محتویات این دوره دسترسی ندارید.",
+    "accessLoading": "برسی دسترسی ..."
 
+  },
   "pagination": {
     "previous": "قبلی",
     "next": "بعدی",
     "pageOf": "صفحه {current} از {total}"
   },
-
   "studentCourses": {
     "title": "دوره‌های من",
     "loading": "در حال بارگذاری دوره‌ها...",
     "startWatching": "شروع تماشا",
-    "noCourses": "هنوز دوره‌ای خریداری نکرده‌ای."
+    "noCourses": "هنوز دوره‌ای خریداری نکرده‌ای.",
+    "detailButton": "مشاهده جزئیات"
   },
-
   "home": {
     "heroTitle": "آینده‌ات را با یادگیری بساز",
     "heroDescription": "مهارت‌هایی یاد بگیر که امروز و فردای شغلی‌ات را تضمین می‌کنند. با بهترین مدرس‌ها، سریع و کاربردی یاد بگیر.",
@@ -411,7 +447,6 @@
     "noCoursesMessage": "دوره‌ای یافت نشد",
     "currency": "تومان"
   },
-
   "roadmap": {
     "title": "مسیر یادگیری",
     "description": "یک مسیر ساده و گام‌به‌گام برای یادگیری دوره‌ها",
@@ -432,7 +467,6 @@
     "customViewButton": "مشاهده نقشه راه",
     "customEmptyState": "هیچ دسته‌بندی مطابق جستجو پیدا نشد."
   },
-
   "roadmapCategory": {
     "notFound": "هیچ مسیر یادگیری برای این دسته‌بندی تعریف نشده است.",
     "subtitle": "هر مرحله را کامل کنید تا مرحله بعدی باز شود.",
@@ -444,13 +478,11 @@
     "completeStep": "تکمیل این مرحله",
     "unlockMessage": "مرحله قبلی را کامل کنید تا این مرحله باز شود."
   },
-
   "validation": {
     "required": "این فیلد الزامی است",
     "invalidEmail": "ایمیل نامعتبر است",
     "passwordTooShort": "رمز عبور باید حداقل ۶ حرف باشد"
   },
-
   "categories": {
     "Web_Development": "توسعه وب",
     "Backend_Development": "برنامه‌نویسی سمت سرور",
@@ -500,107 +532,108 @@
     "uploadFailedTitle": "بارگذاری ویدیو شکست خورد",
     "largeFilesHint": "آپلود فایل‌های بزرگ ممکن است چند دقیقه طول بکشد؛ لطفاً تا تکمیل شدن در همین صفحه بمانید.",
     "invalidVideo": "لطفاً فقط فایل ویدیویی انتخاب کنید",
-    "uploadFailed": "آپلود ویدیو با خطا مواجه شد"
+    "uploadFailed": "آپلود ویدیو با خطا مواجه شد",
+    "uploadedLectures": "جلسات آپلودشده",
+    "pendingUploads": "آپلودهای در انتظار",
+    "moduleCount": "تعداد ماژول‌ها",
+    "module": "ماژول",
+    "uploadedShort": "آپلود شده",
+    "totalLectures": "تعداد کل جلسات",
+    "fillDetails": "اطلاعات را تکمیل کنید",
+    "chunkSizeDescription": "آپلود به‌صورت تکه‌ای انجام می‌شود. برای پایداری بیشتر می‌توانید اندازه هر تکه را تغییر دهید.",
+    "lectures": "جلسات"
   },
   "courseLanding": {
     "title": "صفحه معرفی دوره",
     "subtitle": "اطلاعات اصلی دوره را وارد کنید تا جذاب‌تر به نظر برسد"
   },
-"about": {
-  "title": "درباره ما",
-  "heroDescription": "هدف ما ایجاد دسترسی آسان و رایگان به آموزش‌های باکیفیت برای علاقه مندان و همچنین ارائه دوره‌های حرفه‌ای برای عموم جامعه است.",
-  
-  "missionTitle": "ماموریت ما",
-  "missionText1": "این سامانه با هدف ارتقای سطح دانش و مهارت علاقه مندان و همچنین ارائه آموزش‌های تخصصی به عموم طراحی شده است.",
-  "missionFree": "• دوره‌های رایگان برای علاقه مندان",
-  "missionPaid": "• دوره‌های حرفه‌ای برای عموم",
-  "missionText2": "ما تلاش می‌کنیم یادگیری را ساده، جذاب و در دسترس نگه داریم.",
-
-  "teamTitle": "تیم سازنده",
-  "parsaName": "پارسا محمدی‌فر",
-  "parsaRole": "توسعه‌دهنده فول‌استک و  توسعه دهنده پلتفرم",
-
-  "mehdiName": "مهدی ابراهیمی",
-  "mehdiRole": "توسعه‌دهنده فول‌استک و طراح و توسعه دهنده پلتفرم",
-
-  "JAName": "مسعود عبدالهی",
-  "JARole": "پشتیبان و ادمین پلتفرم",
-  
-  "contactAdminCTA":"ارسال پیام",
-
-"funLine1": "اگر مشکلی دیدید،",
-"funNames": "کاری از candy و cOOci",
-"funLine2": "هست، تمام شد!"
-
-},
-"tickets": {
-  "myTickets": "تیکت‌های من",
-  "description": "مدیریت تیکت‌های پشتیبانی",
-  "createNew": "ایجاد تیکت جدید",
-  "create": "ایجاد تیکت",
-  "subject": "موضوع",
-  "subjectPlaceholder": "موضوع تیکت را وارد کنید",
-  "message": "پیام",
-  "messagePlaceholder": "مشکل خود را شرح دهید...",
-  "reply": "پاسخ",
-  "replyPlaceholder": "پیام خود را بنویسید...",
-  "send": "ارسال پیام",
-  "view": "مشاهده",
-  "close": "بستن تیکت",
-  "confirmClose": "آیا از بستن این تیکت مطمئن هستید؟",
-  "all": "همه",
-  "statusOpen": "باز",
-  "statusInProgress": "در حال بررسی",
-  "statusResolved": "حل شده",
-  "statusClosed": "بسته",
-  "createdAt": "تاریخ ایجاد",
-  "lastMessage": "آخرین پیام",
-  "noTickets": "تیکتی یافت نشد",
-  "createdSuccess": "تیکت با موفقیت ایجاد شد",
-  "closedSuccess": "تیکت با موفقیت بسته شد",
-  "messageSent": "پیام با موفقیت ارسال شد",
-  "errorLoading": "خطا در بارگذاری تیکت‌ها",
-  "errorCreating": "خطا در ایجاد تیکت",
-  "errorSending": "خطا در ارسال پیام",
-  "errorClosing": "خطا در بستن تیکت",
-  "fillAllFields": "لطفاً تمام فیلدها را تکمیل کنید"
-},
-"helpCenter": {
-  "title": "مرکز پشتیبانی",
-  "description": "مدیریت و پاسخ به تیکت‌های پشتیبانی کاربران",
-  "tickets": "تیکت‌ها",
-  "totalTickets": "کل تیکت‌ها",
-  "open": "باز",
-  "inProgress": "در حال بررسی",
-  "urgent": "فوری",
-  "filterByStatus": "فیلتر بر اساس وضعیت",
-  "filterByPriority": "فیلتر بر اساس اولویت",
-  "all": "همه",
-  "statusOpen": "باز",
-  "statusInProgress": "در حال بررسی",
-  "statusResolved": "حل شده",
-  "statusClosed": "بسته",
-  "priorityLow": "کم",
-  "priorityMedium": "متوسط",
-  "priorityHigh": "زیاد",
-  "priorityUrgent": "فوری",
-  "noTickets": "تیکتی یافت نشد",
-  "selectTicket": "یک تیکت را برای مشاهده جزئیات انتخاب کنید",
-  "user": "کاربر",
-  "createdAt": "تاریخ ایجاد",
-  "reply": "پاسخ",
-  "replyPlaceholder": "پاسخ خود را بنویسید...",
-  "sendReply": "ارسال پاسخ",
-  "updateStatus": "به‌روزرسانی وضعیت",
-  "updatePriority": "به‌روزرسانی اولویت",
-  "assignToMe": "اختصاص به من",
-  "replySent": "پاسخ با موفقیت ارسال شد",
-  "statusUpdated": "وضعیت با موفقیت به‌روزرسانی شد",
-  "assigned": "تیکت با موفقیت اختصاص داده شد",
-  "errorLoading": "خطا در بارگذاری تیکت‌ها",
-  "errorSending": "خطا در ارسال پاسخ",
-  "errorUpdating": "خطا در به‌روزرسانی وضعیت",
-  "errorAssigning": "خطا در اختصاص تیکت"
-}
-
+  "about": {
+    "title": "درباره ما",
+    "heroDescription": "هدف ما ایجاد دسترسی آسان و رایگان به آموزش‌های باکیفیت برای علاقه مندان و همچنین ارائه دوره‌های حرفه‌ای برای عموم جامعه است.",
+    "missionTitle": "ماموریت ما",
+    "missionText1": "این سامانه با هدف ارتقای سطح دانش و مهارت علاقه مندان و همچنین ارائه آموزش‌های تخصصی به عموم طراحی شده است.",
+    "missionFree": "• دوره‌های رایگان برای علاقه مندان",
+    "missionPaid": "• دوره‌های حرفه‌ای برای عموم",
+    "missionText2": "ما تلاش می‌کنیم یادگیری را ساده، جذاب و در دسترس نگه داریم.",
+    "teamTitle": "تیم سازنده",
+    "parsaName": "پارسا محمدی‌فر",
+    "parsaRole": "توسعه‌دهنده فول‌استک و  توسعه دهنده پلتفرم",
+    "mehdiName": "مهدی ابراهیمی",
+    "mehdiRole": "توسعه‌دهنده فول‌استک و طراح و توسعه دهنده پلتفرم",
+    "JAName": "مسعود عبدالهی",
+    "JARole": "پشتیبان و ادمین پلتفرم",
+    "contactAdminCTA": "ارسال پیام",
+    "funLine1": "اگر مشکلی دیدید،",
+    "funNames": "کاری از candy و cOOci",
+    "funLine2": "هست، تمام شد!"
+  },
+  "tickets": {
+    "myTickets": "تیکت‌های من",
+    "description": "مدیریت تیکت‌های پشتیبانی",
+    "createNew": "ایجاد تیکت جدید",
+    "create": "ایجاد تیکت",
+    "subject": "موضوع",
+    "subjectPlaceholder": "موضوع تیکت را وارد کنید",
+    "message": "پیام",
+    "messagePlaceholder": "مشکل خود را شرح دهید...",
+    "reply": "پاسخ",
+    "replyPlaceholder": "پیام خود را بنویسید...",
+    "send": "ارسال پیام",
+    "view": "مشاهده",
+    "close": "بستن تیکت",
+    "confirmClose": "آیا از بستن این تیکت مطمئن هستید؟",
+    "all": "همه",
+    "statusOpen": "باز",
+    "statusInProgress": "در حال بررسی",
+    "statusResolved": "حل شده",
+    "statusClosed": "بسته",
+    "createdAt": "تاریخ ایجاد",
+    "lastMessage": "آخرین پیام",
+    "noTickets": "تیکتی یافت نشد",
+    "createdSuccess": "تیکت با موفقیت ایجاد شد",
+    "closedSuccess": "تیکت با موفقیت بسته شد",
+    "messageSent": "پیام با موفقیت ارسال شد",
+    "errorLoading": "خطا در بارگذاری تیکت‌ها",
+    "errorCreating": "خطا در ایجاد تیکت",
+    "errorSending": "خطا در ارسال پیام",
+    "errorClosing": "خطا در بستن تیکت",
+    "fillAllFields": "لطفاً تمام فیلدها را تکمیل کنید"
+  },
+  "helpCenter": {
+    "title": "مرکز پشتیبانی",
+    "description": "مدیریت و پاسخ به تیکت‌های پشتیبانی کاربران",
+    "tickets": "تیکت‌ها",
+    "totalTickets": "کل تیکت‌ها",
+    "open": "باز",
+    "inProgress": "در حال بررسی",
+    "urgent": "فوری",
+    "filterByStatus": "فیلتر بر اساس وضعیت",
+    "filterByPriority": "فیلتر بر اساس اولویت",
+    "all": "همه",
+    "statusOpen": "باز",
+    "statusInProgress": "در حال بررسی",
+    "statusResolved": "حل شده",
+    "statusClosed": "بسته",
+    "priorityLow": "کم",
+    "priorityMedium": "متوسط",
+    "priorityHigh": "زیاد",
+    "priorityUrgent": "فوری",
+    "noTickets": "تیکتی یافت نشد",
+    "selectTicket": "یک تیکت را برای مشاهده جزئیات انتخاب کنید",
+    "user": "کاربر",
+    "createdAt": "تاریخ ایجاد",
+    "reply": "پاسخ",
+    "replyPlaceholder": "پاسخ خود را بنویسید...",
+    "sendReply": "ارسال پاسخ",
+    "updateStatus": "به‌روزرسانی وضعیت",
+    "updatePriority": "به‌روزرسانی اولویت",
+    "assignToMe": "اختصاص به من",
+    "replySent": "پاسخ با موفقیت ارسال شد",
+    "statusUpdated": "وضعیت با موفقیت به‌روزرسانی شد",
+    "assigned": "تیکت با موفقیت اختصاص داده شد",
+    "errorLoading": "خطا در بارگذاری تیکت‌ها",
+    "errorSending": "خطا در ارسال پاسخ",
+    "errorUpdating": "خطا در به‌روزرسانی وضعیت",
+    "errorAssigning": "خطا در اختصاص تیکت"
+  }
 }

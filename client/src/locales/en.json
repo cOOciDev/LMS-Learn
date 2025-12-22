@@ -48,10 +48,10 @@
     "currency": "Toman",
     "free": "Free",
     "new": "New",
+    "continue":"Continiue",
     "saveAndContinue": "save and continue",
     "publish": "Publish"
   },
-
   "auth": {
     "signInToAccount": "Sign in to your account",
     "enterEmailPassword": "Enter your email and password to access your account",
@@ -65,9 +65,9 @@
     "failedToRegister": "Failed to register user",
     "loginSuccessful": "Login successful! Redirecting...",
     "loginFailed": "Login failed. Please check your credentials and try again.",
-    "pleaseFillAllFields": "Please fill in all required fields"
+    "pleaseFillAllFields": "Please fill in all required fields",
+    "GUID": "Public signup is disabled. Accounts are created by an admin. Contact support to request access."
   },
-
   "admin": {
     "adminPanel": "Admin Panel",
     "panelSubtitle": "Manage everything in one place",
@@ -187,7 +187,6 @@
     "categoryNameRequired": "Category name is required.",
     "deleteCategoryConfirm": "Delete this category? It cannot be recovered."
   },
-
   "instructor": {
     "instructorDashboard": "Dashboard",
     "myCourses": "My Courses",
@@ -198,56 +197,52 @@
     "studentsWillAppearHere": "When a student enrolls in your courses, they will appear here",
     "addNewCourseDesc": "Add new course",
     "informations": "informations",
-    "liveClasses":"Live Classes"
-
+    "liveClasses": "Live Classes"
   },
-  
-    "liveClassesManager": {
-      "header": {
-        "title": "Live Classes",
-        "description": "Manage recurring live schedules, attendance rules, and session plans."
-      },
-      "buttons": {
-        "refresh": "Refresh",
-        "newLivePlan": "New Live Plan",
-        "publish": "Publish",
-        "archive": "Archive",
-        "startClass": "Start Class",
-        "viewAll": "View all live classes →"
-      },
-      "tabs": {
-        "all": "All",
-        "draft": "Draft",
-        "published": "Published",
-        "archived": "Archived"
-      },
-      "plan": {
-        "course": "Course",
-        "standalone": "Standalone live plan",
-        "courseUnavailable": "Linked course unavailable",
-        "timezone": "Timezone",
-        "weekdays": "Weekdays",
-        "attendance": "Attendance requirement"
-      },
-      "emptyState": {
-        "title": "No live classes yet",
-        "description": "Create your first live plan to automatically schedule sessions and notify students."
-      },
-      "statusBadge": {
-        "draft": "Draft",
-        "published": "Published",
-        "archived": "Archived"
-      },
-      "starting": "Starting..."
-    },  
-
-    "createLiveEventCard": {
-      "title": "Create a live lesson event",
-      "description": "Schedule a one-off live lesson, invite selected students, and sync interactive presentations.",
-      "button": "Create Live Event"
+  "liveClassesManager": {
+    "header": {
+      "title": "Live Classes",
+      "description": "Manage recurring live schedules, attendance rules, and session plans."
     },
-
-    "weekDays":{
+    "buttons": {
+      "refresh": "Refresh",
+      "newLivePlan": "New Live Plan",
+      "publish": "Publish",
+      "archive": "Archive",
+      "startClass": "Start Class",
+      "viewAll": "View all live classes →"
+    },
+    "tabs": {
+      "all": "All",
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "plan": {
+      "course": "Course",
+      "standalone": "Standalone live plan",
+      "courseUnavailable": "Linked course unavailable",
+      "timezone": "Timezone",
+      "weekdays": "Weekdays",
+      "attendance": "Attendance requirement"
+    },
+    "emptyState": {
+      "title": "No live classes yet",
+      "description": "Create your first live plan to automatically schedule sessions and notify students."
+    },
+    "statusBadge": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "starting": "Starting..."
+  },
+  "createLiveEventCard": {
+    "title": "Create a live lesson event",
+    "description": "Schedule a one-off live lesson, invite selected students, and sync interactive presentations.",
+    "button": "Create Live Event"
+  },
+  "weekDays": {
     "Mon": "Monday",
     "Tue": "Tuesday",
     "Wed": "Wednesday",
@@ -256,9 +251,7 @@
     "Sat": "Saturday",
     "Sun": "Sunday"
   },
-
-
-    "createLivePlan": {
+  "createLivePlan": {
     "header": {
       "title": "Create Live Plan",
       "description": "Define a recurring live class schedule linked to one of your courses."
@@ -300,14 +293,59 @@
       "minAttendanceRequired": "Minimum attendance is required"
     }
   },
-
   "student": {
     "studentDashboard": "Student Dashboard",
     "enrolledCourses": "Enrolled Courses",
     "courseProgress": "Course Progress",
-    "purchaseCourse": "Purchase Course"
+    "purchaseCourse": "Purchase Course",
+    "backToCourses": "Back to my courses",
+    "loadingCourse": "Loading course...",
+    "coursePath": "Course journey",
+    "complete": "complete",
+    "completed": "completed",
+    "currentLecture": "Watching now",
+    "upNext": "Up next",
+    "allLectures": "All lectures",
+    "courseOverview": "Course overview",
+    "courseOverviewTitle": "Course overview and goals",
+    "rateCourse": "Rate this course",
+    "rateHint": "Share a quick rating and review to help others.",
+    "ratePlaceholder": "Tell us what worked well or where we can improve.",
+    "ratingPoor": "Needs improvement",
+    "ratingFair": "Fair",
+    "ratingGood": "Good",
+    "ratingStrong": "Very good",
+    "ratingExcellent": "Excellent",
+    "stars": "stars",
+    "submitRating": "Submit rating",
+    "ratingSubmitting": "Saving...",
+    "ratingSubmitted": "Rating saved",
+    "thanksForRating": "Thanks, your review keeps instructors motivated!",
+    "ratingThanksDialog": "Thanks again for sharing your feedback via the rating panel.",
+    "ratePromptDialog": "Head to the rating card on the right to share your experience.",
+    "purchaseToContinue": "Purchase this course to continue watching the lessons.",
+    "goToCourse": "Go to course page",
+    "myCourses": "My courses",
+    "rewatchCourse": "Rewatch course",
+    "congrats": "Congratulations!",
+    "courseFinished": "You have successfully completed this course.",
+    "exerciseTitle": "Practice challenge",
+    "exerciseInstructions": "Complete this exercise and submit your answer for review.",
+    "exerciseAnswerPlaceholder": "Write your solution, notes, or include a link to your work.",
+    "exerciseAttachmentPlaceholder": "Optional link (GitHub, Google Drive, etc.)",
+    "exerciseSubmit": "Submit exercise",
+    "exerciseStatusPending": "Waiting for review",
+    "exerciseStatusApproved": "Approved",
+    "exerciseStatusRejected": "Needs revision",
+    "exerciseFeedbackLabel": "Reviewer feedback",
+    "certificatePending": "Your certificate request is waiting for admin approval.",
+    "certificateNotRequested": "Submit all exercises to request your certificate.",
+    "certificateRejected": "Your certificate was rejected. Please review the feedback.",
+    "certificateApprovedMessage": "Certificate issued! Congratulations on completing this course.",
+    "completeCourseToRate": "Finish the course to enable rating.",
+    "accessLoading": "Checking access...",
+    "accessDenied": "You do not have access to this course."
   },
-
   "filters": {
     "title": "Filters",
     "clearAll": "Clear All",
@@ -324,7 +362,6 @@
       "english": "English"
     }
   },
-
   "sort": {
     "newest": "Newest",
     "priceLowToHigh": "Price: Low to High",
@@ -334,14 +371,12 @@
   "app": {
     "name": "Fajrane"
   },
-
   "coursesPage": {
     "title": "All Courses",
     "searchPlaceholder": "Search courses...",
     "results": "{{count}} courses found",
     "noCoursesFound": "No courses found"
   },
-
   "course": {
     "title": "Title",
     "description": "Description",
@@ -384,20 +419,19 @@
     "primaryLanguage": "language",
     "subtitle": "course subtitle under tilte"
   },
-
   "pagination": {
     "previous": "Previous",
     "next": "Next",
     "pageOf": "Page {current} of {total}"
   },
-
   "studentCourses": {
     "title": "My Courses",
     "loading": "Loading your courses...",
     "startWatching": "Start Watching",
-    "noCourses": "You haven't purchased any courses yet."
-  },
+    "noCourses": "You haven't purchased any courses yet.",
+    "detailButton": "View Details"
 
+  },
   "home": {
     "heroTitle": "Build Your Future with Learning",
     "heroDescription": "Acquire skills that guarantee your career today and tomorrow. Learn quickly and practically with the best instructors.",
@@ -411,7 +445,6 @@
     "noCoursesMessage": "No courses found",
     "currency": "Toman"
   },
-
   "roadmap": {
     "title": "Learning Roadmap",
     "description": "A simple step-by-step path to learn courses",
@@ -432,7 +465,6 @@
     "customViewButton": "View Roadmap",
     "customEmptyState": "No categories match your search."
   },
-
   "roadmapCategory": {
     "notFound": "No roadmap defined for this category.",
     "subtitle": "Complete each milestone to unlock the next stage of your journey.",
@@ -444,13 +476,11 @@
     "completeStep": "Complete this step",
     "unlockMessage": "Finish the previous step to unlock this one."
   },
-
   "validation": {
     "required": "This field is required",
     "invalidEmail": "Invalid email address",
     "passwordTooShort": "Password must be at least 6 characters"
   },
-
   "categories": {
     "Web_Development": "Web Development",
     "Backend_Development": "Backend Development",
@@ -500,105 +530,109 @@
     "uploadFailedTitle": "Video upload failed",
     "largeFilesHint": "Large uploads can take a few minutes. Keep this tab open until completion.",
     "invalidVideo": "Please select video files only",
-    "uploadFailed": "Video upload failed"
+    "uploadFailed": "Video upload failed",
+    "uploadedLectures": "uploaded Lectures",
+    "pendingUploads": "Pending uploads",
+    "moduleCount": "Module count",
+    "module": "Module",
+    "uploadedShort": "Uploaded",
+    "totalLectures": "Total lectures",
+    "fillDetails": "Fill in the details",
+    "chunkSizeDescription": "Upload is done in chunks. You can change the chunk size for more stable uploads.",
+    "lectures": "Lectures",
+    "invalidVideo":"Please select video files only"
   },
   "courseLanding": {
     "title": "Course Landing Page",
     "subtitle": "Fill in the main course details to make it more attractive"
   },
- "about": {
-  "title": "About Us",
-  "heroDescription": "Our mission is to provide easy and free access to high-quality education for Enthusiasts, as well as advanced professional courses for the public.",
-  
-  "missionTitle": "Our Mission",
-  "missionText1": "This platform is designed to improve the knowledge and skills of Navy Enthusiasts while also offering specialized courses for everyone.",
-  "missionFree": "• Free courses for Enthusiasts",
-  "missionPaid": "• Professional courses for the public",
-  "missionText2": "We aim to keep learning simple, enjoyable, and accessible for all.",
-
-  "teamTitle": "The Team",
-  "parsaName": "Parsa Mohammadi-Far",
-  "parsaRole": "Full-stack developer and platform collaborator",
-
-  "mehdiName": "Mahdi Ebrahimi",
-  "mehdiRole": "Full-stack developer and platform designer ",
-
-  "JAName": "Massoud Abdollahi",
-  "JARole": "Support and platform admin",
-  "contactAdminCTA":"Send Message",
-
-  "funLine1": "If you find a bug, don't worry!",
-  "funNames": "A job by candy and cOOci",
-  "funLine2": "It's probably one of them who messed up 😄"
-},
-"tickets": {
-  "myTickets": "My Tickets",
-  "description": "Manage your support tickets",
-  "createNew": "Create New Ticket",
-  "create": "Create Ticket",
-  "subject": "Subject",
-  "subjectPlaceholder": "Enter ticket subject",
-  "message": "Message",
-  "messagePlaceholder": "Describe your issue...",
-  "reply": "Reply",
-  "replyPlaceholder": "Type your message...",
-  "send": "Send Message",
-  "view": "View",
-  "close": "Close Ticket",
-  "confirmClose": "Are you sure you want to close this ticket?",
-  "all": "All",
-  "statusOpen": "Open",
-  "statusInProgress": "In Progress",
-  "statusResolved": "Resolved",
-  "statusClosed": "Closed",
-  "createdAt": "Created",
-  "lastMessage": "Last message",
-  "noTickets": "No tickets found",
-  "createdSuccess": "Ticket created successfully",
-  "closedSuccess": "Ticket closed successfully",
-  "messageSent": "Message sent successfully",
-  "errorLoading": "Error loading tickets",
-  "errorCreating": "Error creating ticket",
-  "errorSending": "Error sending message",
-  "errorClosing": "Error closing ticket",
-  "fillAllFields": "Please fill all fields"
-},
-"helpCenter": {
-  "title": "Help Center",
-  "description": "Manage and respond to user support tickets",
-  "tickets": "Tickets",
-  "totalTickets": "Total Tickets",
-  "open": "Open",
-  "inProgress": "In Progress",
-  "urgent": "Urgent",
-  "filterByStatus": "Filter by Status",
-  "filterByPriority": "Filter by Priority",
-  "all": "All",
-  "statusOpen": "Open",
-  "statusInProgress": "In Progress",
-  "statusResolved": "Resolved",
-  "statusClosed": "Closed",
-  "priorityLow": "Low",
-  "priorityMedium": "Medium",
-  "priorityHigh": "High",
-  "priorityUrgent": "Urgent",
-  "noTickets": "No tickets found",
-  "selectTicket": "Select a ticket to view details",
-  "user": "User",
-  "createdAt": "Created",
-  "reply": "Reply",
-  "replyPlaceholder": "Type your reply...",
-  "sendReply": "Send Reply",
-  "updateStatus": "Update Status",
-  "updatePriority": "Update Priority",
-  "assignToMe": "Assign to Me",
-  "replySent": "Reply sent successfully",
-  "statusUpdated": "Status updated successfully",
-  "assigned": "Ticket assigned successfully",
-  "errorLoading": "Error loading tickets",
-  "errorSending": "Error sending reply",
-  "errorUpdating": "Error updating status",
-  "errorAssigning": "Error assigning ticket"
-}
-
+  "about": {
+    "title": "About Us",
+    "heroDescription": "Our mission is to provide easy and free access to high-quality education for Enthusiasts, as well as advanced professional courses for the public.",
+    "missionTitle": "Our Mission",
+    "missionText1": "This platform is designed to improve the knowledge and skills of Navy Enthusiasts while also offering specialized courses for everyone.",
+    "missionFree": "• Free courses for Enthusiasts",
+    "missionPaid": "• Professional courses for the public",
+    "missionText2": "We aim to keep learning simple, enjoyable, and accessible for all.",
+    "teamTitle": "The Team",
+    "parsaName": "Parsa Mohammadi-Far",
+    "parsaRole": "Full-stack developer and platform collaborator",
+    "mehdiName": "Mahdi Ebrahimi",
+    "mehdiRole": "Full-stack developer and platform designer ",
+    "JAName": "Massoud Abdollahi",
+    "JARole": "Support and platform admin",
+    "contactAdminCTA": "Send Message",
+    "funLine1": "If you find a bug, don't worry!",
+    "funNames": "A job by candy and cOOci",
+    "funLine2": "It's probably one of them who messed up 😄"
+  },
+  "tickets": {
+    "myTickets": "My Tickets",
+    "description": "Manage your support tickets",
+    "createNew": "Create New Ticket",
+    "create": "Create Ticket",
+    "subject": "Subject",
+    "subjectPlaceholder": "Enter ticket subject",
+    "message": "Message",
+    "messagePlaceholder": "Describe your issue...",
+    "reply": "Reply",
+    "replyPlaceholder": "Type your message...",
+    "send": "Send Message",
+    "view": "View",
+    "close": "Close Ticket",
+    "confirmClose": "Are you sure you want to close this ticket?",
+    "all": "All",
+    "statusOpen": "Open",
+    "statusInProgress": "In Progress",
+    "statusResolved": "Resolved",
+    "statusClosed": "Closed",
+    "createdAt": "Created",
+    "lastMessage": "Last message",
+    "noTickets": "No tickets found",
+    "createdSuccess": "Ticket created successfully",
+    "closedSuccess": "Ticket closed successfully",
+    "messageSent": "Message sent successfully",
+    "errorLoading": "Error loading tickets",
+    "errorCreating": "Error creating ticket",
+    "errorSending": "Error sending message",
+    "errorClosing": "Error closing ticket",
+    "fillAllFields": "Please fill all fields"
+  },
+  "helpCenter": {
+    "title": "Help Center",
+    "description": "Manage and respond to user support tickets",
+    "tickets": "Tickets",
+    "totalTickets": "Total Tickets",
+    "open": "Open",
+    "inProgress": "In Progress",
+    "urgent": "Urgent",
+    "filterByStatus": "Filter by Status",
+    "filterByPriority": "Filter by Priority",
+    "all": "All",
+    "statusOpen": "Open",
+    "statusInProgress": "In Progress",
+    "statusResolved": "Resolved",
+    "statusClosed": "Closed",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityUrgent": "Urgent",
+    "noTickets": "No tickets found",
+    "selectTicket": "Select a ticket to view details",
+    "user": "User",
+    "createdAt": "Created",
+    "reply": "Reply",
+    "replyPlaceholder": "Type your reply...",
+    "sendReply": "Send Reply",
+    "updateStatus": "Update Status",
+    "updatePriority": "Update Priority",
+    "assignToMe": "Assign to Me",
+    "replySent": "Reply sent successfully",
+    "statusUpdated": "Status updated successfully",
+    "assigned": "Ticket assigned successfully",
+    "errorLoading": "Error loading tickets",
+    "errorSending": "Error sending reply",
+    "errorUpdating": "Error updating status",
+    "errorAssigning": "Error assigning ticket"
+  }
 }
