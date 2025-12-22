@@ -25,8 +25,8 @@ function InstructorMobileSidebar({ open, onClose }) {
     onClose?.();
   };
 
-  const handleLogout = () => {
-    resetCredentials();
+  const handleLogout = async () => {
+    await resetCredentials();
     sessionStorage.clear();
     window.location.href = "/auth";
   };

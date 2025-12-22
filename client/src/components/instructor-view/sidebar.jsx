@@ -77,8 +77,8 @@ function InstructorSidebar() {
     fetchAllCourses();
   }, []);
 
-  function handleLogout() {
-    resetCredentials();
+  async function handleLogout() {
+    await resetCredentials();
     sessionStorage.clear();
     window.location.href = "/auth";
   }

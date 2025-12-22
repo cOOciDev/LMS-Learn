@@ -16,8 +16,8 @@ function StudentViewCommonHeader() {
   const isRTL = language === "fa";
   const [open, setOpen] = useState(false);
 
-  function handleLogout() {
-    resetCredentials();
+  async function handleLogout() {
+    await resetCredentials();
     sessionStorage.clear();
     navigate("/auth");
   }
