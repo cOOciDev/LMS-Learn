@@ -17,6 +17,8 @@ const StudentCoursesSchema = new mongoose.Schema({
       },
       review: String,
       ratedAt: Date,
+      certificateIssuedAt: Date,
+      certificateCode: String,
     },
   ],
 });

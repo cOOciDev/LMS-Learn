@@ -22,6 +22,15 @@ const LectureSchema = new mongoose.Schema(
       default: 0,
     },
     description: String,
+    exerciseRequired: {
+      type: Boolean,
+      default: true,
+    },
+    exercisePrompt: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   { _id: true }
 );
