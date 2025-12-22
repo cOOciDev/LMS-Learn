@@ -1,6 +1,11 @@
 // client/src/services/index.js
 import axiosInstance from "@/api/axiosInstance";
 
+const withCacheBuster = (url) => {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}_=${Date.now()}`;
+};
+
 export async function registerService(formData) {
   const { data } = await axiosInstance.post("/auth/register", formData);
 
@@ -20,6 +25,11 @@ export async function loginService(formData) {
 export async function checkAuthService() {
   const { data } = await axiosInstance.get("/auth/check-auth");
 
+  return data;
+}
+
+export async function logoutService() {
+  const { data } = await axiosInstance.post("/auth/logout");
   return data;
 }
 
@@ -156,32 +166,34 @@ export async function mediaBulkUploadService(formData, onProgressCallback) {
 
 // client/src/services/index.js — فقط این تابع رو عوض کن
 export async function fetchStudentViewCourseListService(queryParams = {}) {
-  // اگر queryParams یه شیء بود، به string تبدیل کن
   const queryString = new URLSearchParams(queryParams).toString();
-  const endpoint = queryString ? `/get?${queryString}` : "/get";
+  const endpoint = queryString
+    ? `/student/courses/get?${queryString}`
+    : "/student/courses/get";
 
   const { data } = await axiosInstance.get(endpoint);
   return data;
 }
 
+
 export async function fetchStudentViewCourseDetailsService(courseId) {
   const { data } = await axiosInstance.get(
-    `/student/course/get/details/${courseId}`
+    `/student/courses/get/details/${courseId}`
   );
 
   return data;
 }
 
-export async function checkCoursePurchaseInfoService(courseId, studentId) {
+export async function checkCoursePurchaseInfoService(courseId) {
   const { data } = await axiosInstance.get(
-    `/student/course/purchase-info/${courseId}/${studentId}`
+    withCacheBuster(`/student/courses/purchase-info/${courseId}`)
   );
 
   return data;
 }
 
 export async function createPaymentService(formData) {
-  const { data } = await axiosInstance.post(`/student/order/create`, formData);
+  const { data } = await axiosInstance.post(`/student/orders/create`, formData);
 
   return data;
 }
@@ -191,7 +203,7 @@ export async function captureAndFinalizePaymentService(
   payerId,
   orderId
 ) {
-  const { data } = await axiosInstance.post(`/student/order/capture`, {
+  const { data } = await axiosInstance.post(`/student/orders/capture`, {
     paymentId,
     payerId,
     orderId,
@@ -200,27 +212,26 @@ export async function captureAndFinalizePaymentService(
   return data;
 }
 
-export async function fetchStudentBoughtCoursesService(studentId) {
+export async function fetchStudentBoughtCoursesService() {
   const { data } = await axiosInstance.get(
-    `/student/courses-bought/get/${studentId}`
+    withCacheBuster(`/student/my-courses/get`)
   );
 
   return data;
 }
 
-export async function getCurrentCourseProgressService(userId, courseId) {
+export async function getCurrentCourseProgressService(courseId) {
   const { data } = await axiosInstance.get(
-    `/student/course-progress/get/${userId}/${courseId}`
+    withCacheBuster(`/student/course-progress/get/${courseId}`)
   );
 
   return data;
 }
 
-export async function markLectureAsViewedService(userId, courseId, lectureId) {
+export async function markLectureAsViewedService(courseId, lectureId) {
   const { data } = await axiosInstance.post(
     `/student/course-progress/mark-lecture-viewed`,
     {
-      userId,
       courseId,
       lectureId,
     }
@@ -229,15 +240,36 @@ export async function markLectureAsViewedService(userId, courseId, lectureId) {
   return data;
 }
 
-export async function resetCourseProgressService(userId, courseId) {
+export async function resetCourseProgressService(courseId) {
   const { data } = await axiosInstance.post(
     `/student/course-progress/reset-progress`,
     {
-      userId,
       courseId,
     }
   );
 
+  return data;
+}
+
+export async function getCourseExercisesService(courseId) {
+  const { data } = await axiosInstance.get(
+    withCacheBuster(`/student/course-progress/exercises/${courseId}`)
+  );
+  return data;
+}
+
+export async function submitCourseExerciseService(payload) {
+  const { data } = await axiosInstance.post(
+    `/student/course-progress/exercises/submit`,
+    payload
+  );
+  return data;
+}
+
+export async function getCourseCertificateStatusService(courseId) {
+  const { data } = await axiosInstance.get(
+    withCacheBuster(`/student/course-progress/certificate/${courseId}`)
+  );
   return data;
 }
 
