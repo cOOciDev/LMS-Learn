@@ -30,8 +30,8 @@ function CourseSettings() {
   const handleImageUpload = async (file) => {
     if (!file || !file.type.startsWith("image/")) {
       toast({
-        title: isRTL ? "خطا" : "Error",
-        description: isRTL ? "فقط فایل تصویری مجاز است" : "Only image files are allowed",
+        title: "خطا",
+        description: "فقط فایل‌های تصویری می‌توانند آپلود شوند.",
         variant: "destructive",
       });
       return;
@@ -51,21 +51,22 @@ function CourseSettings() {
           await mediaDeleteService(courseLandingFormData.image_public_id);
         }
 
+        const uploadedUrl = response.data.secure_url || response.data.url;
         setCourseLandingFormData({
           ...courseLandingFormData,
-          image: response.data.url,
+          image: uploadedUrl,
           image_public_id: response.data.public_id,
         });
 
         toast({
-          title: isRTL ? "موفق" : "Success",
-          description: isRTL ? "تصویر دوره با موفقیت آپلود شد" : "Course image uploaded successfully",
+          title: "موفق",
+          description: "تصویر دوره با موفقیت آپلود شد.",
         });
       }
     } catch (error) {
       toast({
-        title: isRTL ? "خطا" : "Error",
-        description: isRTL ? "آپلود تصویر ناموفق بود" : "Failed to upload image",
+        title: "خطا",
+        description: "آپلود تصویر با خطا مواجه شد.",
         variant: "destructive",
       });
     } finally {
@@ -83,7 +84,7 @@ function CourseSettings() {
       image: "",
       image_public_id: "",
     });
-    toast({ description: isRTL ? "تصویر حذف شد" : "Image removed" });
+    toast({ description: "تصویر دوره حذف شد." });
   };
 
   const handleDragOver = (e) => {

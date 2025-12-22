@@ -26,7 +26,7 @@ function CourseLanding({ onNext }) {
   );
 
 const validateAndNext = () => {
-  const requiredFields = landingControls.filter(item => item.required);
+  const requiredFields = landingControls.filter((item) => item.required);
 
   for (const field of requiredFields) {
     const value = courseLandingFormData[field.name];
@@ -36,15 +36,12 @@ const validateAndNext = () => {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
         element.focus();
       }
-      toast.error(isRTL ? `${field.label} الزامی است` : `${field.label} is required`);
+      toast.error(`فیلد ${field.label} الزامی است.`);
       return false;
     }
   }
 
-  // اضافه شده: چک حداقل ۵ کاراکتر برای عنوان
-
-
-  toast.success(isRTL ? "به مرحله بعد رفتید!" : "Moved to next step!");
+  toast.success("مرحله معرفی دوره با موفقیت ثبت شد.");
   window.scrollTo({ top: 0, behavior: "smooth" });
   onNext();
   return true;

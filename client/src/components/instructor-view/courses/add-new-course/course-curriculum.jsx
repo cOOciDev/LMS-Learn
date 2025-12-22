@@ -56,6 +56,14 @@ const isVideoFile = (file) => {
   return VIDEO_EXTENSIONS.has(`.${ext}`);
 };
 
+const toSecureUrl = (item) => {
+  const candidate = item?.secure_url || item?.url;
+  if (!candidate) return "";
+  return candidate.startsWith("http://")
+    ? candidate.replace(/^http:/, "https:")
+    : candidate;
+};
+
 function CourseCurriculum({ onNext }) {
   const {
     courseCurriculumFormData,
@@ -93,22 +101,16 @@ function CourseCurriculum({ onNext }) {
   const handleSaveAndContinue = () => {
     if (!isCurriculumValid()) {
       toast({
-        title: isRTL ? "برنامه درسی ناتمام است" : "Curriculum Incomplete",
-        description: isRTL
-          ? "لطفاً عنوان و ویدیو را برای تمام جلسات وارد کنید."
-          : "Please add a title and video for all lectures.",
+        title: "خطا",
+        description: "برای رفتن به تنظیمات باید همه جلسات عنوان و ویدیو داشته باشند.",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: isRTL
-        ? "عالی! همه چیز کامل است"
-        : "Great! All lectures are complete",
-      description: isRTL
-        ? "در حال انتقال به تنظیمات..."
-        : "Moving to settings...",
+      title: "آماده‌اید",
+      description: "جلسات کامل شدند؛ حالا به تنظیمات دوره بروید.",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
     onNext?.();
@@ -120,9 +122,9 @@ function CourseCurriculum({ onNext }) {
     const validFiles = Array.from(files).filter((f) => isVideoFile(f));
     if (validFiles.length === 0) {
       toast({
-        title: t("common.error") || "???",
+        title: t("common.error") || "Error",
         description:
-          t("curriculum.invalidVideo") || "???? ??????? ??????? ???",
+          t("curriculum.invalidVideo") || "Please select video files only",
         variant: "destructive",
       });
       return;
@@ -158,7 +160,7 @@ function CourseCurriculum({ onNext }) {
             : `${t("curriculum.lecture") || "Lecture"} ${
                 courseCurriculumFormData.length + i + 1
               }`,
-        videoUrl: item.url,
+        videoUrl: toSecureUrl(item),
         public_id: item.public_id,
         freePreview:
           replaceIndex !== null
@@ -173,18 +175,13 @@ function CourseCurriculum({ onNext }) {
       );
 
       toast({
-        title: t("curriculum.uploadSuccessTitle") || "Videos uploaded",
-        description:
-          t("curriculum.uploadSuccessDescription") ||
-          `${validFiles.length} video(s) are processed and ready.`,
+        title: "آپلود موفق",
+        description: `${validFiles.length} ویدیو با موفقیت آماده شد.`,
       });
     } catch (err) {
-      const errMessage =
-        err?.response?.data?.message ||
-        t("curriculum.uploadFailed") ||
-        (isRTL ? "بارگذاری با مشکل مواجه شد" : "Failed to upload video");
+      const errMessage = err?.response?.data?.message || "خطا در آپلود ویدیوها";
       toast({
-        title: t("curriculum.uploadFailedTitle") || t("common.error"),
+        title: "خطا",
         description: errMessage,
         variant: "destructive",
       });
