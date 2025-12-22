@@ -50,6 +50,7 @@ export const signInFormControls = [
     placeholder: "Enter your password",
     type: "password",
     componentType: "input",
+    showPasswordToggle: true,
   },
 ];
 

@@ -1,6 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { initialSignInFormData, initialSignUpFormData } from "@/config";
-import { checkAuthService, loginService, registerService } from "@/services";
+import {
+  checkAuthService,
+  loginService,
+  logoutService,
+  registerService,
+} from "@/services";
 import { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext(null);
@@ -25,17 +30,8 @@ export default function AuthProvider({ children }) {
       const data = await loginService(signInFormData);
 
       if (data?.success) {
-        // Store tokens
-        sessionStorage.setItem(
-          "accessToken",
-          JSON.stringify(data.data.accessToken)
-        );
-        if (data.data.refreshToken) {
-          sessionStorage.setItem(
-            "refreshToken",
-            JSON.stringify(data.data.refreshToken)
-          );
-        }
+        // Store access token
+        sessionStorage.setItem("accessToken", data.data.accessToken);
         
         // Update auth state
         const userData = data.data.user;
@@ -94,7 +90,6 @@ export default function AuthProvider({ children }) {
       console.error("Auth check error:", error);
       // Clear tokens if check fails
       sessionStorage.removeItem("accessToken");
-      sessionStorage.removeItem("refreshToken");
       setAuth({
         authenticate: false,
         user: null,
@@ -104,11 +99,21 @@ export default function AuthProvider({ children }) {
     }
   }
 
-  function resetCredentials() {
-    setAuth({
-      authenticate: false,
-      user: null,
-    });
+  async function resetCredentials() {
+    try {
+      await logoutService();
+    } catch (error) {
+      console.error(
+        "Logout failed:",
+        error?.response?.data || error?.message || error
+      );
+    } finally {
+      sessionStorage.removeItem("accessToken");
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
+    }
   }
 
   useEffect(() => {
