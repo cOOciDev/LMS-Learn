@@ -107,8 +107,13 @@ function FormControls({ formControls = [], formData, setFormData, isRTL = false 
     <div className="space-y-6">
       {formControls.map((item) => (
         <div key={item.name} className="space-y-2">
-          <Label htmlFor={item.name} className="font-medium">
+          <Label htmlFor={item.name} className="font-medium flex items-center gap-1">
             {item.label}
+            {item.required && (
+              <span aria-hidden className="text-destructive text-xs font-bold">
+                *
+              </span>
+            )}
           </Label>
           {renderComponentByType(item)}
         </div>
