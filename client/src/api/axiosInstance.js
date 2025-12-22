@@ -2,64 +2,86 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5000",
+  withCredentials: true,
+  headers: {
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+  },
 });
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    try {
-      const tokenString = sessionStorage.getItem("accessToken");
-      if (tokenString) {
-        const accessToken = JSON.parse(tokenString);
-        if (accessToken) {
-          config.headers.Authorization = `Bearer ${accessToken}`;
-        }
-      }
-    } catch (error) {
-      console.error("Error parsing access token:", error);
+    const token = sessionStorage.getItem("accessToken");
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (err) => Promise.reject(err)
 );
 
 // Response interceptor for error handling
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const subscribeTokenRefresh = (cb) => {
+  refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (token) => {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+};
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If token expired and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      try {
-        // Try to refresh token
-        const refreshTokenString = sessionStorage.getItem("refreshToken");
-        if (refreshTokenString) {
-          const refreshToken = JSON.parse(refreshTokenString);
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
           const response = await axios.post(
             `${axiosInstance.defaults.baseURL}/auth/refresh`,
-            { refreshToken }
+            null,
+            { withCredentials: true }
           );
 
           if (response.data?.success) {
             const newAccessToken = response.data.data.accessToken;
-            sessionStorage.setItem(
-              "accessToken",
-              JSON.stringify(newAccessToken)
-            );
+            sessionStorage.setItem("accessToken", newAccessToken);
+            onRefreshed(newAccessToken);
+            isRefreshing = false;
+            originalRequest.headers = originalRequest.headers || {};
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return axiosInstance(originalRequest);
           }
-        }
       } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
         sessionStorage.removeItem("accessToken");
-        sessionStorage.removeItem("refreshToken");
-        window.location.href = "/auth";
+        isRefreshing = false;
+        onRefreshed(null);
+        if (!originalRequest || !originalRequest.url?.includes("/auth/check-auth")) {
+          window.location.href = "/auth";
+        }
         return Promise.reject(refreshError);
       }
+      }
+
+      return new Promise((resolve, reject) => {
+        subscribeTokenRefresh((token) => {
+          if (!token) {
+            reject(error);
+            return;
+          }
+          originalRequest.headers = originalRequest.headers || {};
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          resolve(axiosInstance(originalRequest));
+        });
+      });
     }
 
     return Promise.reject(error);

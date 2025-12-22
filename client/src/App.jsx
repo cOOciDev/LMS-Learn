@@ -109,6 +109,7 @@ function App() {
         <Route path="courses" element={<StudentViewCoursesPage />} />
         <Route path="roadmap" element={<RoadmapPage />} />
         <Route path="roadmap/category/:slug" element={<StudentCategoryRoadmapPage />} />
+        <Route path="course/details" element={<StudentViewCourseDetailsPage />} />
         <Route path="course/details/:id" element={<StudentViewCourseDetailsPage />} />
         <Route path="payment-return" element={<PaypalPaymentReturnPage />} />
         <Route path="student-courses" element={<StudentCoursesPage />} />
