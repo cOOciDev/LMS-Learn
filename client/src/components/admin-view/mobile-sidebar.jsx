@@ -25,8 +25,8 @@ function AdminMobileSidebar({ open, onClose }) {
     onClose?.();
   }
 
-  function handleLogout() {
-    resetCredentials();
+  async function handleLogout() {
+    await resetCredentials();
     sessionStorage.clear();
     navigate("/auth");
     onClose?.();

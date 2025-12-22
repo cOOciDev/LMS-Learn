@@ -114,8 +114,8 @@ function AdminSidebar() {
     navigate(path);
   }
 
-  function handleLogout() {
-    resetCredentials();
+  async function handleLogout() {
+    await resetCredentials();
     sessionStorage.clear();
     navigate("/auth");
   }
