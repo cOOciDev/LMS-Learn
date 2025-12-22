@@ -124,6 +124,16 @@ function AuthPage() {
               {t("auth.enterEmailPassword")}
             </CardDescription>
           </CardHeader>
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm space-y-1">
+            {/* <p className="font-semibold text-muted-foreground">
+              ثبت‌نام عمومی فعال نیست. حساب‌ها توسط ادمین ساخته می‌شوند. برای دریافت دسترسی با پشتیبانی تماس بگیرید.
+              Public signup is disabled. Accounts are created by an admin. Contact support to request access.
+            </p> */}
+            <p className="text-muted-foreground">
+              
+              {t("auth.GUID")}
+            </p>
+          </div>
           <CardContent className="space-y-2">
             <CommonForm
               formControls={translatedFormControls}
