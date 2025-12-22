@@ -19,8 +19,10 @@ const instructorLiveClassPlanRoutes = require("./routes/instructor-routes/live-c
 const studentRoutes = require("./routes/student-routes/index");
 const roadmapRoutes = require("./routes/roadmap-routes");
 const categoryRoutes = require("./routes/category-routes");
+const noStore = require("./middleware/no-store");
 
 const app = express();
+app.disable("etag");
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -29,7 +31,7 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control", "Pragma"],
     credentials: true,
   })
 );
@@ -51,12 +53,12 @@ app.get("/health", async (req, res) => {
 connectDB();
 
 // Routes configuration
-app.use("/auth", authRoutes);
-app.use("/admin", adminRoutes);
+app.use("/auth", noStore, authRoutes);
+app.use("/admin", noStore, adminRoutes);
 app.use("/media", mediaRoutes);
-app.use("/instructor/course", instructorCourseRoutes);
-app.use("/instructor/live-class-plans", instructorLiveClassPlanRoutes);
-app.use("/student", studentRoutes);
+app.use("/instructor/course", noStore, instructorCourseRoutes);
+app.use("/instructor/live-class-plans", noStore, instructorLiveClassPlanRoutes);
+app.use("/student", noStore, studentRoutes);
 // app.use("/student/course", studentViewCourseRoutes);
 // app.use("/student/live-class-plans", studentLiveClassPlanRoutes);
 // app.use("/student/order", studentViewOrderRoutes);

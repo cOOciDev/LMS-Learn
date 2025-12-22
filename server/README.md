@@ -63,7 +63,7 @@ A comprehensive Learning Management System backend built with Node.js, Express, 
 - `GET /student/course/get/details/:id` - Get course details
 - `GET /student/course/featured` - Get featured courses
 - `GET /student/course/category/:category` - Get courses by category
-- `GET /student/course/purchase-info/:courseId/:studentId` - Check purchase info
+- `GET /student/course/purchase-info/:courseId` - Check purchase info
 
 ## Environment Variables
 
