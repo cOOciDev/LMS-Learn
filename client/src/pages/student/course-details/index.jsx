@@ -4,19 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import VideoPlayer from "@/components/video-player";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
 import {
   checkCoursePurchaseInfoService,
   createPaymentService,
+  fetchStudentBoughtCoursesService,
   fetchStudentViewCourseDetailsService,
   fetchStudentViewCourseListService,
 } from "@/services";
@@ -24,8 +22,61 @@ import { CheckCircle, Globe, Lock, PlayCircle } from "lucide-react";
 import { useContext, useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js"; 
+import { useToast } from "@/hooks/use-toast";
 const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = STRIPE_PUBLIC_KEY ? loadStripe(STRIPE_PUBLIC_KEY) : null;
+
+const MESSAGES = {
+  invalidId: "شناسه دوره معتبر نیست. لطفاً از لیست دوره‌ها وارد شوید.",
+  notFound: "دوره پیدا نشد.",
+  fetchError: "خطا در دریافت اطلاعات دوره. لطفاً دوباره تلاش کنید.",
+  retry: "تلاش مجدد",
+  backToCourses: "بازگشت به لیست دوره‌ها",
+  loading: "در حال بارگذاری اطلاعات دوره...",
+};
+
+const normalizeCourseFromResponse = (responseData, courseId) => {
+  if (!responseData) return null;
+
+  const root = responseData;
+  const dataBlock = root?.data ?? root;
+
+  const pickFromArray = (list) => {
+    if (!Array.isArray(list) || list.length === 0) return null;
+    const matched = list.find(
+      (item) => item?._id === courseId || item?.id === courseId
+    );
+    return matched || list[0];
+  };
+
+  if (Array.isArray(dataBlock)) return pickFromArray(dataBlock);
+  if (Array.isArray(dataBlock?.courses))
+    return pickFromArray(dataBlock.courses);
+  if (Array.isArray(dataBlock?.data)) return pickFromArray(dataBlock.data);
+  if (Array.isArray(dataBlock?.myCourses))
+    return pickFromArray(dataBlock.myCourses);
+  if (dataBlock?._id || dataBlock?.id) return dataBlock;
+  if (dataBlock?.course) return dataBlock.course;
+
+  return null;
+};
+
+const normalizePreviewUrl = (value) => {
+  if (!value) return "";
+  return value.startsWith("http://") ? value.replace(/^http:/, "https:") : value;
+};
+
+const normalizeCourseListPayload = (responseData) => {
+  const root = responseData;
+  const dataBlock = root?.data ?? root;
+
+  if (Array.isArray(dataBlock)) return dataBlock;
+  if (Array.isArray(dataBlock?.courses)) return dataBlock.courses;
+  if (Array.isArray(dataBlock?.myCourses)) return dataBlock.myCourses;
+  if (Array.isArray(dataBlock?.data)) return dataBlock.data;
+
+  return [];
+};
 
 function StudentViewCourseDetailsPage() {
   const {
@@ -35,12 +86,29 @@ function StudentViewCourseDetailsPage() {
     setCurrentCourseDetailsId,
     loadingState,
     setLoadingState,
+    setStudentBoughtCoursesList,
   } = useContext(StudentContext);
 
   const { auth } = useContext(AuthContext);
+  const { toast } = useToast();
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  const [pageError, setPageError] = useState("");
+
+  const notifyError = (description) =>
+    toast({ title: "خطا", description, variant: "destructive" });
+
+  const refreshStudentCourses = async () => {
+    if (!auth?.user?._id) return;
+    try {
+      const response = await fetchStudentBoughtCoursesService();
+      const normalized = normalizeCourseListPayload(response);
+      setStudentBoughtCoursesList(normalized);
+    } catch (refreshError) {
+      console.error("Failed to refresh student courses:", refreshError);
+    }
+  };
 
   const [displayCurrentVideoFreePreview, setDisplayCurrentVideoFreePreview] = useState(null);
   const [showFreePreviewDialog, setShowFreePreviewDialog] = useState(false);
@@ -94,15 +162,21 @@ function StudentViewCourseDetailsPage() {
       setLoadingInstructorCourses(false);
     }
   }, [studentViewCourseDetails, currentCourseDetailsId]);
-  // مهم: وقتی آیدی دوره عوض شد، فوراً داده‌های قبلی رو پاک کن
+  // هماهنگ‌سازی شناسه دوره
   useEffect(() => {
-    if (id && id !== currentCourseDetailsId) {
+    if (!id) {
+      setPageError(MESSAGES.invalidId);
+      setLoadingState(false);
       setStudentViewCourseDetails(null);
+      setCurrentCourseDetailsId(null);
       setInstructorCourses([]);
-      setLoadingInstructorCourses(false);
       setPurchaseInfo(null);
+      return;
     }
-  }, [id, currentCourseDetailsId]);
+
+    setPageError("");
+    setCurrentCourseDetailsId(id);
+  }, [id]);
 
   // فقط وقتی دوره اصلی کامل لود شد، دوره‌های مدرس رو بگیر
   useEffect(() => {
@@ -113,37 +187,78 @@ function StudentViewCourseDetailsPage() {
 
   // بقیه توابع اصلی
   async function fetchStudentViewCourseDetails() {
+    if (!currentCourseDetailsId) {
+      setPageError(MESSAGES.invalidId);
+      setLoadingState(false);
+      setStudentViewCourseDetails(null);
+      return;
+    }
+
     setLoadingState(true);
     try {
-      if (auth?.user?._id && currentCourseDetailsId) {
-        const checkResponse = await checkCoursePurchaseInfoService(currentCourseDetailsId, auth.user._id);
+      if (auth?.user?._id) {
+        const checkResponse = await checkCoursePurchaseInfoService(
+          currentCourseDetailsId
+        );
         if (checkResponse?.success) setPurchaseInfo(checkResponse.data);
         else setPurchaseInfo(null);
       }
 
-      if (currentCourseDetailsId) {
-        const response = await fetchStudentViewCourseDetailsService(currentCourseDetailsId);
-        if (response?.success) {
-          setStudentViewCourseDetails(response.data?.course || null);
-          setPurchaseInfo(prev => ({ ...(prev || {}), enrollment: response.data?.enrollment }));
-        }
+      const response = await fetchStudentViewCourseDetailsService(
+        currentCourseDetailsId
+      );
+      const normalizedCourse = normalizeCourseFromResponse(
+        response,
+        currentCourseDetailsId
+      );
+
+      if (!normalizedCourse) {
+        setPageError(MESSAGES.notFound);
+        setStudentViewCourseDetails(null);
+      } else {
+        setStudentViewCourseDetails(normalizedCourse);
+        setPageError("");
       }
+
+      setPurchaseInfo((prev) => ({
+        ...(prev || {}),
+        enrollment: response?.data?.enrollment || response?.enrollment,
+      }));
+    } catch (err) {
+      console.error(
+        "Course details fetch failed:",
+        err?.response?.status ?? err?.message,
+        err?.response?.data
+      );
+      setPageError(MESSAGES.fetchError);
     } finally {
       setLoadingState(false);
     }
   }
-
   const handleSetFreePreview = (item) => {
-    setDisplayCurrentVideoFreePreview(item?.videoUrl || "");
+    setDisplayCurrentVideoFreePreview(normalizePreviewUrl(item?.videoUrl));
   };
 
-  const handleCreatePayment = async () => {
-    if (purchaseInfo?.isEnrolled) {
-      navigate(`/course-progress/${studentViewCourseDetails?._id}`);
+  const handleCreatePayment = async (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const studentId = auth?.user?._id || auth?.user?.id;
+    if (!studentId) {
+      notifyError("شناسه کاربر معتبر نیست.");
+      return;
+    }
+    const courseId = studentViewCourseDetails?._id || studentViewCourseDetails?.id;
+    if (!courseId) {
+      notifyError("شناسه دوره معتبر نیست.");
       return;
     }
 
-    if (!auth?.authenticated) {
+    if (purchaseInfo?.isEnrolled) {
+      navigate(`/course-progress/${courseId}`);
+      return;
+    }
+
+    if (!auth?.authenticate) {
       navigate("/auth");
       return;
     }
@@ -160,27 +275,38 @@ function StudentViewCourseDetailsPage() {
       instructorName: studentViewCourseDetails.instructorName,
       courseImage: studentViewCourseDetails.image,
       courseTitle: studentViewCourseDetails.title,
-      courseId: studentViewCourseDetails._id,
+      courseId,
       coursePricing: studentViewCourseDetails.pricing,
     };
 
-    const res = await createPaymentService(payload);
-    if (!res?.success) return;
+    try {
+      const res = await createPaymentService(payload);
+      if (!res?.success) {
+        notifyError(res?.message || "در پردازش ثبت‌نام مشکلی پیش آمد.");
+        return;
+      }
 
-    if (res.data?.freeEnrollment) {
-      navigate(`/course-progress/${studentViewCourseDetails._id}`);
-      return;
-    }
+      if (res.data?.freeEnrollment) {
+        await refreshStudentCourses();
+        navigate(`/course-progress/${courseId}`);
+        return;
+      }
 
-    if (res.data?.paymentUrl) {
-      window.location.href = res.data.paymentUrl;
-      return;
-    }
+      if (res.data?.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+        return;
+      }
 
-    if (stripePromise && res.data?.sessionId) {
-      const stripe = await stripePromise;
-      const { error } = await stripe.redirectToCheckout({ sessionId: res.data.sessionId });
-      if (error) console.error(error);
+      if (stripePromise && res.data?.sessionId) {
+        const stripe = await stripePromise;
+        const { error } = await stripe.redirectToCheckout({ sessionId: res.data.sessionId });
+        if (error) console.error(error);
+      }
+    } catch (error) {
+      notifyError(
+        error?.response?.data?.message ||
+          "در ثبت‌نام دوره مشکلی پیش آمد. لطفاً دوباره تلاش کنید."
+      );
     }
   };
 
@@ -205,9 +331,62 @@ function StudentViewCourseDetailsPage() {
 
   if (loadingState) return <Skeleton className="h-screen w-full" />;
 
-  const firstFreePreviewIndex = studentViewCourseDetails?.curriculum?.findIndex(item => item.freePreview) ?? -1;
+  if (!id) {
+    return (
+      <div className="mx-auto max-w-3xl py-20 text-center">
+        <h3 className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-100">
+          شناسه دوره معتبر نیست.
+        </h3>
+        <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+          لطفاً از لیست دوره‌ها وارد شوید.
+        </p>
+        <Button onClick={() => navigate("/courses")} size="lg">
+          بازگشت به لیست دوره‌ها
+        </Button>
+      </div>
+    );
+  }
+
+  if (pageError && !studentViewCourseDetails) {
+    return (
+      <div className="mx-auto max-w-3xl py-20 text-center">
+        <h3 className="mb-4 text-3xl font-bold text-red-600">{pageError}</h3>
+        <Button onClick={fetchStudentViewCourseDetails} size="lg">
+          تلاش مجدد
+        </Button>
+        <Button
+          variant="outline"
+          className="mt-3"
+          onClick={() => navigate("/courses")}
+        >
+          بازگشت به لیست دوره‌ها
+        </Button>
+      </div>
+    );
+  }
+
+  const firstFreePreviewIndex =
+    studentViewCourseDetails?.curriculum?.findIndex((item) => item.freePreview) ?? -1;
   const isFreeCourse = Number(studentViewCourseDetails?.pricing) <= 0;
-  const isEnrolled = purchaseInfo?.isEnrolled || purchaseInfo?.enrollment?.isEnrolled;
+  const isEnrolled =
+    purchaseInfo?.isEnrolled || purchaseInfo?.enrollment?.isEnrolled;
+  const formattedPrice = Number(studentViewCourseDetails?.pricing || 0);
+  const priceLabel = isFreeCourse
+    ? "رایگان"
+    : `${formattedPrice.toLocaleString("fa-IR")} تومان`;
+  const actionLabel = isEnrolled
+    ? "ادامه دوره"
+    : isFreeCourse
+    ? "ثبت‌نام رایگان"
+    : "خرید دوره";
+  const previewLecture =
+    firstFreePreviewIndex !== -1
+      ? studentViewCourseDetails.curriculum[firstFreePreviewIndex]
+      : studentViewCourseDetails?.curriculum?.[0] || null;
+  const previewVideoUrl = normalizePreviewUrl(previewLecture?.videoUrl);
+  const dialogPreviewUrl = normalizePreviewUrl(
+    displayCurrentVideoFreePreview || previewLecture?.videoUrl
+  );
 
   return (
     <div className="mx-auto max-w-7xl p-4">
@@ -274,18 +453,25 @@ function StudentViewCourseDetailsPage() {
         <aside className="w-full md:w-96">
           <Card className="sticky top-4">
             <CardContent className="p-6">
-              <div className="aspect-video overflow-hidden rounded-lg">
-                <VideoPlayer
-                  url={firstFreePreviewIndex !== -1 ? studentViewCourseDetails.curriculum[firstFreePreviewIndex].videoUrl : ""}
-                  width="100%"
-                  height="200px"
-                />
+          <div className="aspect-video overflow-hidden rounded-lg bg-black">
+            {previewVideoUrl ? (
+              <video
+                controls
+                className="h-full w-full object-cover"
+                src={previewVideoUrl}
+              >
+                <source src={previewVideoUrl} type="video/mp4" />
+                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+              </video>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                ویدیوی پیش‌نمایش موجود نیست.
               </div>
-              <div className="mt-6 text-3xl font-bold">
-                {isFreeCourse ? "رایگان" : `$${studentViewCourseDetails?.pricing}`}
-              </div>
-              <Button onClick={handleCreatePayment} className="mt-4 w-full" size="lg">
-                {isEnrolled ? "ادامه دوره" : isFreeCourse ? "ثبت‌نام رایگان" : "خرید دوره"}
+            )}
+          </div>
+              <div className="mt-6 text-3xl font-bold">{priceLabel}</div>
+              <Button type="button" onClick={(e) => handleCreatePayment(e)} className="mt-4 w-full" size="lg">
+                {actionLabel}
               </Button>
             </CardContent>
           </Card>
@@ -296,12 +482,29 @@ function StudentViewCourseDetailsPage() {
       <Dialog open={showFreePreviewDialog} onOpenChange={(open) => !open && setShowFreePreviewDialog(false) && setDisplayCurrentVideoFreePreview(null)}>
         <DialogContent className="max-w-4xl">
           <DialogHeader><DialogTitle>پیش‌نمایش دوره</DialogTitle></DialogHeader>
-          <div className="aspect-video">
-            <VideoPlayer url={displayCurrentVideoFreePreview} width="100%" height="400px" />
+          <div className="aspect-video bg-black">
+            {dialogPreviewUrl ? (
+              <video
+                controls
+                className="h-full w-full object-cover"
+                src={dialogPreviewUrl}
+              >
+                <source src={dialogPreviewUrl} type="video/mp4" />
+                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+              </video>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                ویدیوی پیش‌نمایش موجود نیست.
+              </div>
+            )}
           </div>
           <div className="mt-4 space-y-2">
-            {studentViewCourseDetails?.curriculum?.filter(i => i.freePreview).map((item, i) => (
-              <p key={i} className="cursor-pointer font-medium hover:text-blue-600" onClick={() => setDisplayCurrentVideoFreePreview(item.videoUrl)}>
+            {studentViewCourseDetails?.curriculum?.filter((i) => i.freePreview).map((item, i) => (
+              <p
+                key={i}
+                className="cursor-pointer font-medium hover:text-blue-600"
+                onClick={() => handleSetFreePreview(item)}
+              >
                 {item.title}
               </p>
             ))}

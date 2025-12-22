@@ -124,24 +124,23 @@ function StudentViewCoursesPage() {
         setStudentViewCoursesList(courses);
         setResultsTotal(courses.length);
 
-        if (auth?.user?._id) {
-          const map = {};
-          for (const c of courses) {
-            try {
-              const res = await checkCoursePurchaseInfoService(
-                c._id,
-                auth.user._id
-              );
-              if (res?.success) {
-                map[c._id] = {
-                  isEnrolled: res.data?.isEnrolled || false,
-                  progress: Math.round(res.data?.progress || 0),
-                };
+          if (auth?.user?._id) {
+            const map = {};
+            for (const c of courses) {
+              try {
+                const res = await checkCoursePurchaseInfoService(c._id);
+                if (res?.success) {
+                  map[c._id] = {
+                    isEnrolled: res.data?.isEnrolled || false,
+                    progress: Math.round(res.data?.progress || 0),
+                  };
+                }
+              } catch {
+                // ignore errors
               }
-            } catch {}
+            }
+            setPurchasedCourses(map);
           }
-          setPurchasedCourses(map);
-        }
       }
     } catch (e) {
       console.error(e);
@@ -154,6 +153,22 @@ function StudentViewCoursesPage() {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  useEffect(() => {
+    const storedFilters = sessionStorage.getItem("filters");
+    if (storedFilters) {
+      try {
+        const parsed = JSON.parse(storedFilters);
+        if (parsed && typeof parsed === "object") {
+          setFilters(parsed);
+        }
+      } catch (error) {
+        console.warn("Failed to parse stored filters", error);
+      } finally {
+        sessionStorage.removeItem("filters");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchCourses();
@@ -203,7 +218,7 @@ function StudentViewCoursesPage() {
   const goToCourse = async (id) => {
     if (!auth?.user?._id) return navigate(`/course/details/${id}`);
     try {
-      const res = await checkCoursePurchaseInfoService(id, auth.user._id);
+      const res = await checkCoursePurchaseInfoService(id);
       if (res?.success && res.data?.isEnrolled) {
         navigate(`/course-progress/${id}`);
       } else {
@@ -437,14 +452,14 @@ function StudentViewCoursesPage() {
                           isRTL ? "left-3" : "right-3"
                         } flex flex-col gap-2`}
                       >
-                        {isFree && (
+                        {/* {isFree && (
                           <Badge className="bg-emerald-600 text-xs font-medium">
-                            {t("courses.free")}
+                            {t("common.free")}
                           </Badge>
-                        )}
+                        )} */}
                         {isNew && (
                           <Badge className="bg-green-500 text-xs font-medium">
-                            {t("courses.new")}
+                            {t("common.new")}
                           </Badge>
                         )}
                       </div>
@@ -495,7 +510,7 @@ function StudentViewCoursesPage() {
                           <span className="text-xl font-bold text-gray-900 dark:text-white">
                             {isFree ? (
                               <span className="text-emerald-600">
-                                {t("courses.free")}
+                                {t("common.free")}
                               </span>
                             ) : (
                               `${course.pricing.toLocaleString()} ${t(
@@ -510,7 +525,7 @@ function StudentViewCoursesPage() {
                           onClick={() => goToCourse(course._id)}
                         >
                           {bought?.isEnrolled
-                            ? t("courses.continue")
+                            ? t("common.continue")
                             : t("course.viewDetails")}
                         </Button>
                       </div>
