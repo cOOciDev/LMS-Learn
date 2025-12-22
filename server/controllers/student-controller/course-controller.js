@@ -197,14 +197,20 @@ const getCoursesByCategory = asyncHandler(async (req, res) => {
 });
 
 // @desc    Check if user can purchase course
-// @route   GET /student/course/purchase-info/:courseId/:studentId
+// @route   GET /student/course/purchase-info/:courseId
 // @access  Private
 const getPurchaseInfo = asyncHandler(async (req, res) => {
   const { courseId, studentId } = req.params;
-  const userId = req.user.userId || req.user._id;
+  const userId = req.user?.userId || req.user?._id;
 
-  // Verify user can only check their own purchase info
-  if (studentId !== userId.toString()) {
+  if (!userId) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing user identifier",
+    });
+  }
+
+  if (studentId && String(studentId) !== String(userId)) {
     return res.status(403).json({
       success: false,
       message: "Unauthorized",

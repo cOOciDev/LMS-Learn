@@ -23,7 +23,9 @@ const getAllUsers = asyncHandler(async (req, res) => {
   }
 
   const users = await User.find(query)
-    .select("-password -refreshToken -passwordResetToken")
+    .select(
+      "-password -refreshToken -resetPasswordTokenHash -resetPasswordExpires"
+    )
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(parseInt(limit));
@@ -49,7 +51,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select(
-    "-password -refreshToken -passwordResetToken"
+    "-password -refreshToken -resetPasswordTokenHash -resetPasswordExpires"
   );
 
   if (!user) {
@@ -80,7 +82,9 @@ const updateUser = asyncHandler(async (req, res) => {
     req.params.id,
     { $set: updateData },
     { new: true, runValidators: true }
-  ).select("-password -refreshToken -passwordResetToken");
+  ).select(
+    "-password -refreshToken -resetPasswordTokenHash -resetPasswordExpires"
+  );
 
   if (!user) {
     return res.status(404).json({
@@ -394,7 +398,8 @@ const getAllInstructors = asyncHandler(async (req, res) => {
             password: 0,
             refreshToken: 0,
             courses: 0,
-            passwordResetToken: 0,
+            resetPasswordTokenHash: 0,
+            resetPasswordExpires: 0,
           },
         },
         { $sort: { createdAt: -1 } },
@@ -452,7 +457,9 @@ const getInstructorDetails = asyncHandler(async (req, res) => {
   const instructor = await User.findOne({
     _id: req.params.id,
     role: "instructor",
-  }).select("-password -refreshToken -passwordResetToken");
+  }).select(
+    "-password -refreshToken -resetPasswordTokenHash -resetPasswordExpires"
+  );
 
   if (!instructor) {
     return res.status(404).json({

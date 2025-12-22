@@ -1,11 +1,25 @@
 const StudentCourses = require("../../models/StudentCourses");
 
+const normalizeId = (id) => {
+  if (!id) return id;
+  if (typeof id === "object" && typeof id.toString === "function") {
+    return id.toString();
+  }
+  return id;
+};
+
 const getCoursesByStudentId = async (req, res) => {
   try {
-    const { studentId } = req.params;
-    const studentBoughtCourses = await StudentCourses.findOne({
-      userId: studentId,
-    });
+    const userId = normalizeId(req.user?.userId || req.user?._id);
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User identifier missing",
+      });
+    }
+
+    const studentBoughtCourses = await StudentCourses.findOne({ userId });
 
     res.status(200).json({
       success: true,
@@ -15,7 +29,7 @@ const getCoursesByStudentId = async (req, res) => {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "خطای سرور. لطفاً دوباره تلاش کنید.",
     });
   }
 };

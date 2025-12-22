@@ -3,20 +3,36 @@ const Order = require("../../models/Order");
 const Course = require("../../models/Course");
 const StudentCourses = require("../../models/StudentCourses");
 
+const normalizeId = (value) => {
+  if (!value) return value;
+  if (typeof value === "object" && typeof value.toString === "function") {
+    return value.toString();
+  }
+  return value;
+};
+
 async function upsertStudentCourse(userId, coursePayload) {
-  const studentCourses = await StudentCourses.findOne({ userId });
+  const normalizedUserId = normalizeId(userId);
+  const normalizedCourseId = normalizeId(coursePayload.courseId);
+
+  const studentCourses = await StudentCourses.findOne({ userId: normalizedUserId });
+  const preparedCoursePayload = {
+    ...coursePayload,
+    courseId: normalizedCourseId,
+  };
+
   if (studentCourses) {
     const alreadyAdded = studentCourses.courses?.some(
-      (course) => course.courseId?.toString() === coursePayload.courseId?.toString()
+      (course) => normalizeId(course.courseId) === normalizedCourseId
     );
     if (!alreadyAdded) {
-      studentCourses.courses.push(coursePayload);
+      studentCourses.courses.push(preparedCoursePayload);
       await studentCourses.save();
     }
   } else {
     const newStudentCourses = new StudentCourses({
-      userId,
-      courses: [coursePayload],
+      userId: normalizedUserId,
+      courses: [preparedCoursePayload],
     });
     await newStudentCourses.save();
   }
@@ -24,13 +40,14 @@ async function upsertStudentCourse(userId, coursePayload) {
 
 async function enrollStudentInCourse(course, { userId, userName, userEmail, amount, purchaseDate }) {
   if (!course) return;
+  const normalizedUserId = normalizeId(userId);
   const alreadyEnrolled = course.students?.some(
-    (student) => student.studentId?.toString() === userId?.toString()
+    (student) => normalizeId(student.studentId) === normalizedUserId
   );
 
   if (!alreadyEnrolled) {
     course.students.push({
-      studentId: userId,
+      studentId: normalizedUserId,
       studentName: userName,
       studentEmail: userEmail,
       paidAmount: amount,
@@ -45,13 +62,24 @@ async function enrollStudentInCourse(course, { userId, userName, userEmail, amou
 
 const createOrder = async (req, res) => {
   try {
-    const {
-      userId,
-      userName,
-      userEmail,
-      orderDate,
-      courseId,
-    } = req.body;
+    const userId = normalizeId(req.user?.userId || req.user?._id);
+    const userName = req.user?.userName || "Student";
+    const userEmail = req.user?.userEmail || "";
+    const { courseId, orderDate } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course ID is required",
+      });
+    }
 
     const course = await Course.findById(courseId);
     if (!course) {
@@ -191,4 +219,79 @@ const createOrder = async (req, res) => {
   }
 };
 
-module.exports = { createOrder };
+const captureOrder = async (req, res) => {
+  try {
+    const { orderId, paymentId, payerId } = req.body;
+    const userId = normalizeId(req.user?.userId || req.user?._id);
+    const userName = req.user?.userName || "Student";
+    const userEmail = req.user?.userEmail || "";
+
+    if (!orderId || !paymentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing capture identifiers",
+      });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (!userId || String(order.userId) !== String(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized request",
+      });
+    }
+
+    order.paymentStatus = "paid";
+    order.paymentMethod = order.paymentMethod || "card";
+    order.paymentResult = {
+      paymentId,
+      payerId,
+      capturedAt: new Date(),
+    };
+
+    await order.save();
+
+    await upsertStudentCourse(userId, {
+      courseId: order.courseId,
+      title: order.courseTitle,
+      instructorId: order.instructorId,
+      instructorName: order.instructorName,
+      dateOfPurchase: order.orderDate,
+      courseImage: order.courseImage,
+    });
+    const course = await Course.findById(order.courseId);
+    await enrollStudentInCourse(course, {
+      userId,
+      userName,
+      userEmail,
+      amount: order.coursePricing || 0,
+      purchaseDate: order.orderDate || new Date(),
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        orderId: order._id,
+        paymentStatus: order.paymentStatus,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Error while capturing order!",
+    });
+  }
+};
+
+module.exports = {
+  createOrder,
+  captureOrder,
+};

@@ -2,7 +2,37 @@
 const User = require("../../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { asyncHandler } = require("../../middleware/error-handler");
+
+const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: "/",
+};
+
+const parseCookies = (cookieHeader = "") => {
+  if (!cookieHeader) return {};
+  return cookieHeader.split(";").reduce((acc, part) => {
+    const [key, ...rest] = part.split("=");
+    if (!key) return acc;
+    acc[key.trim()] = decodeURIComponent(rest.join("="));
+    return acc;
+  }, {});
+};
+
+const getRefreshTokenFromRequest = (req) => {
+  if (req.body?.refreshToken) {
+    return req.body.refreshToken;
+  }
+  const header = req.headers?.cookie;
+  if (!header) return null;
+  const cookies = parseCookies(header);
+  return cookies.refreshToken || null;
+};
+const { sendEitaaMessage } = require("../../helpers/eitaa");
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -114,11 +144,14 @@ const loginUser = asyncHandler(async (req, res) => {
   user.lastLogin = new Date();
   await user.save();
 
+  res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
+
   // Remove sensitive data
   const userResponse = user.toObject();
   delete userResponse.password;
   delete userResponse.refreshToken;
-  delete userResponse.passwordResetToken;
+  delete userResponse.resetPasswordTokenHash;
+  delete userResponse.resetPasswordExpires;
 
   res.status(200).json({
     success: true,
@@ -135,9 +168,9 @@ const loginUser = asyncHandler(async (req, res) => {
 // @route   POST /auth/refresh
 // @access  Public
 const refreshToken = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshTokenValue = getRefreshTokenFromRequest(req);
 
-  if (!refreshToken) {
+  if (!refreshTokenValue) {
     return res.status(401).json({
       success: false,
       message: "Refresh token is required",
@@ -147,14 +180,14 @@ const refreshToken = asyncHandler(async (req, res) => {
   try {
     // Verify refresh token
     const decoded = jwt.verify(
-      refreshToken,
+      refreshTokenValue,
       process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
     );
 
     // Find user with this refresh token
     const user = await User.findOne({
       _id: decoded.userId,
-      refreshToken,
+      refreshToken: refreshTokenValue,
       refreshTokenExpires: { $gt: new Date() },
     });
 
@@ -167,6 +200,7 @@ const refreshToken = asyncHandler(async (req, res) => {
 
     // Generate new access token
     const newAccessToken = generateToken(user._id);
+    res.cookie("refreshToken", refreshTokenValue, REFRESH_COOKIE_OPTIONS);
 
     res.status(200).json({
       success: true,
@@ -190,6 +224,11 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   await User.findByIdAndUpdate(userId, {
     $unset: { refreshToken: "", refreshTokenExpires: "" },
+  });
+
+  res.clearCookie("refreshToken", {
+    ...REFRESH_COOKIE_OPTIONS,
+    maxAge: 0,
   });
 
   res.status(200).json({
@@ -291,30 +330,48 @@ const changePassword = asyncHandler(async (req, res) => {
 // @route   POST /auth/forgot-password
 // @access  Public
 const forgotPassword = asyncHandler(async (req, res) => {
+  const genericMessage =
+    "اگر حسابی با این مشخصات وجود داشته باشد، پیام بازیابی ارسال می‌شود.";
+  const respondWithGenericMessage = () =>
+    res.status(200).json({
+      success: true,
+      message: genericMessage,
+    });
+
   const { userEmail } = req.body;
+  if (!userEmail) {
+    return respondWithGenericMessage();
+  }
 
   const user = await User.findOne({ userEmail });
 
-  if (!user) {
-    // Don't reveal if user exists for security
-    return res.status(200).json({
-      success: true,
-      message: "If email exists, password reset link has been sent",
-    });
+  if (!user || !user.eitaaChatId || !process.env.EITAA_TOKEN) {
+    return respondWithGenericMessage();
   }
 
-  const resetToken = user.generatePasswordResetToken();
+  const ttlMinutes = Number.parseInt(
+    process.env.RESET_TOKEN_TTL_MIN || "15",
+    10
+  );
+  const tokenTTL = Number.isNaN(ttlMinutes) ? 15 : ttlMinutes;
+
+  const resetToken = user.generatePasswordResetToken(tokenTTL);
   await user.save({ validateBeforeSave: false });
 
-  // In production, send email with reset token
-  // For now, return token (remove in production)
-  res.status(200).json({
-    success: true,
-    message: "Password reset token generated",
-    data: {
-      resetToken, // Remove this in production, send via email instead
-    },
-  });
+  const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(
+    /\/$/,
+    ""
+  );
+  const resetLink = `${clientUrl}/reset-password?token=${resetToken}`;
+  const message = `درخواست بازنشانی رمز عبور دریافت شد.\nبرای تنظیم مجدد رمز، روی لینک زیر کلیک کنید:\n${resetLink}`;
+
+  try {
+    await sendEitaaMessage(user.eitaaChatId, message);
+  } catch (error) {
+    console.error("Eitaa notification failed:", error?.message || error);
+  }
+
+  return respondWithGenericMessage();
 });
 
 // @desc    Reset password
@@ -330,12 +387,11 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
   }
 
-  const crypto = require("crypto");
   const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
   const user = await User.findOne({
-    passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() },
+    resetPasswordTokenHash: hashedToken,
+    resetPasswordExpires: { $gt: Date.now() },
   }).select("+password");
 
   if (!user) {
@@ -346,8 +402,8 @@ const resetPassword = asyncHandler(async (req, res) => {
   }
 
   user.password = newPassword;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
+  user.resetPasswordTokenHash = undefined;
+  user.resetPasswordExpires = undefined;
   await user.save();
 
   res.status(200).json({
