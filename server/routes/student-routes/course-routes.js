@@ -18,7 +18,11 @@ router.get("/featured", getFeaturedCourses);
 router.get("/category/:category", validatePagination, getCoursesByCategory);
 
 // Protected routes
-router.get("/purchase-info/:courseId/:studentId", authenticateMiddleware, getPurchaseInfo);
+router.get(
+  "/purchase-info/:courseId",
+  authenticateMiddleware,
+  getPurchaseInfo
+);
 router.post("/rate", authenticateMiddleware, rateCourse);
 
 module.exports = router;

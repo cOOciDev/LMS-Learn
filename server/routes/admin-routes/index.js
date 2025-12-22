@@ -32,6 +32,12 @@ const {
   assignTicket,
   getTicketStats,
 } = require("../../controllers/admin-controller/ticket-controller");
+const {
+  listExerciseSubmissions,
+  reviewExerciseSubmission,
+  listCertificateRequests,
+  reviewCertificateRequest,
+} = require("../../controllers/admin-controller/course-verification-controller");
 const router = express.Router();
 
 // All routes require admin authentication
@@ -75,6 +81,12 @@ router.get("/tickets/:ticketId", getTicketById);
 router.post("/tickets/:ticketId/reply", addReply);
 router.patch("/tickets/:ticketId/status", updateTicketStatus);
 router.patch("/tickets/:ticketId/assign", assignTicket);
+
+// Course verification
+router.get("/course-submissions", listExerciseSubmissions);
+router.patch("/course-submissions/:submissionId", reviewExerciseSubmission);
+router.get("/course-certificates", listCertificateRequests);
+router.patch("/course-certificates/:requestId", reviewCertificateRequest);
 
 module.exports = router;
 
