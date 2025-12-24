@@ -9,8 +9,20 @@ const LectureSchema = new mongoose.Schema(
     },
     videoUrl: {
       type: String,
-      required: [true, "Video URL is required"],
+      default: "",
     },
+    videoFileKey: String,
+    videoFileName: String,
+    videoFileType: String,
+    videoFileSize: Number,
+    attachmentUrl: {
+      type: String,
+      default: "",
+    },
+    attachmentFileKey: String,
+    attachmentFileName: String,
+    attachmentFileType: String,
+    attachmentFileSize: Number,
     public_id: String,
     freePreview: {
       type: Boolean,

@@ -29,6 +29,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import Confetti from "react-confetti";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/context/language-context";
+import { withAuthToken } from "@/utils/media";
 
 function StudentViewCourseProgressPage() {
   const navigate = useNavigate();
@@ -212,9 +213,16 @@ function StudentViewCourseProgressPage() {
   }
 
   function handleVideoProgress(progress) {
+    if (!currentLecture?.videoUrl) {
+      return;
+    }
     if (progress.played >= 0.9 && !currentLecture?.viewed) {
       updateCourseProgress();
     }
+  }
+
+  function handleMarkLectureComplete() {
+    updateCourseProgress();
   }
 
   async function handleRewatchCourse() {
@@ -414,14 +422,51 @@ function StudentViewCourseProgressPage() {
       <div className="flex flex-col lg:flex-row flex-1 gap-6 p-4 lg:p-6">
         <div className="flex-1 space-y-6">
           <div className="aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-gray-800">
-            <VideoPlayer
-              url={currentLecture?.videoUrl || ""}
-              width="100%"
-              height="100%"
-              onProgress={handleVideoProgress}
-              progressData={currentLecture}
-              thumbnail={studentCurrentCourseProgress?.courseDetails?.image}
-            />
+            {currentLecture?.videoUrl ? (
+              <div className="flex h-full flex-col">
+                <div className="flex-1">
+                  <VideoPlayer
+                    url={currentLecture?.videoUrl || ""}
+                    width="100%"
+                    height="100%"
+                    onProgress={handleVideoProgress}
+                    progressData={currentLecture}
+                    thumbnail={studentCurrentCourseProgress?.courseDetails?.image}
+                  />
+                </div>
+                {currentLecture?.attachmentUrl && (
+                  <div className="bg-black/60 px-4 py-2 text-right">
+                    <a
+                      className="text-xs text-blue-300 hover:underline"
+                      href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t("course.downloadAttachment") || "Download lesson file"}
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-gray-300">
+                <p className="text-sm">
+                  {t("course.noVideo") || "No video for this lesson."}
+                </p>
+                {currentLecture?.attachmentUrl && (
+                  <a
+                    className="text-blue-400 hover:underline"
+                    href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t("course.downloadAttachment") || "Download lesson file"}
+                  </a>
+                )}
+                <Button size="sm" onClick={handleMarkLectureComplete}>
+                  {t("course.markComplete") || "Mark as completed"}
+                </Button>
+              </div>
+            )}
           </div>
           {currentExercise && (
             <div className="rounded-3xl border border-gray-800 bg-[#07070d] p-5 shadow-2xl space-y-4">
@@ -449,6 +494,19 @@ function StudentViewCourseProgressPage() {
                   </span>
                 )}
               </div>
+              {currentLecture?.attachmentUrl && (
+                <div className="flex items-center justify-between rounded-2xl border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs text-blue-200">
+                  <span>{t("course.downloadAttachment") || "Download lesson file"}</span>
+                  <a
+                    className="text-blue-300 hover:underline"
+                    href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t("common.download") || "Download"}
+                  </a>
+                </div>
+              )}
               <div className="rounded-2xl bg-white/5 p-3 text-sm text-gray-200">
                 {currentExercise.exercisePrompt ||
                   t("student.exerciseInstructions") ||
@@ -709,6 +767,11 @@ function StudentViewCourseProgressPage() {
                               <p className="text-sm font-medium truncate">
                                 {index + 1}. {item.title}
                               </p>
+                              {item.attachmentUrl && (
+                                <p className="text-xs text-blue-300">
+                                  {t("course.hasAttachment") || "PDF attached"}
+                                </p>
+                              )}
                             </div>
                           </div>
                         );

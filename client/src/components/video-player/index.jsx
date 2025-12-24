@@ -13,6 +13,7 @@ import {
   VolumeX,
   RefreshCw,
 } from "lucide-react";
+import { withAuthToken } from "@/utils/media";
 
 function VideoPlayer({
   width = "100%",
@@ -119,6 +120,8 @@ function VideoPlayer({
     return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
+  const resolvedUrl = withAuthToken(url);
+
   return (
     <div
       ref={playerContainerRef}
@@ -141,7 +144,7 @@ function VideoPlayer({
         ref={playerRef}
         width="100%"
         height="100%"
-        url={url}
+        url={resolvedUrl}
         playing={playing}
         volume={volume}
         muted={muted}

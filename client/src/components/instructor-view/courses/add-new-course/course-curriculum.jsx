@@ -7,32 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import VideoPlayer from "@/components/video-player";
-import { useLanguage } from "@/context/language-context";
 import { InstructorContext } from "@/context/instructor-context";
-import { mediaBulkUploadService, mediaDeleteService } from "@/services";
+import { useLanguage } from "@/context/language-context";
 import {
+  mediaLocalBulkUploadService,
+  mediaLocalDeleteService,
+  mediaLocalUploadService,
+} from "@/services";
+import { withAuthToken } from "@/utils/media";
+import {
+  AlertCircle,
+  FileText,
+  GripVertical,
+  Plus,
+  Replace,
+  Trash2,
   Upload,
   UploadCloud,
-  Trash2,
-  Replace,
-  Plus,
-  AlertCircle,
-  GripVertical,
 } from "lucide-react";
 import { useContext, useMemo, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const LECTURES_PER_GROUP = 5;
-
-const chunkLectures = (lectures, size) => {
-  if (!lectures || lectures.length === 0) return [];
-  const grouped = [];
-  for (let i = 0; i < lectures.length; i += size) {
-    grouped.push(lectures.slice(i, i + size));
-  }
-  return grouped;
-};
-
+const MAX_FILE_SIZE = 200 * 1024 * 1024;
 const VIDEO_EXTENSIONS = new Set([
   ".mp4",
   ".mov",
@@ -47,6 +44,16 @@ const VIDEO_EXTENSIONS = new Set([
   ".3gp",
   ".ogg",
 ]);
+const PDF_EXTENSIONS = new Set([".pdf"]);
+
+const chunkLectures = (lectures, size) => {
+  if (!lectures || lectures.length === 0) return [];
+  const grouped = [];
+  for (let i = 0; i < lectures.length; i += size) {
+    grouped.push(lectures.slice(i, i + size));
+  }
+  return grouped;
+};
 
 const isVideoFile = (file) => {
   if (!file) return false;
@@ -56,12 +63,12 @@ const isVideoFile = (file) => {
   return VIDEO_EXTENSIONS.has(`.${ext}`);
 };
 
-const toSecureUrl = (item) => {
-  const candidate = item?.secure_url || item?.url;
-  if (!candidate) return "";
-  return candidate.startsWith("http://")
-    ? candidate.replace(/^http:/, "https:")
-    : candidate;
+const isPdfFile = (file) => {
+  if (!file) return false;
+  if (file.type === "application/pdf") return true;
+  const ext = file.name?.split(".").pop()?.toLowerCase();
+  if (!ext) return false;
+  return PDF_EXTENSIONS.has(`.${ext}`);
 };
 
 function CourseCurriculum({ onNext }) {
@@ -74,118 +81,240 @@ function CourseCurriculum({ onNext }) {
     setMediaUploadProgressPercentage,
   } = useContext(InstructorContext);
 
-  const { t, language } = useLanguage();
-  const isRTL = language === "fa";
+  const { t } = useLanguage();
   const { toast } = useToast();
 
   const bulkUploadRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const { courseLandingFormData } = useContext(InstructorContext);
+
   const groupedLectures = useMemo(
     () => chunkLectures(courseCurriculumFormData, LECTURES_PER_GROUP),
     [courseCurriculumFormData]
   );
+
   const uploadedCount = courseCurriculumFormData.filter(
-    (lecture) => lecture.videoUrl
+    (lecture) => lecture.videoUrl || lecture.attachmentUrl
   ).length;
   const pendingCount = courseCurriculumFormData.length - uploadedCount;
   const moduleCount = groupedLectures.length;
+
   const isCurriculumValid = () => {
     if (courseCurriculumFormData.length === 0) return false;
     return courseCurriculumFormData.every(
       (lecture) =>
-        lecture.title?.trim() && lecture.videoUrl && lecture.public_id
+        lecture.title?.trim() && (lecture.videoUrl || lecture.attachmentUrl)
     );
   };
 
   const handleSaveAndContinue = () => {
-    if (!isCurriculumValid()) {
+    const normalizedLectures = courseCurriculumFormData
+      .map((lecture, index) => {
+        if (!lecture) return null;
+        const hasMedia = !!(lecture.videoUrl || lecture.attachmentUrl);
+        const title = lecture.title?.trim();
+        if (!hasMedia && !title) return null;
+        if (!title && hasMedia) {
+          return {
+            ...lecture,
+            title: `${t("curriculum.lecture") || "Lecture"} ${index + 1}`,
+          };
+        }
+        return lecture;
+      })
+      .filter(Boolean);
+
+    if (normalizedLectures.length !== courseCurriculumFormData.length) {
+      setCourseCurriculumFormData(normalizedLectures);
+    }
+
+    if (
+      normalizedLectures.length === 0 ||
+      !normalizedLectures.every(
+        (lecture) =>
+          lecture.title?.trim() && (lecture.videoUrl || lecture.attachmentUrl)
+      )
+    ) {
       toast({
-        title: "خطا",
-        description: "برای رفتن به تنظیمات باید همه جلسات عنوان و ویدیو داشته باشند.",
+        title: t("common.error") || "Error",
+        description:
+          t("curriculum.fillDetails") ||
+          "Please complete every lecture title and upload a video or PDF.",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "آماده‌اید",
-      description: "جلسات کامل شدند؛ حالا به تنظیمات دوره بروید.",
+      title: t("common.success") || "Success",
+      description:
+        t("common.saveAndContinue") || "Saved. Continue to the next step.",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
     onNext?.();
   };
 
-  const processVideoFiles = async (files, replaceIndex = null) => {
+  const validateFiles = (files, { allowVideo, allowPdf }) => {
+    const valid = [];
+    const rejected = [];
+    Array.from(files).forEach((file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        rejected.push(file);
+        return;
+      }
+      if ((allowVideo && isVideoFile(file)) || (allowPdf && isPdfFile(file))) {
+        valid.push(file);
+      } else {
+        rejected.push(file);
+      }
+    });
+    return { valid, rejected };
+  };
+
+  const applyUploadedFileToLecture = (payload, replaceIndex, fileType) => {
+    setCourseCurriculumFormData((prev) => {
+      const updated = [...prev];
+      const nextAvailableIndex =
+        replaceIndex !== null && replaceIndex !== undefined
+          ? replaceIndex
+          : updated.findIndex(
+              (lecture) => !lecture.videoUrl && !lecture.attachmentUrl
+            );
+      const targetIndex =
+        nextAvailableIndex !== -1 ? nextAvailableIndex : updated.length;
+      const baseLecture =
+        updated[targetIndex] ||
+        {
+          title: "",
+          videoUrl: "",
+          videoFileKey: "",
+          videoFileName: "",
+          videoFileType: "",
+          videoFileSize: 0,
+          attachmentUrl: "",
+          attachmentFileKey: "",
+          attachmentFileName: "",
+          attachmentFileType: "",
+          attachmentFileSize: 0,
+          freePreview: false,
+          public_id: "",
+        };
+
+      const nextLecture = { ...baseLecture };
+      if (!nextLecture.title?.trim()) {
+        nextLecture.title = `${t("curriculum.lecture") || "Lecture"} ${
+          targetIndex + 1
+        }`;
+      }
+      if (fileType === "video") {
+        nextLecture.videoUrl = payload.fileUrl;
+        nextLecture.videoFileKey = payload.fileKey;
+        nextLecture.videoFileName = payload.fileName;
+        nextLecture.videoFileType = payload.fileType;
+        nextLecture.videoFileSize = payload.fileSize;
+      } else {
+        nextLecture.attachmentUrl = payload.fileUrl;
+        nextLecture.attachmentFileKey = payload.fileKey;
+        nextLecture.attachmentFileName = payload.fileName;
+        nextLecture.attachmentFileType = payload.fileType;
+        nextLecture.attachmentFileSize = payload.fileSize;
+      }
+
+      updated[targetIndex] = nextLecture;
+      return updated;
+    });
+  };
+
+  const processLectureFiles = async (
+    files,
+    replaceIndex = null,
+    targetType = "auto"
+  ) => {
     if (!files || files.length === 0) return;
 
-    const validFiles = Array.from(files).filter((f) => isVideoFile(f));
-    if (validFiles.length === 0) {
+    const { valid, rejected } = validateFiles(files, {
+      allowVideo: targetType !== "attachment",
+      allowPdf: targetType !== "video",
+    });
+
+    if (rejected.length > 0 && valid.length === 0) {
       toast({
         title: t("common.error") || "Error",
         description:
-          t("curriculum.invalidVideo") || "Please select video files only",
+          t("curriculum.invalidVideo") ||
+          "Please select video or PDF files only.",
         variant: "destructive",
       });
       return;
     }
 
+    if (valid.length === 0) return;
+
+    if (rejected.length > 0) {
+      toast({
+        title: t("common.error") || "Error",
+        description: "Some files were skipped. Max size is 200MB.",
+        variant: "destructive",
+      });
+    }
+
     const formData = new FormData();
-    validFiles.forEach((f) => formData.append("files", f));
+    if (replaceIndex !== null) {
+      formData.append("file", valid[0]);
+    } else {
+      valid.forEach((file) => formData.append("files", file));
+    }
 
     setMediaUploadProgress(true);
     setMediaUploadProgressPercentage(0);
 
     toast({
-      title: t("curriculum.uploadStartTitle") || "Uploading videos",
+      title: t("curriculum.uploadStartTitle") || "Uploading files",
       description:
         t("curriculum.uploadStartDescription") ||
-        "Uploading your files. Large uploads may take a few minutes, please keep this tab open.",
+        "Uploading your files. Large uploads may take a few minutes.",
     });
 
     try {
-      const response = await mediaBulkUploadService(
-        formData,
-        setMediaUploadProgressPercentage
-      );
+      const response =
+        replaceIndex !== null
+          ? await mediaLocalUploadService(
+              formData,
+              setMediaUploadProgressPercentage
+            )
+          : await mediaLocalBulkUploadService(
+              formData,
+              setMediaUploadProgressPercentage
+            );
+
       if (!response?.success) {
-        throw new Error("Bulk upload failed");
+        throw new Error("Upload failed");
       }
 
-      const newLectures = response.data.map((item, i) => ({
-        title:
-          replaceIndex !== null
-            ? courseCurriculumFormData[replaceIndex]?.title ||
-              `${t("curriculum.lecture") || "Lecture"} ${replaceIndex + 1}`
-            : `${t("curriculum.lecture") || "Lecture"} ${
-                courseCurriculumFormData.length + i + 1
-              }`,
-        videoUrl: toSecureUrl(item),
-        public_id: item.public_id,
-        freePreview:
-          replaceIndex !== null
-            ? courseCurriculumFormData[replaceIndex]?.freePreview
-            : false,
-      }));
+      const payloads = Array.isArray(response.data)
+        ? response.data
+        : [response.data];
 
-      setCourseCurriculumFormData((prev) =>
-        replaceIndex !== null
-          ? prev.map((l, idx) => (idx === replaceIndex ? newLectures[0] : l))
-          : [...prev, ...newLectures]
-      );
+      payloads.forEach((payload, idx) => {
+        const file = valid[replaceIndex !== null ? 0 : idx];
+        const derivedType = isPdfFile(file) ? "attachment" : "video";
+        const fileType = targetType === "auto" ? derivedType : targetType;
+        applyUploadedFileToLecture(payload, replaceIndex, fileType);
+      });
 
       toast({
-        title: "آپلود موفق",
-        description: `${validFiles.length} ویدیو با موفقیت آماده شد.`,
+        title: t("common.success") || "Success",
+        description: `${valid.length} file(s) uploaded successfully.`,
       });
     } catch (err) {
-      const errMessage = err?.response?.data?.message || "خطا در آپلود ویدیوها";
+      const errMessage =
+        err?.response?.data?.message || "Upload failed. Please try again.";
       toast({
-        title: "خطا",
+        title: t("common.error") || "Error",
         description: errMessage,
         variant: "destructive",
       });
-      console.error("Bulk upload failed:", errMessage, err);
+      console.error("Upload failed:", errMessage, err);
     } finally {
       setMediaUploadProgress(false);
       setMediaUploadProgressPercentage(0);
@@ -196,11 +325,13 @@ function CourseCurriculum({ onNext }) {
     e.preventDefault();
     setDragOver(true);
   };
+
   const handleDragLeave = () => setDragOver(false);
+
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
-    processVideoFiles(e.dataTransfer.files);
+    processLectureFiles(e.dataTransfer.files);
   };
 
   const handleTitleChange = (value, i) => {
@@ -219,15 +350,24 @@ function CourseCurriculum({ onNext }) {
     });
   };
 
-  const handleReplace = async (i) => {
-    const publicId = courseCurriculumFormData[i]?.public_id;
-    if (publicId) await mediaDeleteService(publicId);
-    document.getElementById(`replace-${i}`).click();
+  const handleReplace = async (i, targetType) => {
+    const lecture = courseCurriculumFormData[i];
+    const fileKey =
+      targetType === "attachment"
+        ? lecture?.attachmentFileKey
+        : lecture?.videoFileKey;
+    if (fileKey) await mediaLocalDeleteService(fileKey);
+    document.getElementById(`replace-${targetType}-${i}`).click();
   };
 
   const handleDelete = async (i) => {
-    const publicId = courseCurriculumFormData[i]?.public_id;
-    if (publicId) await mediaDeleteService(publicId);
+    const lecture = courseCurriculumFormData[i];
+    if (lecture?.videoFileKey) {
+      await mediaLocalDeleteService(lecture.videoFileKey);
+    }
+    if (lecture?.attachmentFileKey) {
+      await mediaLocalDeleteService(lecture.attachmentFileKey);
+    }
     setCourseCurriculumFormData((prev) => prev.filter((_, idx) => idx !== i));
   };
 
@@ -235,8 +375,17 @@ function CourseCurriculum({ onNext }) {
     setCourseCurriculumFormData((prev) => [
       ...prev,
       {
-        title: "",
+        title: `${t("curriculum.lecture") || "Lecture"} ${prev.length + 1}`,
         videoUrl: "",
+        videoFileKey: "",
+        videoFileName: "",
+        videoFileType: "",
+        videoFileSize: 0,
+        attachmentUrl: "",
+        attachmentFileKey: "",
+        attachmentFileName: "",
+        attachmentFileType: "",
+        attachmentFileSize: 0,
         public_id: "",
         freePreview: false,
       },
@@ -302,17 +451,19 @@ function CourseCurriculum({ onNext }) {
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={() => handleReplace(index)}
+              onClick={() => handleReplace(index, "video")}
             >
               <Replace className="h-4 w-4 ml-2" />{" "}
               {t("curriculum.replaceVideo")}
             </Button>
             <Input
-              id={`replace-${index}`}
+              id={`replace-video-${index}`}
               type="file"
               accept="video/*"
               className="hidden"
-              onChange={(e) => processVideoFiles(e.target.files, index)}
+              onChange={(e) =>
+                processLectureFiles(e.target.files, index, "video")
+              }
             />
           </div>
         ) : (
@@ -325,10 +476,71 @@ function CourseCurriculum({ onNext }) {
               type="file"
               accept="video/*"
               className="mx-auto max-w-xs"
-              onChange={(e) => processVideoFiles(e.target.files, index)}
+              onChange={(e) =>
+                processLectureFiles(e.target.files, index, "video")
+              }
             />
           </div>
         )}
+
+        <div className="border-t border-border/50 pt-4">
+          {lecture.attachmentUrl ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    {lecture.attachmentFileName || "PDF"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {lecture.attachmentFileType || "application/pdf"}
+                  </p>
+                </div>
+                <a
+                  className="text-xs text-blue-500 hover:underline"
+                  href={withAuthToken(lecture.attachmentUrl, { download: true })}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("common.download") || "Download"}
+                </a>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => handleReplace(index, "attachment")}
+              >
+                <Replace className="h-4 w-4 ml-2" />{" "}
+                {t("curriculum.replaceFile") || "Replace file"}
+              </Button>
+              <Input
+                id={`replace-attachment-${index}`}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={(e) =>
+                  processLectureFiles(e.target.files, index, "attachment")
+                }
+              />
+            </div>
+          ) : (
+            <div className="border-2 border-dashed rounded-lg p-6 text-center bg-muted/50">
+              <FileText className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground mb-4">
+                {t("curriculum.uploadLectureFile") || "Upload lecture PDF"}
+              </p>
+              <Input
+                type="file"
+                accept="application/pdf"
+                className="mx-auto max-w-xs"
+                onChange={(e) =>
+                  processLectureFiles(e.target.files, index, "attachment")
+                }
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -344,10 +556,10 @@ function CourseCurriculum({ onNext }) {
             <Input
               ref={bulkUploadRef}
               type="file"
-              accept="video/*"
+              accept="video/*,application/pdf"
               multiple
               className="hidden"
-              onChange={(e) => processVideoFiles(e.target.files)}
+              onChange={(e) => processLectureFiles(e.target.files)}
             />
             <Button
               size="sm"
@@ -367,7 +579,7 @@ function CourseCurriculum({ onNext }) {
         {mediaUploadProgress && (
           <div className="space-y-2">
             <Label className="text-sm text-muted-foreground">
-              {t("curriculum.uploading")}
+              {t("curriculum.uploading") || "Uploading files..."}
             </Label>
             <MediaProgressbar
               isMediaUploading={mediaUploadProgress}
@@ -427,16 +639,21 @@ function CourseCurriculum({ onNext }) {
             <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
               {t("curriculum.uploadedLectures") || "Uploaded Lectures"}
             </p>
-            <p className="text-3xl font-semibold text-foreground">{uploadedCount}</p>
+            <p className="text-3xl font-semibold text-foreground">
+              {uploadedCount}
+            </p>
             <p className="text-sm text-muted-foreground">
-              {t("curriculum.totalLectures") || "Total lectures"}: {courseCurriculumFormData.length}
+              {t("curriculum.totalLectures") || "Total lectures"}:{" "}
+              {courseCurriculumFormData.length}
             </p>
           </div>
           <div className="rounded-3xl border border-border/40 bg-card/70 p-4 text-center shadow-inner">
             <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
               {t("curriculum.pendingUploads") || "Pending"}
             </p>
-            <p className="text-3xl font-semibold text-foreground">{pendingCount}</p>
+            <p className="text-3xl font-semibold text-foreground">
+              {pendingCount}
+            </p>
             <p className="text-sm text-muted-foreground">
               {t("curriculum.fillDetails") || "Need video or title"}
             </p>
@@ -449,7 +666,8 @@ function CourseCurriculum({ onNext }) {
               {moduleCount}
             </p>
             <p className="text-sm text-muted-foreground">
-              {t("curriculum.chunkSizeDescription") || `${LECTURES_PER_GROUP} ${t("curriculum.perModule") || "per module"}`}
+              {t("curriculum.chunkSizeDescription") ||
+                `${LECTURES_PER_GROUP} per module`}
             </p>
           </div>
         </div>
@@ -472,7 +690,12 @@ function CourseCurriculum({ onNext }) {
                     </p>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {group.filter((lecture) => lecture.videoUrl).length} {t("curriculum.uploadedShort") || "Uploaded"}
+                    {
+                      group.filter(
+                        (lecture) => lecture.videoUrl || lecture.attachmentUrl
+                      ).length
+                    }{" "}
+                    {t("curriculum.uploadedShort") || "Uploaded"}
                   </span>
                 </summary>
                 <div className="space-y-5 px-5 pb-5 pt-0">
@@ -487,13 +710,14 @@ function CourseCurriculum({ onNext }) {
             ))}
           </div>
         )}
+
         <div className="pt-6 border-t border-border">
           <Button
             onClick={handleSaveAndContinue}
             className="w-full text-lg font-semibold h-12"
             size="lg"
           >
-            {isRTL ? "ذخیره و ادامه" : "Save & Continue"}
+            {t("common.saveAndContinue") || "Save & Continue"}
           </Button>
         </div>
       </CardContent>

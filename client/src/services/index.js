@@ -57,6 +57,53 @@ export async function mediaDeleteService(id) {
   return data;
 }
 
+export async function mediaLocalUploadService(formData, onProgressCallback) {
+  const { data } = await axiosInstance.post("/media/local-upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+    onUploadProgress: (progressEvent) => {
+      if (typeof onProgressCallback === "function") {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / Math.max(progressEvent.total, 1)
+        );
+        onProgressCallback(percentCompleted);
+      }
+    },
+  });
+
+  return data;
+}
+
+export async function mediaLocalBulkUploadService(formData, onProgressCallback) {
+  const { data } = await axiosInstance.post("/media/local-bulk-upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+    onUploadProgress: (progressEvent) => {
+      if (typeof onProgressCallback === "function") {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / Math.max(progressEvent.total, 1)
+        );
+        onProgressCallback(percentCompleted);
+      }
+    },
+  });
+
+  return data;
+}
+
+export async function mediaLocalDeleteService(fileKey) {
+  const { data } = await axiosInstance.delete(
+    `/media/local-delete?path=${encodeURIComponent(fileKey)}`
+  );
+  return data;
+}
+
 export async function fetchInstructorCourseListService() {
   const { data } = await axiosInstance.get(`/instructor/course/get`);
 

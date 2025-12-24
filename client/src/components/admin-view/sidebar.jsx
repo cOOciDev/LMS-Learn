@@ -5,7 +5,7 @@ import {
   LayoutGrid,
   BookOpenCheck,
   GraduationCap,
-  DollarSign,
+  // DollarSign,
   MessageCircle,
   Settings2,
   Tags,

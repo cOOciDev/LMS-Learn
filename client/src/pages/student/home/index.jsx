@@ -102,7 +102,8 @@ function StudentHomePage() {
   };
 
   const formatWeekdays = (values = []) => {
-    if (!values.length) return "Flexible schedule";
+    if (!values.length)
+      return t("home.liveFlexibleSchedule") || "Flexible schedule";
     return values.map((day) => weekdayShort[day] || day).join(", ");
   };
 
@@ -171,12 +172,14 @@ function StudentHomePage() {
           <div className="flex flex-col gap-4 text-center mb-10">
             <div className="mx-auto flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm uppercase tracking-wide">
               <Radio className="h-4 w-4" />
-              Live Online
+              {t("home.liveOnlineLabel") || "Live Online"}
             </div>
-            <h2 className="text-3xl font-bold">Live &amp; Time-Bound Classes</h2>
+            <h2 className="text-3xl font-bold">
+              {t("home.liveClassesTitle") || "Live & Time-Bound Classes"}
+            </h2>
             <p className="text-white/70 max-w-2xl mx-auto">
-              Join immersive live cohorts with instructors in real time. Limited seats,
-              curated schedules, and attendance tracking keep you engaged.
+              {t("home.liveClassesDescription") ||
+                "Join immersive live cohorts with instructors in real time. Limited seats, curated schedules, and attendance tracking keep you engaged."}
             </p>
           </div>
 
@@ -188,7 +191,7 @@ function StudentHomePage() {
               >
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-rose-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
-                    Live
+                    {t("home.liveBadge") || "Live"}
                   </span>
                   <span className="text-xs text-white/70">
                     {formatDate(plan.startDate)} ↦ {formatDate(plan.endDate)}
@@ -197,20 +200,28 @@ function StudentHomePage() {
 
                 <h3 className="mt-4 text-xl font-semibold">{plan.title}</h3>
                 <p className="mt-1 text-sm text-white/70">
-                  {plan.courseId ? "Linked course" : "Standalone live program"}
+                  {plan.courseId
+                    ? t("home.liveLinkedCourse") || "Linked course"
+                    : t("home.liveStandalone") || "Standalone live program"}
                 </p>
 
                 <div className="mt-4 space-y-1 text-sm text-white/80">
                   <p>
-                    <span className="font-semibold">Schedule:</span>{" "}
+                    <span className="font-semibold">
+                      {t("home.liveSchedule") || "Schedule:"}
+                    </span>{" "}
                     {plan.dailyStartTime} – {plan.dailyEndTime} ({plan.timezone})
                   </p>
                   <p className="text-xs text-white/60">
-                    Weekdays: {formatWeekdays(plan.weekdays)}
+                    {t("home.liveWeekdays") || "Weekdays:"}{" "}
+                    {formatWeekdays(plan.weekdays)}
                   </p>
                   <p>
-                    <span className="font-semibold">Attendance:</span>{" "}
-                    {plan.minAttendanceMinutes} min required
+                    <span className="font-semibold">
+                      {t("home.liveAttendance") || "Attendance:"}
+                    </span>{" "}
+                    {plan.minAttendanceMinutes} {t("home.liveMinutes") || "min"}{" "}
+                    {t("home.liveRequired") || "required"}
                   </p>
                 </div>
 
@@ -219,7 +230,9 @@ function StudentHomePage() {
                   className="mt-6 w-full bg-white text-purple-900 hover:bg-white/90"
                   onClick={() => handleLivePlanNavigate(plan)}
                 >
-                  {plan.courseId ? "View course details" : "See live plan"}
+                  {plan.courseId
+                    ? t("home.viewCourseDetails") || "View course details"
+                    : t("home.seeLivePlan") || "See live plan"}
                 </Button>
               </div>
             ))}

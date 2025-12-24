@@ -166,6 +166,17 @@ const togglePublishCourse = asyncHandler(async (req, res) => {
       message: "Course must have at least one lecture before publishing",
     });
   }
+  if (req.body.isPublished) {
+    const hasInvalidLecture = course.curriculum.some(
+      (lecture) => !lecture.videoUrl && !lecture.attachmentUrl
+    );
+    if (hasInvalidLecture) {
+      return res.status(400).json({
+        success: false,
+        message: "Each lecture must have a video or a PDF attachment",
+      });
+    }
+  }
 
   course.isPublished = req.body.isPublished !== undefined ? req.body.isPublished : !course.isPublished;
   course.status = course.isPublished ? "published" : "draft";

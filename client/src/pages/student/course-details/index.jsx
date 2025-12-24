@@ -1,4 +1,4 @@
-// client/src/pages/student/course-details/index.jsx
+﻿// client/src/pages/student/course-details/index.jsx
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthContext } from "@/context/auth-context";
+import { useLanguage } from "@/context/language-context";
 import { StudentContext } from "@/context/student-context";
+import { withAuthToken } from "@/utils/media";
 import {
   checkCoursePurchaseInfoService,
   createPaymentService,
@@ -25,15 +27,6 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useToast } from "@/hooks/use-toast";
 const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = STRIPE_PUBLIC_KEY ? loadStripe(STRIPE_PUBLIC_KEY) : null;
-
-const MESSAGES = {
-  invalidId: "شناسه دوره معتبر نیست. لطفاً از لیست دوره‌ها وارد شوید.",
-  notFound: "دوره پیدا نشد.",
-  fetchError: "خطا در دریافت اطلاعات دوره. لطفاً دوباره تلاش کنید.",
-  retry: "تلاش مجدد",
-  backToCourses: "بازگشت به لیست دوره‌ها",
-  loading: "در حال بارگذاری اطلاعات دوره...",
-};
 
 const normalizeCourseFromResponse = (responseData, courseId) => {
   if (!responseData) return null;
@@ -90,15 +83,28 @@ function StudentViewCourseDetailsPage() {
   } = useContext(StudentContext);
 
   const { auth } = useContext(AuthContext);
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
   const [pageError, setPageError] = useState("");
 
-  const notifyError = (description) =>
-    toast({ title: "خطا", description, variant: "destructive" });
+  const messages = {
+    invalidId:
+      t("courseDetails.invalidId") ||
+      "Invalid course id. Please select a course from the list.",
+    notFound: t("courseDetails.notFound") || "Course not found.",
+    fetchError:
+      t("courseDetails.fetchError") ||
+      "Error fetching course details. Please try again.",
+    retry: t("courseDetails.retry") || "Retry",
+    backToCourses: t("courseDetails.backToCourses") || "Back to courses",
+    loading: t("courseDetails.loading") || "Loading course details...",
+  };
 
+  const notifyError = (description) =>
+    toast({ title: t("common.error") || "Error", description, variant: "destructive" });
   const refreshStudentCourses = async () => {
     if (!auth?.user?._id) return;
     try {
@@ -111,23 +117,24 @@ function StudentViewCourseDetailsPage() {
   };
 
   const [displayCurrentVideoFreePreview, setDisplayCurrentVideoFreePreview] = useState(null);
+  const [selectedPreviewLecture, setSelectedPreviewLecture] = useState(null);
   const [showFreePreviewDialog, setShowFreePreviewDialog] = useState(false);
   const [purchaseInfo, setPurchaseInfo] = useState(null);
 
-  // بخش جدید: دوره‌های دیگر همین استاد
+  // ╪¿╪«╪┤ ╪¼╪»█î╪»: ╪»┘ê╪▒┘çΓÇî┘ç╪º█î ╪»█î┌»╪▒ ┘ç┘à█î┘å ╪º╪│╪¬╪º╪»
   const [instructorCourses, setInstructorCourses] = useState([]);
   const [loadingInstructorCourses, setLoadingInstructorCourses] = useState(false);
 
-  // تابع لود دوره‌های مدرس با تأخیر (برای سرعت بیشتر صفحه)
+  // ╪¬╪º╪¿╪╣ ┘ä┘ê╪» ╪»┘ê╪▒┘çΓÇî┘ç╪º█î ┘à╪»╪▒╪│ ╪¿╪º ╪¬╪ú╪«█î╪▒ (╪¿╪▒╪º█î ╪│╪▒╪╣╪¬ ╪¿█î╪┤╪¬╪▒ ╪╡┘ü╪¡┘ç)
   const fetchInstructorOtherCourses = useCallback(async () => {
-    // اگه هنوز دوره اصلی لود نشده، هیچ کاری نکن
+    // ╪º┌»┘ç ┘ç┘å┘ê╪▓ ╪»┘ê╪▒┘ç ╪º╪╡┘ä█î ┘ä┘ê╪» ┘å╪┤╪»┘ç╪î ┘ç█î┌å ┌⌐╪º╪▒█î ┘å┌⌐┘å
     if (!studentViewCourseDetails?._id) {
       setInstructorCourses([]);
       setLoadingInstructorCourses(false);
       return;
     }
 
-    // اگه آیدی دوره عوض شده، صبر کن تا داده جدید بیاد
+    // ╪º┌»┘ç ╪ó█î╪»█î ╪»┘ê╪▒┘ç ╪╣┘ê╪╢ ╪┤╪»┘ç╪î ╪╡╪¿╪▒ ┌⌐┘å ╪¬╪º ╪»╪º╪»┘ç ╪¼╪»█î╪» ╪¿█î╪º╪»
     if (studentViewCourseDetails._id !== currentCourseDetailsId && currentCourseDetailsId) {
       return;
     }
@@ -157,38 +164,15 @@ function StudentViewCourseDetailsPage() {
         setInstructorCourses(filtered);
       }
     } catch (err) {
-      console.error("خطا در لود دوره‌های مدرس:", err);
+      console.error("Failed to load instructor courses:", err);
     } finally {
       setLoadingInstructorCourses(false);
     }
   }, [studentViewCourseDetails, currentCourseDetailsId]);
-  // هماهنگ‌سازی شناسه دوره
-  useEffect(() => {
-    if (!id) {
-      setPageError(MESSAGES.invalidId);
-      setLoadingState(false);
-      setStudentViewCourseDetails(null);
-      setCurrentCourseDetailsId(null);
-      setInstructorCourses([]);
-      setPurchaseInfo(null);
-      return;
-    }
 
-    setPageError("");
-    setCurrentCourseDetailsId(id);
-  }, [id]);
-
-  // فقط وقتی دوره اصلی کامل لود شد، دوره‌های مدرس رو بگیر
-  useEffect(() => {
-    if (studentViewCourseDetails?._id && !loadingState) {
-      fetchInstructorOtherCourses();
-    }
-  }, [studentViewCourseDetails?._id, loadingState, fetchInstructorOtherCourses]);
-
-  // بقیه توابع اصلی
   async function fetchStudentViewCourseDetails() {
     if (!currentCourseDetailsId) {
-      setPageError(MESSAGES.invalidId);
+      setPageError(messages.invalidId);
       setLoadingState(false);
       setStudentViewCourseDetails(null);
       return;
@@ -213,7 +197,7 @@ function StudentViewCourseDetailsPage() {
       );
 
       if (!normalizedCourse) {
-        setPageError(MESSAGES.notFound);
+        setPageError(messages.notFound);
         setStudentViewCourseDetails(null);
       } else {
         setStudentViewCourseDetails(normalizedCourse);
@@ -230,26 +214,24 @@ function StudentViewCourseDetailsPage() {
         err?.response?.status ?? err?.message,
         err?.response?.data
       );
-      setPageError(MESSAGES.fetchError);
+      setPageError(messages.fetchError);
     } finally {
       setLoadingState(false);
     }
   }
-  const handleSetFreePreview = (item) => {
-    setDisplayCurrentVideoFreePreview(normalizePreviewUrl(item?.videoUrl));
-  };
 
   const handleCreatePayment = async (event) => {
     event?.preventDefault?.();
     event?.stopPropagation?.();
     const studentId = auth?.user?._id || auth?.user?.id;
     if (!studentId) {
-      notifyError("شناسه کاربر معتبر نیست.");
+      notifyError(t("courseDetails.invalidUser") || "Invalid user id.");
       return;
     }
-    const courseId = studentViewCourseDetails?._id || studentViewCourseDetails?.id;
+    const courseId =
+      studentViewCourseDetails?._id || studentViewCourseDetails?.id;
     if (!courseId) {
-      notifyError("شناسه دوره معتبر نیست.");
+      notifyError(t("courseDetails.invalidCourse") || "Invalid course id.");
       return;
     }
 
@@ -282,7 +264,11 @@ function StudentViewCourseDetailsPage() {
     try {
       const res = await createPaymentService(payload);
       if (!res?.success) {
-        notifyError(res?.message || "در پردازش ثبت‌نام مشکلی پیش آمد.");
+        notifyError(
+          res?.message ||
+            t("courseDetails.enrollError") ||
+            "An error occurred while processing enrollment."
+        );
         return;
       }
 
@@ -299,28 +285,44 @@ function StudentViewCourseDetailsPage() {
 
       if (stripePromise && res.data?.sessionId) {
         const stripe = await stripePromise;
-        const { error } = await stripe.redirectToCheckout({ sessionId: res.data.sessionId });
+        const { error } = await stripe.redirectToCheckout({
+          sessionId: res.data.sessionId,
+        });
         if (error) console.error(error);
       }
     } catch (error) {
       notifyError(
         error?.response?.data?.message ||
-          "در ثبت‌نام دوره مشکلی پیش آمد. لطفاً دوباره تلاش کنید."
+          t("courseDetails.enrollError") ||
+          "An error occurred while processing enrollment. Please try again."
       );
     }
   };
+  // ┘ç┘à╪º┘ç┘å┌»ΓÇî╪│╪º╪▓█î ╪┤┘å╪º╪│┘ç ╪»┘ê╪▒┘ç
+  useEffect(() => {
+    if (!id) {
+      setPageError(messages.invalidId);
+      setLoadingState(false);
+      setStudentViewCourseDetails(null);
+      setCurrentCourseDetailsId(null);
+      setInstructorCourses([]);
+      setPurchaseInfo(null);
+      return;
+    }
+
+    setPageError("");
+    setCurrentCourseDetailsId(id);
+  }, [id]);
 
   useEffect(() => {
-    if (displayCurrentVideoFreePreview !== null) setShowFreePreviewDialog(true);
-  }, [displayCurrentVideoFreePreview]);
+    if (studentViewCourseDetails?._id && !loadingState) {
+      fetchInstructorOtherCourses();
+    }
+  }, [studentViewCourseDetails?._id, loadingState, fetchInstructorOtherCourses]);
 
   useEffect(() => {
     if (currentCourseDetailsId !== null) fetchStudentViewCourseDetails();
   }, [currentCourseDetailsId, auth?.user?._id]);
-
-  useEffect(() => {
-    if (id) setCurrentCourseDetailsId(id);
-  }, [id]);
 
   useEffect(() => {
     if (!location.pathname.includes("course/details")) {
@@ -335,13 +337,13 @@ function StudentViewCourseDetailsPage() {
     return (
       <div className="mx-auto max-w-3xl py-20 text-center">
         <h3 className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-100">
-          شناسه دوره معتبر نیست.
+          {messages.invalidId}
         </h3>
         <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-          لطفاً از لیست دوره‌ها وارد شوید.
+          {messages.backToCourses}
         </p>
         <Button onClick={() => navigate("/courses")} size="lg">
-          بازگشت به لیست دوره‌ها
+          {messages.backToCourses}
         </Button>
       </div>
     );
@@ -352,14 +354,14 @@ function StudentViewCourseDetailsPage() {
       <div className="mx-auto max-w-3xl py-20 text-center">
         <h3 className="mb-4 text-3xl font-bold text-red-600">{pageError}</h3>
         <Button onClick={fetchStudentViewCourseDetails} size="lg">
-          تلاش مجدد
+          {messages.retry}
         </Button>
         <Button
           variant="outline"
           className="mt-3"
           onClick={() => navigate("/courses")}
         >
-          بازگشت به لیست دوره‌ها
+          {messages.backToCourses}
         </Button>
       </div>
     );
@@ -371,48 +373,67 @@ function StudentViewCourseDetailsPage() {
   const isEnrolled =
     purchaseInfo?.isEnrolled || purchaseInfo?.enrollment?.isEnrolled;
   const formattedPrice = Number(studentViewCourseDetails?.pricing || 0);
+  const priceLocale = language === "fa" ? "fa-IR" : "en-US";
   const priceLabel = isFreeCourse
-    ? "رایگان"
-    : `${formattedPrice.toLocaleString("fa-IR")} تومان`;
+    ? t("common.free") || "Free"
+    : `${formattedPrice.toLocaleString(priceLocale)} ${
+        t("common.currency") || "Toman"
+      }`;
   const actionLabel = isEnrolled
-    ? "ادامه دوره"
+    ? t("courseDetails.continueCourse") || "Continue course"
     : isFreeCourse
-    ? "ثبت‌نام رایگان"
-    : "خرید دوره";
+    ? t("courseDetails.freeEnroll") || "Enroll for free"
+    : t("courseDetails.buyCourse") || "Buy course";
   const previewLecture =
     firstFreePreviewIndex !== -1
       ? studentViewCourseDetails.curriculum[firstFreePreviewIndex]
       : studentViewCourseDetails?.curriculum?.[0] || null;
-  const previewVideoUrl = normalizePreviewUrl(previewLecture?.videoUrl);
+  const activePreviewLecture = selectedPreviewLecture || previewLecture;
+  const previewVideoUrl = normalizePreviewUrl(activePreviewLecture?.videoUrl);
   const dialogPreviewUrl = normalizePreviewUrl(
-    displayCurrentVideoFreePreview || previewLecture?.videoUrl
+    displayCurrentVideoFreePreview || activePreviewLecture?.videoUrl
   );
-
+  const resolvedPreviewUrl = withAuthToken(previewVideoUrl);
+  const resolvedDialogUrl = withAuthToken(dialogPreviewUrl);
   return (
     <div className="mx-auto max-w-7xl p-4">
-      {/* هدر دوره */}
+      {/* ┘ç╪»╪▒ ╪»┘ê╪▒┘ç */}
       <div className="rounded-t-lg bg-white p-8 shadow dark:bg-gray-900">
         <h1 className="mb-4 text-3xl font-bold">{studentViewCourseDetails?.title}</h1>
         <p className="mb-4 text-xl">{studentViewCourseDetails?.subtitle}</p>
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
-          <span>مدرس: <span className="font-semibold">{studentViewCourseDetails?.instructorName}</span></span>
+          <span>
+            {t("course.instructor") || "Instructor"}: {" "}
+            <span className="font-semibold">
+              {studentViewCourseDetails?.instructorName}
+            </span>
+          </span>
           <span className="flex items-center gap-1">
             <Globe className="h-4 w-4" />
             {studentViewCourseDetails?.primaryLanguage}
           </span>
-          <span>{studentViewCourseDetails?.students?.length || 0} دانشجو</span>
+          <span>
+            {studentViewCourseDetails?.students?.length || 0} {" "}
+            {t("course.students") || "Students"}
+          </span>
         </div>
       </div>
 
       <div className="mt-8 flex flex-col gap-8 md:flex-row">
         <main className="flex-grow">
           <Card className="mb-8">
-            <CardHeader><CardTitle>چه چیزی یاد می‌گیرید</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>
+                {t("course.whatYouWillLearn") || "What you will learn"}
+              </CardTitle>
+            </CardHeader>
             <CardContent>
               <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {(Array.isArray(studentViewCourseDetails?.objectives)
                   ? studentViewCourseDetails.objectives
-                  : (studentViewCourseDetails?.objectives || "").split(",").filter(Boolean)
+                  : (studentViewCourseDetails?.objectives || "")
+                      .split(",")
+                      .filter(Boolean)
                 ).map((obj, i) => (
                   <li key={i} className="flex items-start">
                     <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
@@ -424,14 +445,20 @@ function StudentViewCourseDetailsPage() {
           </Card>
 
           <Card className="mb-8">
-            <CardHeader><CardTitle>توضیحات دوره</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>
+                {t("courseDetails.descriptionTitle") || "Course description"}
+              </CardTitle>
+            </CardHeader>
             <CardContent className="prose dark:prose-invert">
               {studentViewCourseDetails?.description}
             </CardContent>
           </Card>
 
           <Card className="mb-8">
-            <CardHeader><CardTitle>برنامه درسی</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>{t("course.curriculum") || "Curriculum"}</CardTitle>
+            </CardHeader>
             <CardContent>
               <ul className="space-y-4">
                 {studentViewCourseDetails?.curriculum?.map((item, idx) => (
@@ -440,9 +467,22 @@ function StudentViewCourseDetailsPage() {
                     className={`flex items-center ${item.freePreview ? "cursor-pointer hover:text-blue-600" : "text-gray-500"}`}
                     onClick={() => item.freePreview && handleSetFreePreview(item)}
                   >
-                    {item.freePreview ? <PlayCircle className="ml-3 h-5 w-5" /> : <Lock className="ml-3 h-5 w-5" />}
+                    {item.freePreview ? (
+                      <PlayCircle className="ml-3 h-5 w-5" />
+                    ) : (
+                      <Lock className="ml-3 h-5 w-5" />
+                    )}
                     <span className="text-lg">{item.title}</span>
-                    {item.freePreview && <span className="mr-auto text-sm text-green-600">پیش‌نمایش</span>}
+                    {item.attachmentUrl && (
+                      <span className="mr-3 text-xs text-blue-600">
+                        {t("course.hasAttachment") || "PDF attached"}
+                      </span>
+                    )}
+                    {item.freePreview && (
+                      <span className="mr-auto text-sm text-green-600">
+                        {t("courseDetails.freePreview") || "Free preview"}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -453,24 +493,41 @@ function StudentViewCourseDetailsPage() {
         <aside className="w-full md:w-96">
           <Card className="sticky top-4">
             <CardContent className="p-6">
-          <div className="aspect-video overflow-hidden rounded-lg bg-black">
-            {previewVideoUrl ? (
-              <video
-                controls
-                className="h-full w-full object-cover"
-                src={previewVideoUrl}
-              >
-                <source src={previewVideoUrl} type="video/mp4" />
-                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
-              </video>
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                ویدیوی پیش‌نمایش موجود نیست.
+              <div className="aspect-video overflow-hidden rounded-lg bg-black">
+                {resolvedPreviewUrl ? (
+                  <video
+                    controls
+                    className="h-full w-full object-cover"
+                    src={resolvedPreviewUrl}
+                  >
+                    <source src={resolvedPreviewUrl} type="video/mp4" />
+                    {t("courseDetails.videoNotSupported") ||
+                      "Your browser does not support the video tag."}
+                  </video>
+                ) : activePreviewLecture?.attachmentUrl ? (
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                    <a
+                      className="text-blue-500 hover:underline"
+                      href={withAuthToken(activePreviewLecture.attachmentUrl, { download: true })}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t("course.downloadAttachment") || "Download lesson file"}
+                    </a>
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                    {t("course.noVideo") || "No video for this lesson."}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
               <div className="mt-6 text-3xl font-bold">{priceLabel}</div>
-              <Button type="button" onClick={(e) => handleCreatePayment(e)} className="mt-4 w-full" size="lg">
+              <Button
+                type="button"
+                onClick={(e) => handleCreatePayment(e)}
+                className="mt-4 w-full"
+                size="lg"
+              >
                 {actionLabel}
               </Button>
             </CardContent>
@@ -478,23 +535,48 @@ function StudentViewCourseDetailsPage() {
         </aside>
       </div>
 
-      {/* دیالوگ پیش‌نمایش */}
-      <Dialog open={showFreePreviewDialog} onOpenChange={(open) => !open && setShowFreePreviewDialog(false) && setDisplayCurrentVideoFreePreview(null)}>
+      {/* ╪»█î╪º┘ä┘ê┌» ┘╛█î╪┤ΓÇî┘å┘à╪º█î╪┤ */}
+      <Dialog
+        open={showFreePreviewDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowFreePreviewDialog(false);
+            setDisplayCurrentVideoFreePreview(null);
+            setSelectedPreviewLecture(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-4xl">
-          <DialogHeader><DialogTitle>پیش‌نمایش دوره</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>
+              {t("courseDetails.previewTitle") || "Course preview"}
+            </DialogTitle>
+          </DialogHeader>
           <div className="aspect-video bg-black">
-            {dialogPreviewUrl ? (
+            {resolvedDialogUrl ? (
               <video
                 controls
                 className="h-full w-full object-cover"
-                src={dialogPreviewUrl}
+                src={resolvedDialogUrl}
               >
-                <source src={dialogPreviewUrl} type="video/mp4" />
-                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+                <source src={resolvedDialogUrl} type="video/mp4" />
+                {t("courseDetails.videoNotSupported") ||
+                  "Your browser does not support the video tag."}
               </video>
+            ) : activePreviewLecture?.attachmentUrl ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                <a
+                  className="text-blue-500 hover:underline"
+                  href={withAuthToken(activePreviewLecture.attachmentUrl, { download: true })}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("course.downloadAttachment") || "Download lesson file"}
+                </a>
+              </div>
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                ویدیوی پیش‌نمایش موجود نیست.
+                {t("course.noVideo") || "No video for this lesson."}
               </div>
             )}
           </div>
@@ -512,16 +594,13 @@ function StudentViewCourseDetailsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* بخش نهایی: دوره‌های بیشتر از این استاد – همیشه نمایش داده میشه */}
+      {/* ╪¿╪«╪┤ ┘å┘ç╪º█î█î: ╪»┘ê╪▒┘çΓÇî┘ç╪º█î ╪¿█î╪┤╪¬╪▒ ╪º╪▓ ╪º█î┘å ╪º╪│╪¬╪º╪» ΓÇô ┘ç┘à█î╪┤┘ç ┘å┘à╪º█î╪┤ ╪»╪º╪»┘ç ┘à█î╪┤┘ç */}
       <div className="mt-20">
-        <h2 className="mb-10 text-3xl font-bold text-center md:text-right">
-          دوره‌های بیشتر از استاد {studentViewCourseDetails?.instructorName || "در حال بارگذاری..."}
-        </h2>
+        <h2 className="mb-10 text-3xl font-bold text-center md:text-right">{t("courseDetails.moreFromInstructor", { name: studentViewCourseDetails?.instructorName || "" }) || `More from ${studentViewCourseDetails?.instructorName || ""}`}</h2>
 
-        {/* کل بخش با transition نرم */}
+        {/* ┌⌐┘ä ╪¿╪«╪┤ ╪¿╪º transition ┘å╪▒┘à */}
         <div className="min-h-96 transition-all duration-700 ease-in-out">
           {loadingInstructorCourses ? (
-            // اسکلتون نرم و بدون چشمک
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="overflow-hidden rounded-xl shadow-lg">
@@ -534,7 +613,6 @@ function StudentViewCourseDetailsPage() {
               ))}
             </div>
           ) : instructorCourses.length > 0 ? (
-            // دوره‌ها با انیمیشن fade-in
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-fadeIn">
               {instructorCourses.map((course, index) => (
                 <Card
@@ -550,36 +628,54 @@ function StudentViewCourseDetailsPage() {
                       className="h-full w-full object-cover transition-transform group-hover:scale-110 duration-500"
                     />
                     {Number(course.pricing) <= 0 ? (
-                      <div className="absolute left-3 top-3 rounded-full bg-green-600 px-3 py-1 text-sm font-bold text-white">رایگان</div>
+                      <div className="absolute left-3 top-3 rounded-full bg-green-600 px-3 py-1 text-sm font-bold text-white">
+                        {t("common.free") || "Free"}
+                      </div>
                     ) : (
-                      <div className="absolute left-3 top-3 rounded-full bg-black/80 px-3 py-1 text-sm font-bold text-white">${course.pricing}</div>
+                      <div className="absolute left-3 top-3 rounded-full bg-black/80 px-3 py-1 text-sm font-bold text-white">
+                        ${course.pricing}
+                      </div>
                     )}
                   </div>
                   <CardContent className="p-5">
                     <h3 className="mb-2 line-clamp-2 text-lg font-bold group-hover:text-blue-600 transition-colors">
                       {course.title}
                     </h3>
-                    <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">{course.instructorName}</p>
+                    <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                      {course.instructorName}
+                    </p>
                     <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>{course.curriculum?.length || 0} درس</span>
-                      <span>{course.students?.length || 0} دانشجو</span>
+                      <span>
+                        {course.curriculum?.length || 0} {t("course.lectures") || "Lectures"}
+                      </span>
+                      <span>
+                        {course.students?.length || 0} {t("course.students") || "Students"}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : (
-            // پیام فان بدون چشمک‌نزن!
             <div className="py-24 text-center">
               <div className="mx-auto max-w-lg">
-                <div className="mb-8 text-8xl">جستجو کردن</div>
+                <div className="mb-8 text-8xl">
+                  {t("courseDetails.emptyEmoji") || "Search"}
+                </div>
                 <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                  استاد {studentViewCourseDetails?.instructorName} فعلاً فقط همین یک شاهکار رو داره!
+                  {t("courseDetails.emptyTitle", {
+                    name: studentViewCourseDetails?.instructorName || "",
+                  }) ||
+                    `Instructor ${studentViewCourseDetails?.instructorName || ""} only has this course right now!`}
                 </h3>
                 <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                  ولی داره تو زیرزمین شبانه‌روز کد می‌زنه
+                  {t("courseDetails.emptyDescription") ||
+                    "But there might be more coming soon."}
                   <br />
-                  <span className="mt-4 inline-block text-3xl text-blue-600">به زودی دوره جدید میاد، قول!</span>
+                  <span className="mt-4 inline-block text-3xl text-blue-600">
+                    {t("courseDetails.emptyPromise") ||
+                      "A new course is coming soon!"}
+                  </span>
                 </p>
               </div>
             </div>
@@ -591,3 +687,35 @@ function StudentViewCourseDetailsPage() {
 }
 
 export default StudentViewCourseDetailsPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

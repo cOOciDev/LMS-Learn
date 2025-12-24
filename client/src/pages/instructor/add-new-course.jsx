@@ -74,7 +74,7 @@ function AddNewCoursePage() {
     const hasLectures = courseCurriculumFormData?.length > 0;
     const allComplete =
       courseCurriculumFormData?.every(
-        (item) => item.title?.trim() && item.videoUrl && item.public_id
+        (item) => item.title?.trim() && (item.videoUrl || item.attachmentUrl)
       ) || false;
     console.log(
       "[Validation] Curriculum → lectures:",
@@ -147,6 +147,15 @@ function AddNewCoursePage() {
       curriculum: courseCurriculumFormData.map((item) => ({
         title: item.title?.trim(),
         videoUrl: item.videoUrl,
+        videoFileKey: item.videoFileKey,
+        videoFileName: item.videoFileName,
+        videoFileType: item.videoFileType,
+        videoFileSize: item.videoFileSize,
+        attachmentUrl: item.attachmentUrl,
+        attachmentFileKey: item.attachmentFileKey,
+        attachmentFileName: item.attachmentFileName,
+        attachmentFileType: item.attachmentFileType,
+        attachmentFileSize: item.attachmentFileSize,
         public_id: item.public_id,
         freePreview: !!item.freePreview,
       })),
