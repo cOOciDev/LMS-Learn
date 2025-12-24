@@ -439,8 +439,7 @@ function StudentViewCourseProgressPage() {
                     <a
                       className="text-xs text-blue-300 hover:underline"
                       href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
-                      target="_blank"
-                      rel="noreferrer"
+                      download
                     >
                       {t("course.downloadAttachment") || "Download lesson file"}
                     </a>
@@ -456,8 +455,7 @@ function StudentViewCourseProgressPage() {
                   <a
                     className="text-blue-400 hover:underline"
                     href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
-                    target="_blank"
-                    rel="noreferrer"
+                    download
                   >
                     {t("course.downloadAttachment") || "Download lesson file"}
                   </a>
@@ -500,8 +498,7 @@ function StudentViewCourseProgressPage() {
                   <a
                     className="text-blue-300 hover:underline"
                     href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
-                    target="_blank"
-                    rel="noreferrer"
+                    download
                   >
                     {t("common.download") || "Download"}
                   </a>

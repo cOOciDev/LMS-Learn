@@ -10,8 +10,6 @@ const {
 
 const router = express.Router();
 
-router.use(authenticateMiddleware);
-
 const uploadDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -245,6 +243,59 @@ router.post("/local-bulk-upload", localUpload.array("files"), async (req, res) =
   });
 });
 
+const sendAssetFile = async (req, res, absolutePath) => {
+  const ext = path.extname(absolutePath).toLowerCase();
+  const videoTypes = {
+    ".mp4": "video/mp4",
+    ".mov": "video/quicktime",
+    ".mkv": "video/x-matroska",
+    ".webm": "video/webm",
+    ".avi": "video/x-msvideo",
+    ".wmv": "video/x-ms-wmv",
+    ".m4v": "video/x-m4v",
+  };
+  const isVideo = Object.prototype.hasOwnProperty.call(videoTypes, ext);
+  if (!isVideo) {
+    const stat = await fs.promises.stat(absolutePath);
+    const fileName = path.basename(absolutePath);
+    const encodedName = encodeURIComponent(fileName);
+    const contentType =
+      ext === ".pdf" ? "application/pdf" : "application/octet-stream";
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Length", stat.size);
+    if (req.query.download === "1") {
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName.replace(/\"/g, "")}"; filename*=UTF-8''${encodedName}`
+      );
+    }
+    return fs.createReadStream(absolutePath).pipe(res);
+  }
+
+  const stat = await fs.promises.stat(absolutePath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+  if (!range) {
+    res.setHeader("Content-Length", fileSize);
+    res.setHeader("Content-Type", videoTypes[ext] || "video/mp4");
+    return fs.createReadStream(absolutePath).pipe(res);
+  }
+
+  const parts = range.replace(/bytes=/, "").split("-");
+  const start = parseInt(parts[0], 10);
+  const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+  const chunkSize = end - start + 1;
+  res.writeHead(206, {
+    "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+    "Accept-Ranges": "bytes",
+    "Content-Length": chunkSize,
+    "Content-Type": videoTypes[ext] || "video/mp4",
+  });
+  return fs.createReadStream(absolutePath, { start, end }).pipe(res);
+};
+
+router.use(authenticateMiddleware);
+
 router.get("/assets", async (req, res) => {
   try {
     const rawPath = req.query.path;
@@ -264,46 +315,8 @@ router.get("/assets", async (req, res) => {
       });
     }
 
-    const sendFileResponse = async () => {
-      const ext = path.extname(absolutePath).toLowerCase();
-      const videoTypes = {
-        ".mp4": "video/mp4",
-        ".mov": "video/quicktime",
-        ".mkv": "video/x-matroska",
-        ".webm": "video/webm",
-        ".avi": "video/x-msvideo",
-        ".wmv": "video/x-ms-wmv",
-        ".m4v": "video/x-m4v",
-      };
-      const isVideo = Object.prototype.hasOwnProperty.call(videoTypes, ext);
-      if (!isVideo) {
-        if (req.query.download === "1") {
-          return res.download(absolutePath, path.basename(absolutePath));
-        }
-        return res.sendFile(absolutePath);
-      }
-
-      const stat = await fs.promises.stat(absolutePath);
-      const fileSize = stat.size;
-      const range = req.headers.range;
-      if (!range) {
-        res.setHeader("Content-Length", fileSize);
-        res.setHeader("Content-Type", videoTypes[ext] || "video/mp4");
-        return fs.createReadStream(absolutePath).pipe(res);
-      }
-
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-      const chunkSize = end - start + 1;
-      res.writeHead(206, {
-        "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": chunkSize,
-        "Content-Type": videoTypes[ext] || "video/mp4",
-      });
-      return fs.createReadStream(absolutePath, { start, end }).pipe(res);
-    };
+    const sendFileResponse = async () =>
+      sendAssetFile(req, res, absolutePath);
 
     if (req.user?.role === "admin") {
       return sendFileResponse();
