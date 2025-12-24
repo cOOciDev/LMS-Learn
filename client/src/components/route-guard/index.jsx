@@ -21,13 +21,13 @@ function RouteGuard({ authenticated, user, element }) {
   }
 
   // Admin routes - only admins can access
-  if (location.pathname.includes("/admin") && user?.role !== "admin") {
+  if (location.pathname.startsWith("/admin") && user?.role !== "admin") {
     return <Navigate to="/home" replace />;
   }
 
   // Instructor routes - only instructors can access
   if (
-    location.pathname.includes("/instructor") &&
+    location.pathname.startsWith("/instructor") &&
     user?.role !== "instructor"
   ) {
     return <Navigate to="/home" replace />;

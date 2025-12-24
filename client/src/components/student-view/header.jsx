@@ -1,5 +1,5 @@
 // components/student/StudentViewCommonHeader.jsx
-import { BookOpen, TvMinimalPlay, Map, Menu, X, MessageSquare } from "lucide-react";
+import { BookOpen, TvMinimalPlay, Map, Menu, X, MessageSquare, Bell } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -8,12 +8,14 @@ import { AuthContext } from "@/context/auth-context";
 import { useLanguage } from "@/context/language-context";
 import LanguageSwitcher from "@/components/language-switcher";
 import ThemeSwitcher from "@/components/theme-switcher";
+import { useUnreadNotifications } from "@/hooks/use-notifications";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
   const { resetCredentials } = useContext(AuthContext);
   const { t, language } = useLanguage();
   const isRTL = language === "fa";
+  const { unreadCount } = useUnreadNotifications();
   const [open, setOpen] = useState(false);
 
   async function handleLogout() {
@@ -55,6 +57,15 @@ function StudentViewCommonHeader() {
         navigate("/tickets");
         setOpen(false);
       },
+    },
+    {
+      label: t("notifications.title") || "Notifications",
+      icon: <Bell className="w-5 h-5" />,
+      onClick: () => {
+        navigate("/notifications");
+        setOpen(false);
+      },
+      badge: unreadCount,
     },
   ];
 
@@ -120,6 +131,21 @@ function StudentViewCommonHeader() {
             <MessageSquare className="w-5 h-5" />
             {t("common.tickets") || t("common.support")}
           </Button>
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/notifications")}
+            className="font-medium hover:bg-accent flex items-center gap-2"
+          >
+            <div className="relative">
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            {t("notifications.title") || "Notifications"}
+          </Button>
         </nav>
 
         {/* دکمه‌های راست - دسکتاپ */}
@@ -154,7 +180,14 @@ function StudentViewCommonHeader() {
                         isRTL ? "flex-row-reverse" : ""
                       }`}
                     >
-                      {item.icon}
+                      <div className="relative">
+                        {item.icon}
+                        {item.badge > 0 && (
+                          <span className="absolute -top-2 -right-2 rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
                       <span>{item.label}</span>
                     </div>
                   </Button>

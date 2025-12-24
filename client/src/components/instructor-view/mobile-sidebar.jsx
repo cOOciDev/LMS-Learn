@@ -6,15 +6,21 @@ import { AuthContext } from "@/context/auth-context";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
 import { INSTRUCTOR_MENU_ITEMS, getInstructorActiveTab } from "./sidebar";
+import { useUnreadNotifications } from "@/hooks/use-notifications";
 
 function InstructorMobileSidebar({ open, onClose }) {
   const { resetCredentials } = useContext(AuthContext);
   const { t } = useLanguage();
+  const { unreadCount } = useUnreadNotifications();
   const navigate = useNavigate();
   const location = useLocation();
 
   const activeTab = getInstructorActiveTab(location.pathname, location.search);
-  const menuItems = INSTRUCTOR_MENU_ITEMS(t);
+  const menuItems = INSTRUCTOR_MENU_ITEMS(t).map((item) =>
+    item.value === "notifications"
+      ? { ...item, badge: unreadCount }
+      : item
+  );
 
   const handleMenuClick = (item) => {
     if (item.routePath) {
@@ -75,7 +81,14 @@ function InstructorMobileSidebar({ open, onClose }) {
                 className="w-full justify-start h-12 px-4 text-base font-medium rounded-xl"
                 onClick={() => handleMenuClick(menuItem)}
               >
-                <menuItem.icon className="mr-2" />
+                <div className="relative mr-2">
+                  <menuItem.icon className="h-5 w-5" />
+                  {menuItem.badge > 0 && (
+                    <span className="absolute -top-2 -right-2 rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white">
+                      {menuItem.badge}
+                    </span>
+                  )}
+                </div>
                 <span>{menuItem.label}</span>
               </Button>
             ))}

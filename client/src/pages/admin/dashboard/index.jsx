@@ -3,6 +3,8 @@ import { Users, BookOpen, DollarSign, TrendingUp } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useLanguage } from "@/context/language-context";
 import { getAdminDashboardStatsService } from "@/services";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 function AdminDashboard() {
   const { t } = useLanguage();
@@ -73,6 +75,24 @@ function AdminDashboard() {
           </Card>
         ))}
       </div>
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>{t("admin.people") || "People"}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold">{t("admin.instructorManagement") || "Instructor Management"}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("admin.instructorsList") || "Manage instructors in a dedicated view"}
+            </p>
+          </div>
+          <Button asChild>
+            <Link to="/admin/instructors">
+              {t("common.view") || "View"}
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
       {stats?.recentUsers && stats.recentUsers.length > 0 && (
         <Card>
           <CardHeader>

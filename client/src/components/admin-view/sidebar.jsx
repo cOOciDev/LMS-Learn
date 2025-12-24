@@ -89,11 +89,11 @@ export const NAV_SECTIONS = (t) => [
   {
     title: t("admin.system") || "System",
     items: [
-      {
-        icon: DollarSign,
-        label: t("admin.revenueTools") || "Revenue Tools",
-        path: "/admin/financial",
-      },
+      // {
+      //   icon: DollarSign,
+      //   label: t("admin.revenueTools") || "Revenue Tools",
+      //   path: "/admin/financial",
+      // },
       {
         icon: Settings2,
         label: t("admin.settings") || "Settings",

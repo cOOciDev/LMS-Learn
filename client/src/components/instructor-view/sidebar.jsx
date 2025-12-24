@@ -1,4 +1,4 @@
-import { BarChart, Book, LogOut, Video } from "lucide-react";
+import { BarChart, Bell, Book, LogOut, MessageSquare, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -6,6 +6,7 @@ import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import { useLanguage } from "@/context/language-context";
 import { fetchInstructorCourseListService } from "@/services";
+import { useUnreadNotifications } from "@/hooks/use-notifications";
 
 export const INSTRUCTOR_MENU_ITEMS = (t) => [
   {
@@ -24,6 +25,18 @@ export const INSTRUCTOR_MENU_ITEMS = (t) => [
     value: "live-plans",
     routePath: "/instructor/live-classes",
   },
+  {
+    icon: MessageSquare,
+    label: t("common.tickets") || t("common.support"),
+    value: "tickets",
+    routePath: "/instructor/tickets",
+  },
+  {
+    icon: Bell,
+    label: t("notifications.title") || "Notifications",
+    value: "notifications",
+    routePath: "/instructor/notifications",
+  },
 ];
 
 export function getInstructorActiveTab(pathname, search = "") {
@@ -34,6 +47,8 @@ export function getInstructorActiveTab(pathname, search = "") {
   if (pathname.includes("/instructor/create-new-course")) return "";
   if (pathname.includes("/instructor/edit-course")) return "";
   if (pathname.startsWith("/instructor/live-classes")) return "live-plans";
+  if (pathname.startsWith("/instructor/tickets")) return "tickets";
+  if (pathname.startsWith("/instructor/notifications")) return "notifications";
   if (pathname === "/instructor") return "dashboard";
   return "";
 }
@@ -43,6 +58,7 @@ function InstructorSidebar() {
   const { instructorCoursesList, setInstructorCoursesList } =
     useContext(InstructorContext);
   const { t } = useLanguage();
+  const { unreadCount } = useUnreadNotifications();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,7 +66,11 @@ function InstructorSidebar() {
     location.pathname,
     location.search
   );
-  const menuItems = INSTRUCTOR_MENU_ITEMS(t);
+  const menuItems = INSTRUCTOR_MENU_ITEMS(t).map((item) =>
+    item.value === "notifications"
+      ? { ...item, badge: unreadCount }
+      : item
+  );
 
   async function fetchAllCourses() {
     try {
@@ -108,17 +128,24 @@ function InstructorSidebar() {
         </div>
 
         <nav className="flex-1 space-y-2">
-          {menuItems.map((menuItem) => (
-            <Button
-              key={menuItem.value}
-              variant={activeTab === menuItem.value ? "default" : "ghost"}
-              className="w-full justify-start h-12 px-4 text-base font-medium rounded-xl"
-              onClick={() => handleMenuClick(menuItem)}
-            >
-              <menuItem.icon className="mr-1" />
+            {menuItems.map((menuItem) => (
+              <Button
+                key={menuItem.value}
+                variant={activeTab === menuItem.value ? "default" : "ghost"}
+                className="w-full justify-start h-12 px-4 text-base font-medium rounded-xl"
+                onClick={() => handleMenuClick(menuItem)}
+              >
+              <div className="relative mr-2">
+                <menuItem.icon className="h-5 w-5" />
+                {menuItem.badge > 0 && (
+                  <span className="absolute -top-2 -right-2 rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white">
+                    {menuItem.badge}
+                  </span>
+                )}
+              </div>
               <span>{menuItem.label}</span>
-            </Button>
-          ))}
+              </Button>
+            ))}
         </nav>
 
         <div className="mt-auto pt-6 border-t border-border">

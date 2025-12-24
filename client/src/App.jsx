@@ -34,6 +34,8 @@ import AdminHelpCenterPage from "./pages/admin/help-center";
 import StudentCategoryRoadmapPage from "./pages/student/roadmap-category";
 import AboutPage from "./pages/student/about";
 import StudentTicketsPage from "./pages/student/tickets";
+import InstructorTicketsPage from "./pages/instructor/tickets";
+import NotificationsPage from "./pages/notifications";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -67,6 +69,8 @@ function App() {
         <Route path="edit-course/:courseId" element={<AddNewCoursePage />} />
         <Route path="live-classes" element={<InstructorLiveClassesPage />} />
         <Route path="live-classes/:id/host" element={<LiveClassHostPage />} />
+        <Route path="tickets" element={<InstructorTicketsPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
       </Route>
 
       {/* Admin */}
@@ -117,6 +121,7 @@ function App() {
         <Route path="live-plan/:planId" element={<LivePlanDetailsPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="tickets" element={<StudentTicketsPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

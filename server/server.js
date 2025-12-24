@@ -19,6 +19,7 @@ const instructorLiveClassPlanRoutes = require("./routes/instructor-routes/live-c
 const studentRoutes = require("./routes/student-routes/index");
 const roadmapRoutes = require("./routes/roadmap-routes");
 const categoryRoutes = require("./routes/category-routes");
+const notificationRoutes = require("./routes/notification-routes");
 const noStore = require("./middleware/no-store");
 
 const app = express();
@@ -59,6 +60,7 @@ app.use("/media", mediaRoutes);
 app.use("/instructor/course", noStore, instructorCourseRoutes);
 app.use("/instructor/live-class-plans", noStore, instructorLiveClassPlanRoutes);
 app.use("/student", noStore, studentRoutes);
+app.use("/notifications", noStore, notificationRoutes);
 // app.use("/student/course", studentViewCourseRoutes);
 // app.use("/student/live-class-plans", studentLiveClassPlanRoutes);
 // app.use("/student/order", studentViewOrderRoutes);

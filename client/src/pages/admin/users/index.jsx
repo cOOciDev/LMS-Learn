@@ -63,6 +63,7 @@ function AdminUserManagement() {
         limit: 10,
         ...(searchTerm && { search: searchTerm }),
         ...(roleFilter !== "all" && { role: roleFilter }),
+        excludeRole: "instructor",
         ...(statusFilter !== "all" && { isActive: statusFilter === "active" }),
       };
 
@@ -235,7 +236,6 @@ function AdminUserManagement() {
               <SelectContent>
                 <SelectItem value="all">{t("admin.allRoles") || "All Roles"}</SelectItem>
                 <SelectItem value="user">{t("common.user") || "User"}</SelectItem>
-                <SelectItem value="instructor">{t("common.instructor") || "Instructor"}</SelectItem>
                 <SelectItem value="admin">{t("common.admin") || "Admin"}</SelectItem>
               </SelectContent>
             </Select>
@@ -415,7 +415,6 @@ function EditUserForm({ user, onSave, onCancel, t }) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="user">{t("common.user") || "User"}</SelectItem>
-            <SelectItem value="instructor">{t("common.instructor") || "Instructor"}</SelectItem>
             <SelectItem value="admin">{t("common.admin") || "Admin"}</SelectItem>
           </SelectContent>
         </Select>

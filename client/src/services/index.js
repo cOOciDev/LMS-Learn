@@ -343,6 +343,44 @@ export async function updateInstructorService(instructorId, payload) {
   return data;
 }
 
+// Admin message services
+export async function getAdminMessagesService(params = {}) {
+  const queryParams = new URLSearchParams(params).toString();
+  const url = queryParams ? `/admin/messages?${queryParams}` : "/admin/messages";
+  const { data } = await axiosInstance.get(url);
+  return data;
+}
+
+export async function createAdminMessageService(payload) {
+  const { data } = await axiosInstance.post("/admin/messages", payload);
+  return data;
+}
+
+// Notification services
+export async function getNotificationsService(params = {}) {
+  const queryParams = new URLSearchParams(params).toString();
+  const url = queryParams ? `/notifications?${queryParams}` : "/notifications";
+  const { data } = await axiosInstance.get(url);
+  return data;
+}
+
+export async function markNotificationReadService(notificationId) {
+  const { data } = await axiosInstance.patch(
+    `/notifications/${notificationId}/read`
+  );
+  return data;
+}
+
+export async function markAllNotificationsReadService() {
+  const { data } = await axiosInstance.patch("/notifications/read-all");
+  return data;
+}
+
+export async function getUnreadNotificationCountService() {
+  const { data } = await axiosInstance.get("/notifications/unread-count");
+  return data;
+}
+
 // Category services
 export async function getPublicCategoriesService() {
   const { data } = await axiosInstance.get("/categories");

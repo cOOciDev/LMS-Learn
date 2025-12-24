@@ -8,12 +8,23 @@ const { validatePagination } = require("../../middleware/validation");
 // @route   GET /admin/users
 // @access  Private/Admin
 const getAllUsers = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, role, search, isActive } = req.query;
+  const { page = 1, limit = 10, role, search, isActive, excludeRole, excludeRoles } = req.query;
   const skip = (page - 1) * limit;
 
   const query = {};
 
-  if (role) query.role = role;
+  if (role) {
+    query.role = role;
+  } else {
+    const excluded = []
+      .concat(excludeRoles ? String(excludeRoles).split(",") : [])
+      .concat(excludeRole ? [excludeRole] : [])
+      .map((item) => String(item).trim())
+      .filter(Boolean);
+    if (excluded.length > 0) {
+      query.role = { $nin: excluded };
+    }
+  }
   if (isActive !== undefined) query.isActive = isActive === "true";
   if (search) {
     query.$or = [

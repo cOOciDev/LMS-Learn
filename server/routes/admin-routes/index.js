@@ -38,6 +38,10 @@ const {
   listCertificateRequests,
   reviewCertificateRequest,
 } = require("../../controllers/admin-controller/course-verification-controller");
+const {
+  createAdminMessage,
+  getAdminMessages,
+} = require("../../controllers/notification-controller");
 const router = express.Router();
 
 // All routes require admin authentication
@@ -81,6 +85,10 @@ router.get("/tickets/:ticketId", getTicketById);
 router.post("/tickets/:ticketId/reply", addReply);
 router.patch("/tickets/:ticketId/status", updateTicketStatus);
 router.patch("/tickets/:ticketId/assign", assignTicket);
+
+// Admin messages/notifications
+router.get("/messages", getAdminMessages);
+router.post("/messages", createAdminMessage);
 
 // Course verification
 router.get("/course-submissions", listExerciseSubmissions);

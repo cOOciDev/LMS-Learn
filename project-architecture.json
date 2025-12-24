@@ -1,0 +1,643 @@
+{
+  "project": {
+    "name": "LMS Learn",
+    "description": "MERN stack learning management system for courses, live lessons, tickets, and admin dashboards.",
+    "root": ".",
+    "documentation": [
+      "README.md",
+      "server/README.md",
+      "client/README.md",
+      "STUDENT_ROUTE_AUDIT.md",
+      "DEBUG_CHECKLIST.md",
+      "POST_LOGIN_FIXES.md"
+    ]
+  },
+  "environment": {
+    "server": {
+      "envFile": "server/.env",
+      "variables": [
+        {
+          "name": "MONGO_URI",
+          "note": "Atlas connection string used by server/config/database"
+        },
+        {
+          "name": "PORT",
+          "value": "5000"
+        },
+        {
+          "name": "JWT_SECRET",
+          "note": "signs access tokens"
+        },
+        {
+          "name": "STRIPE_SECRET_KEY",
+          "note": "used by server/helpers/stripe"
+        },
+        {
+          "name": "STRIPE_PUBLIC_KEY",
+          "note": "mirrored by client for Stripe elements"
+        },
+        {
+          "name": "CLIENT_URL",
+          "value": "http://localhost:5173"
+        }
+      ]
+    },
+    "client": {
+      "envFile": "client/.env",
+      "variables": [
+        {
+          "name": "REACT_APP_STRIPE_PUBLIC_KEY",
+          "note": "exposed to React for Stripe interactions"
+        }
+      ]
+    }
+  },
+  "backend": {
+    "entry": "server/server.js",
+    "stack": {
+      "framework": "Express",
+      "language": "Node.js",
+      "database": "MongoDB via Mongoose",
+      "payment": "Stripe helper in server/helpers/stripe.js",
+      "media": "Cloudinary helper (server/helpers/cloudinary.js) plus multer disk buffering and uploads folder",
+      "auth": "JWT tokens stored on User model and verified by middleware/auth-middleware"
+    },
+    "middleware": [
+      {
+        "name": "logger",
+        "path": "server/middleware/logger.js",
+        "purpose": "logs every request with duration, status, and color-coded console output"
+      },
+      {
+        "name": "auth-middleware",
+        "path": "server/middleware/auth-middleware.js",
+        "purpose": "verifies Bearer JWT, asserts active user, and injects req.user"
+      },
+      {
+        "name": "admin-middleware",
+        "path": "server/middleware/admin-middleware.js",
+        "purpose": "wraps auth-middleware and enforces role value 'admin'"
+      },
+      {
+        "name": "validation",
+        "path": "server/middleware/validation.js",
+        "purpose": "guards register/login/course inputs and pagination parameters"
+      },
+      {
+        "name": "errorHandler",
+        "path": "server/middleware/error-handler.js",
+        "purpose": "normalizes Mongoose and JWT errors before sending responses"
+      }
+    ],
+    "database": {
+      "connector": "server/config/database.js",
+      "notes": "connectDB retries up to five times, healthCheck pings the admin database, options favor IPv4 and keep sockets alive",
+      "models": [
+        "User",
+        "Course",
+        "Order",
+        "StudentCourses",
+        "CourseProgress",
+        "Ticket",
+        "LiveClassPlan",
+        "Category",
+        "Roadmap"
+      ]
+    },
+    "routes": [
+      {
+        "prefix": "/health",
+        "description": "Reports MongoDB status via config/healthCheck",
+        "method": "GET",
+        "purpose": "Simple uptime endpoint used before other routes are exercised"
+      },
+      {
+        "prefix": "/auth",
+        "module": "Authentication",
+        "description": "Registration (admin only), login, refresh flow, profile updates, and password recovery.",
+        "middleware": [
+          "validation.validateRegister (POST /register)",
+          "validation.validateLogin (POST /login)",
+          "auth-middleware for protected endpoints",
+          "admin-middleware gating POST /register"
+        ],
+        "controller": "server/controllers/auth-controller/index.js",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/register",
+            "purpose": "Admin creates users, instructors, or admins"
+          },
+          {
+            "method": "POST",
+            "path": "/login",
+            "purpose": "issues access and refresh tokens and updates lastLogin"
+          },
+          {
+            "method": "POST",
+            "path": "/refresh",
+            "purpose": "validates refresh token, issues new access token"
+          },
+          {
+            "method": "POST",
+            "path": "/logout",
+            "purpose": "clears stored refresh token"
+          },
+          {
+            "method": "GET",
+            "path": "/check-auth",
+            "purpose": "confirms token validity and echoes requestor"
+          },
+          {
+            "method": "PUT",
+            "path": "/profile",
+            "purpose": "updates profile and optional userName"
+          },
+          {
+            "method": "PUT",
+            "path": "/change-password",
+            "purpose": "validates current password before saving new hash"
+          },
+          {
+            "method": "POST",
+            "path": "/forgot-password",
+            "purpose": "generates and returns reset token"
+          },
+          {
+            "method": "PUT",
+            "path": "/reset-password",
+            "purpose": "consumes reset token to set new password"
+          }
+        ]
+      },
+      {
+        "prefix": "/student",
+        "module": "Student experience",
+        "description": "Course discovery, purchases, progress, live plans, tickets, and personal library.",
+        "router": "server/routes/student-routes/index.js",
+        "controllers": [
+          "student-controller/course-controller.js",
+          "student-controller/order-controller.js",
+          "student-controller/course-progress-controller.js",
+          "student-controller/live-class-plan-controller.js",
+          "student-controller/ticket-controller.js",
+          "student-controller/student-courses-controller.js"
+        ],
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/courses/get",
+            "purpose": "filters published courses with pagination and optional category/level/search"
+          },
+          {
+            "method": "GET",
+            "path": "/courses/get/details/:id",
+            "purpose": "returns course plus enrollment and progress for authenticated students"
+          },
+          {
+            "method": "GET",
+            "path": "/courses/purchase-info/:courseId",
+            "purpose": "confirms caller matches studentId and determines purchase eligibility"
+          },
+          {
+            "method": "POST",
+            "path": "/orders/create",
+            "purpose": "records Order, invokes Stripe for priced courses, upserts StudentCourses, and updates Course.students"
+          },
+          {
+            "method": "POST",
+            "path": "/orders/capture",
+            "purpose": "finalizes payment records and reenrolls student"
+          },
+          {
+            "method": "GET",
+            "path": "/my-courses/get",
+            "purpose": "returns purchased courses list"
+          },
+          {
+            "method": "GET",
+            "path": "/course-progress/get/:courseId",
+            "purpose": "proves purchase before returning CourseProgress"
+          },
+          {
+            "method": "POST",
+            "path": "/course-progress/mark-lecture-viewed",
+            "purpose": "marks lecture as viewed and flags completion when entire curriculum is watched"
+          },
+          {
+            "method": "POST",
+            "path": "/course-progress/reset-progress",
+            "purpose": "clears lecturesProgress so student can replay"
+          },
+          {
+            "method": "POST",
+            "path": "/tickets/create",
+            "purpose": "starts support ticket with initial message"
+          },
+          {
+            "method": "GET",
+            "path": "/tickets",
+            "purpose": "lists tickets with optional status"
+          },
+          {
+            "method": "POST",
+            "path": "/tickets/:ticketId/message",
+            "purpose": "appends student reply and reopens if resolved"
+          },
+          {
+            "method": "PATCH",
+            "path": "/tickets/:ticketId/close",
+            "purpose": "sets status to closed"
+          },
+          {
+            "method": "GET",
+            "path": "/live-class-plans",
+            "purpose": "lists published live plans"
+          },
+          {
+            "method": "GET",
+            "path": "/live-class-plans/:id",
+            "purpose": "fetches one live plan detail"
+          }
+        ]
+      },
+      {
+        "prefix": "/instructor",
+        "module": "Instructor management",
+        "description": "Courses CRUD, stats, live class lifecycle, plus media uploading handled under /media.",
+        "controllers": [
+          "instructor-controller/course-controller.js",
+          "instructor-controller/live-class-plan-controller.js"
+        ],
+        "routes": [
+          {
+            "method": "POST",
+            "path": "/course/add",
+            "purpose": "creates course prefilled with instructor identity"
+          },
+          {
+            "method": "GET",
+            "path": "/course/get",
+            "purpose": "lists instructor courses filtered by status/search"
+          },
+          {
+            "method": "GET",
+            "path": "/course/get/details/:id",
+            "purpose": "loads course for editing"
+          },
+          {
+            "method": "PUT",
+            "path": "/course/update/:id",
+            "purpose": "saves edits"
+          },
+          {
+            "method": "DELETE",
+            "path": "/course/delete/:id",
+            "purpose": "removes course"
+          },
+          {
+            "method": "PATCH",
+            "path": "/course/publish/:id",
+            "purpose": "toggles isPublished and status fields after validating curriculum"
+          },
+          {
+            "method": "GET",
+            "path": "/course/stats",
+            "purpose": "returns total/published courses, students, revenue"
+          },
+          {
+            "method": "POST",
+            "path": "/live-class-plans",
+            "purpose": "creates draft plan after validating dates and time windows"
+          },
+          {
+            "method": "GET",
+            "path": "/live-class-plans",
+            "purpose": "lists plans sorted by createdAt"
+          },
+          {
+            "method": "PUT",
+            "path": "/live-class-plans/:id",
+            "purpose": "merges updates, ensures ownership, and maintains validation"
+          },
+          {
+            "method": "PATCH",
+            "path": "/live-class-plans/:id/publish",
+            "purpose": "switches status to published"
+          },
+          {
+            "method": "DELETE",
+            "path": "/live-class-plans/:id",
+            "purpose": "archives plan"
+          }
+        ]
+      },
+      {
+        "prefix": "/media",
+        "module": "Media assets",
+        "description": "Authenticated instructors upload/delete files that are buffered locally and sent to Cloudinary.",
+        "dependencies": [
+          "multer",
+          "fs"
+        ],
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/upload",
+            "purpose": "single file upload to Cloudinary"
+          },
+          {
+            "method": "POST",
+            "path": "/bulk-upload",
+            "purpose": "multiple files upload with per-file progress"
+          },
+          {
+            "method": "DELETE",
+            "path": "/delete/:id",
+            "purpose": "removes asset by public_id"
+          }
+        ]
+      },
+      {
+        "prefix": "/admin",
+        "module": "Admin orchestration",
+        "description": "Requires auth + admin middleware; exposes dashboard stats, user/course management, financials, categories, roadmaps, instructors, and tickets.",
+        "controller": "server/controllers/admin-controller/index.js",
+        "ticketController": "server/controllers/admin-controller/ticket-controller.js",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/dashboard/stats",
+            "purpose": "aggregates user counts, course counts, and revenue"
+          },
+          {
+            "method": "GET",
+            "path": "/users",
+            "purpose": "paged user table"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "purpose": "user profile"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "purpose": "update role/isActive/profile"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "purpose": "soft-deactivates by setting isActive=false"
+          },
+          {
+            "method": "GET",
+            "path": "/users/growth/stats",
+            "purpose": "month-over-month growth/comparison"
+          },
+          {
+            "method": "GET",
+            "path": "/courses",
+            "purpose": "filtered course reporting"
+          },
+          {
+            "method": "GET",
+            "path": "/financial/reports",
+            "purpose": "revenue summary, monthly buckets, and top performers"
+          },
+          {
+            "method": "GET",
+            "path": "/instructors",
+            "purpose": "return instructors with course aggregates"
+          },
+          {
+            "method": "GET",
+            "path": "/instructors/:id",
+            "purpose": "instructor detail"
+          },
+          {
+            "method": "PUT",
+            "path": "/instructors/:id",
+            "purpose": "update instructor metadata"
+          },
+          {
+            "method": "GET",
+            "path": "/categories",
+            "purpose": "returns categories augmented with course counts"
+          },
+          {
+            "method": "POST",
+            "path": "/categories",
+            "purpose": "creates slug/translation aware category"
+          },
+          {
+            "method": "DELETE",
+            "path": "/categories/:id",
+            "purpose": "guards against deleting categories that still have courses"
+          },
+          {
+            "method": "GET",
+            "path": "/roadmaps",
+            "purpose": "lists roadmaps"
+          },
+          {
+            "method": "POST",
+            "path": "/roadmaps",
+            "purpose": "upserts roadmap for a category"
+          },
+          {
+            "method": "GET",
+            "path": "/tickets",
+            "purpose": "ticket list with unread counts"
+          },
+          {
+            "method": "GET",
+            "path": "/tickets/:ticketId",
+            "purpose": "ticket detail and mark user messages read"
+          },
+          {
+            "method": "POST",
+            "path": "/tickets/:ticketId/reply",
+            "purpose": "admin reply, auto-assign, and status bump"
+          },
+          {
+            "method": "PATCH",
+            "path": "/tickets/:ticketId/status",
+            "purpose": "change status/priority"
+          },
+          {
+            "method": "PATCH",
+            "path": "/tickets/:ticketId/assign",
+            "purpose": "assign or reassign admin"
+          },
+          {
+            "method": "GET",
+            "path": "/tickets/stats",
+            "purpose": "counts for each ticket state"
+          }
+        ]
+      },
+      {
+        "prefix": "/categories",
+        "description": "Public categories endpoint (ensureDefaultCategories seeds defaults).",
+        "controller": "server/controllers/category-controller/index.js",
+        "endpoints": [
+          {
+            "method": "GET",
+            "purpose": "returns active categories sorted by createdAt"
+          }
+        ]
+      },
+      {
+        "prefix": "/roadmaps",
+        "description": "Public roadmap lookup by category slug.",
+        "controller": "server/controllers/roadmap-controller/index.js",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/:slug",
+            "purpose": "returns roadmap steps enriched with course titles"
+          }
+        ]
+      }
+    ],
+    "models": [
+      {
+        "name": "User",
+        "fields": "userName, userEmail, password, role, profile, tokens/flags",
+        "relations": "references courses and tickets, refreshToken stored, bcrypt pre-save",
+        "usage": "auth, admin user/instructor list"
+      },
+      {
+        "name": "Course",
+        "fields": "instructorId, title, category, level, pricing, curriculum[], students[], rating",
+        "methods": "totalLectures, totalDuration, calculateCompletion",
+        "usage": "student discovery/purchase, instructor CRUD, admin reports"
+      },
+      {
+        "name": "StudentCourses",
+        "fields": "userId, courses[courseId,title,instructor,dateOfPurchase,image,rating,review]",
+        "usage": "stores purchased catalog and ratings"
+      },
+      {
+        "name": "CourseProgress",
+        "fields": "userId, courseId, completed, completionDate, lecturesProgress[]",
+        "usage": "tracks lecture viewing and resets"
+      },
+      {
+        "name": "Order",
+        "fields": "user/instructor/course metadata, paymentId/payerId, statuses, pricing",
+        "usage": "order creation/capture and admin financials"
+      },
+      {
+        "name": "Ticket",
+        "fields": "userId, subject, messages[MessageSchema], status, priority, assignedTo",
+        "methods": "markAsRead",
+        "usage": "student support and admin resolution"
+      },
+      {
+        "name": "LiveClassPlan",
+        "fields": "title, courseId, instructorId, timezone, startDate/endDate, weekdays, daily time window, status",
+        "usage": "instructor schedule + student published view"
+      },
+      {
+        "name": "Category",
+        "fields": "name, slug, description, translations, isActive",
+        "usage": "admin creation, category dropdowns, default seeding"
+      },
+      {
+        "name": "Roadmap",
+        "fields": "title, categorySlug, steps[{title, description, courseId, courseTitle, order}], createdBy",
+        "usage": "admin roadmaps and student roadmap pages"
+      }
+    ],
+    "helpers": [
+      {
+        "name": "cloudinary",
+        "path": "server/helpers/cloudinary.js",
+        "purpose": "uploads and deletes assets"
+      },
+      {
+        "name": "stripe",
+        "path": "server/helpers/stripe.js",
+        "purpose": "shared Stripe client for purchase endpoints"
+      }
+    ]
+  },
+  "frontend": {
+    "entry": "client/src/main.jsx",
+    "bundler": "Vite",
+    "framework": "React 18 with React Router 6",
+    "globalProviders": [
+      "ThemeProvider (persists theme and watches prefers-color-scheme)",
+      "LanguageProvider (loads locales/en.json and locales/fa.json, stores language in localStorage)",
+      "CategoryProvider (calls getPublicCategoriesService and caches categories)",
+      "AuthProvider (manages register/login forms, sessionStorage tokens, checkAuth on mount)",
+      "InstructorProvider (holds landing + curriculum state, tracks media upload progress)",
+      "StudentProvider (tracks student course list, details, bought courses, progress, and live plans)"
+    ],
+    "api": {
+      "instance": "client/src/api/axiosInstance.js",
+      "baseURL": "http://localhost:5000",
+      "interceptors": [
+        "attach accessToken from sessionStorage to Authorization header",
+        "on 401 retry once via /auth/refresh, update sessionStorage, redirect to /auth if refresh fails"
+      ]
+    },
+    "services": "client/src/services/index.js exposes helpers for auth, media, instructor courses/live class plans, student catalog/orders/progress/tickets, admin dashboards/users/courses/finance/categories/roadmaps/tickets, and category/roadmap lookups.",
+    "routing": {
+      "App": "client/src/App.jsx configures RouteGuard with nested admin, instructor, and student layouts plus student home, catalog, roadmaps, course progress, live plan details, tickets, about, and NotFound.",
+      "RouteGuard": "client/src/components/route-guard/index.jsx redirects based on auth state and role (admins/instructors redirected to their dashboards, students get student views)."
+    },
+    "ui": "App renders custom Toaster + Sonner toasts over BrowserRouter and wraps everything in StrictMode.",
+    "notes": "Components reference client/src/config for form controls and translation keys. Contexts expose setters so pages can coordinate popups, forms, and lists."
+  },
+  "flows": [
+    {
+      "name": "Student course purchase",
+      "sequence": [
+        "Frontend calls createPaymentService to POST /student/orders/create; order-controller decides if course is free or requires Stripe checkout session.",
+        "Order document is saved, StudentCourses document is upserted, and Course.students array plus revenue counters update.",
+        "Frontend may call captureAndFinalizePaymentService (POST /student/orders/capture) if additional confirmation is needed, reusing enrollStudentInCourse helper, then redirects student to course content."
+      ]
+    },
+    {
+      "name": "Course progress tracking",
+      "sequence": [
+        "Student requests GET /student/course-progress/get/:courseId; controller ensures StudentCourses exists before returning course + CourseProgress.",
+        "Marking lectures viewed hits POST /student/course-progress/mark-lecture-viewed, updates or creates CourseProgress, and sets completed/completionDate when every Curriculum lecture is marked viewed.",
+        "Reset progress calls POST /student/course-progress/reset-progress to clear lecture flags and completion metadata so the course can be replayed."
+      ]
+    },
+    {
+      "name": "Ticket support loop",
+      "sequence": [
+        "Student creates ticket via POST /student/tickets/create; ticket initial message stored with senderRole 'user'.",
+        "Admin reviews /admin/tickets, calls POST /admin/tickets/:ticketId/reply which pushes admin replies, auto-assigns, and can update status to in-progress/resolved.",
+        "Both student and admin controllers call Ticket.markAsRead so unread counts stay accurate; clients refresh via getUserTicketsService or getAllTicketsService."
+      ]
+    },
+    {
+      "name": "Live class plan lifecycle",
+      "sequence": [
+        "Instructor posts /instructor/live-class-plans with validated dates/times; ensureCourseOwnership links optional courseId to an instructor-owned course.",
+        "Plan can be updated, archived, or published (PATCH /:id/publish) while verifying ownership and status restrictions.",
+        "Student clients fetch /student/live-class-plans and /student/live-class-plans/:id; only plans with status 'published' reach public views."
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "name": "Auth tokens",
+      "description": "AuthContext writes tokens to sessionStorage, axiosInstance attaches the accessToken to each request, auth-middleware validates it and reloads User, and admin-middleware enforces role checks."
+    },
+    {
+      "name": "Instructor media path",
+      "description": "/media endpoints rely on multer storing files under server/uploads/<instructor-email>, Cloudinary helper uploads each file, and cleanup removes temp paths afterward."
+    },
+    {
+      "name": "Category and roadmap data",
+      "description": "CategoryController.ensureDefaultCategories seeds defaults, CategoryProvider fetches /categories, and RoadmapController pulls Course titles to enrich admin/public roadmaps."
+    }
+  ]
+}
