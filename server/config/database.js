@@ -7,8 +7,6 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // MongoDB connection options
 const connectionOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   maxPoolSize: 10, // Maintain up to 10 socket connections
   minPoolSize: 2, // Maintain at least 2 socket connections
   serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds

@@ -79,6 +79,7 @@ function CourseCurriculum({ onNext }) {
     setMediaUploadProgress,
     mediaUploadProgressPercentage,
     setMediaUploadProgressPercentage,
+    currentEditedCourseId,
   } = useContext(InstructorContext);
 
   const { t } = useLanguage();
@@ -259,6 +260,12 @@ function CourseCurriculum({ onNext }) {
     }
 
     const formData = new FormData();
+    if (currentEditedCourseId) {
+      formData.append("courseId", currentEditedCourseId);
+    }
+    if (courseLandingFormData?.title) {
+      formData.append("courseTitle", courseLandingFormData.title);
+    }
     if (replaceIndex !== null) {
       formData.append("file", valid[0]);
     } else {

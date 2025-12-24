@@ -72,6 +72,8 @@ A comprehensive Learning Management System backend built with Node.js, Express, 
 PORT=5000
 NODE_ENV=development
 CLIENT_URL=http://localhost:5173
+CLIENT_URLS=http://localhost:5173,http://localhost:5174
+TRUST_PROXY=false
 
 # Database
 MONGO_URI=mongodb://localhost:27017/lms-learn
@@ -81,6 +83,11 @@ JWT_SECRET=your-secret-key-here
 JWT_EXPIRE=15m
 JWT_REFRESH_SECRET=your-refresh-secret-key-here
 JWT_REFRESH_EXPIRE=7d
+
+# Rate limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=1000
+AUTH_RATE_LIMIT_MAX=20
 
 # Payment (if using)
 STRIPE_SECRET_KEY=your-stripe-secret

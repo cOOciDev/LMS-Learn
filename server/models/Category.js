@@ -37,7 +37,6 @@ const CategorySchema = new mongoose.Schema(
 );
 
 CategorySchema.index({ slug: 1 });
-CategorySchema.index({ name: 1 });
 CategorySchema.index({ isActive: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Category", CategorySchema);

@@ -1,7 +1,10 @@
 // server/server.js
-require("dotenv").config();
 const express = require("express");
+const compression = require("compression");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const cors = require("cors");
+const { env, getCorsOrigins, validateEnv } = require("./config/env");
 const { connectDB, healthCheck } = require("./config/database");
 const { errorHandler } = require("./middleware/error-handler");
 const logger = require("./middleware/logger");
@@ -22,15 +25,40 @@ const categoryRoutes = require("./routes/category-routes");
 const notificationRoutes = require("./routes/notification-routes");
 const noStore = require("./middleware/no-store");
 
+validateEnv();
+
 const app = express();
+app.disable("x-powered-by");
 app.disable("etag");
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT || process.env.PORT || 5000;
+const corsOrigins = getCorsOrigins();
+const isProduction = env.NODE_ENV === "production";
+
+if (env.TRUST_PROXY || isProduction) {
+  app.set("trust proxy", 1);
+}
 
 // Middleware
 app.use(logger);
 app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+app.use(compression());
+app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (corsOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "Cache-Control", "Pragma"],
     credentials: true,
@@ -39,6 +67,20 @@ app.use(
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+const generalLimiter = rateLimit({
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max: env.RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max: env.AUTH_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Health check endpoint
 app.get("/health", async (req, res) => {
@@ -54,7 +96,11 @@ app.get("/health", async (req, res) => {
 connectDB();
 
 // Routes configuration
-app.use("/auth", noStore, authRoutes);
+app.use(
+  ["/auth", "/admin", "/student", "/instructor", "/notifications", "/categories", "/roadmaps"],
+  generalLimiter
+);
+app.use("/auth", authLimiter, noStore, authRoutes);
 app.use("/admin", noStore, adminRoutes);
 app.use("/media", mediaRoutes);
 app.use("/instructor/course", noStore, instructorCourseRoutes);
@@ -81,8 +127,8 @@ const startServer = async () => {
     
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
-      console.log(`   Environment: ${process.env.NODE_ENV || "development"}`);
-      console.log(`   Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`);
+      console.log(`   Environment: ${env.NODE_ENV || "development"}`);
+      console.log(`   Client URL(s): ${corsOrigins.join(", ")}`);
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error);

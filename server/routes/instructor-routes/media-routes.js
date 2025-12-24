@@ -15,23 +15,54 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const sanitizeFolderName = (value) => {
+router.use(authenticateMiddleware);
+
+const sanitizeFolderName = (value, fallback = "unknown") => {
   if (!value) {
-    return "unknown";
+    return fallback;
   }
-  return value
+
+  const sanitized = value
     .toString()
     .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9@\.]+/gi, "_")
-    .replace(/_+/g, "_");
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+    .replace(/[\s_]+/g, " ")
+    .replace(/^[\s\.]+|[\s\.]+$/g, "")
+    .trim();
+
+  return sanitized || fallback;
+};
+
+const getInstructorIdentifier = (req) =>
+  req?.user?.userEmail ||
+  req?.user?.email ||
+  req?.user?.userName ||
+  req?.user?._id ||
+  "unknown-instructor";
+
+const getCourseIdentifier = (req) => {
+  const courseId = req?.body?.courseId || req?.query?.courseId;
+  const courseTitle = req?.body?.courseTitle || req?.query?.courseTitle;
+
+  if (courseId && courseTitle) {
+    return `${courseId}-${courseTitle}`;
+  }
+  if (courseId) {
+    return courseId;
+  }
+  if (courseTitle) {
+    return courseTitle;
+  }
+  return "uncategorized-course";
 };
 
 const getInstructorUploadDir = (req) => {
-  const instructorEmail =
-    req?.user?.userEmail || req?.user?.email || "unknown-instructor";
-  const folderName = sanitizeFolderName(instructorEmail);
-  const destination = path.join(uploadDir, folderName);
+  const folderName = sanitizeFolderName(getInstructorIdentifier(req));
+  const courseFolder = sanitizeFolderName(
+    getCourseIdentifier(req),
+    "uncategorized-course"
+  );
+  const destination = path.join(uploadDir, folderName, courseFolder);
   fs.mkdirSync(destination, { recursive: true });
   return destination;
 };
@@ -83,6 +114,13 @@ const cleanupFile = async (filePath) => {
       const remaining = await fs.promises.readdir(parentDir);
       if (remaining.length === 0) {
         await fs.promises.rmdir(parentDir);
+        const instructorDir = path.dirname(parentDir);
+        if (instructorDir && instructorDir !== uploadDir) {
+          const instructorRemaining = await fs.promises.readdir(instructorDir);
+          if (instructorRemaining.length === 0) {
+            await fs.promises.rmdir(instructorDir);
+          }
+        }
       }
     }
   } catch (error) {
@@ -91,11 +129,13 @@ const cleanupFile = async (filePath) => {
 };
 
 const buildFileResponse = (file, req) => {
-  const instructorEmail =
-    req?.user?.userEmail || req?.user?.email || "unknown-instructor";
-  const folderName = sanitizeFolderName(instructorEmail);
+  const folderName = sanitizeFolderName(getInstructorIdentifier(req));
+  const courseFolder = sanitizeFolderName(
+    getCourseIdentifier(req),
+    "uncategorized-course"
+  );
   const relativePath = path
-    .join(folderName, file.filename)
+    .join(folderName, courseFolder, file.filename)
     .replace(/\\/g, "/");
   const encoded = encodeURIComponent(relativePath);
   const fileUrl = `/media/assets?path=${encoded}`;
@@ -118,9 +158,7 @@ const resolveFilePath = (relativePath) => {
 };
 
 const isInstructorOwner = (req, fileKey) => {
-  const instructorEmail =
-    req?.user?.userEmail || req?.user?.email || "unknown-instructor";
-  const folderName = sanitizeFolderName(instructorEmail);
+  const folderName = sanitizeFolderName(getInstructorIdentifier(req));
   return fileKey?.startsWith(`${folderName}/`);
 };
 
@@ -244,6 +282,19 @@ router.post("/local-bulk-upload", localUpload.array("files"), async (req, res) =
 });
 
 const sendAssetFile = async (req, res, absolutePath) => {
+  let stat;
+  try {
+    stat = await fs.promises.stat(absolutePath);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return res.status(404).json({
+        success: false,
+        message: "File not found",
+      });
+    }
+    throw error;
+  }
+
   const ext = path.extname(absolutePath).toLowerCase();
   const videoTypes = {
     ".mp4": "video/mp4",
@@ -256,7 +307,6 @@ const sendAssetFile = async (req, res, absolutePath) => {
   };
   const isVideo = Object.prototype.hasOwnProperty.call(videoTypes, ext);
   if (!isVideo) {
-    const stat = await fs.promises.stat(absolutePath);
     const fileName = path.basename(absolutePath);
     const encodedName = encodeURIComponent(fileName);
     const contentType =
@@ -272,7 +322,6 @@ const sendAssetFile = async (req, res, absolutePath) => {
     return fs.createReadStream(absolutePath).pipe(res);
   }
 
-  const stat = await fs.promises.stat(absolutePath);
   const fileSize = stat.size;
   const range = req.headers.range;
   if (!range) {
@@ -293,8 +342,6 @@ const sendAssetFile = async (req, res, absolutePath) => {
   });
   return fs.createReadStream(absolutePath, { start, end }).pipe(res);
 };
-
-router.use(authenticateMiddleware);
 
 router.get("/assets", async (req, res) => {
   try {
@@ -397,10 +444,20 @@ router.delete("/local-delete", async (req, res) => {
 
     const decoded = decodeURIComponent(rawPath);
     if (!isInstructorOwner(req, decoded)) {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized access",
-      });
+      const Course = require("../../models/Course");
+      const course = await Course.findOne({
+        instructorId: req.user._id,
+        $or: [
+          { "curriculum.videoFileKey": decoded },
+          { "curriculum.attachmentFileKey": decoded },
+        ],
+      }).lean();
+      if (!course) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized access",
+        });
+      }
     }
 
     const absolutePath = resolveFilePath(decoded);

@@ -51,7 +51,8 @@ const authenticate = async (req, res, next) => {
         userId: user._id,
         _id: user._id,
         userName: user.userName,
-        userEmail: user.userEmail,
+        userEmail: user.userEmail || user.email,
+        email: user.email || user.userEmail,
         role: user.role,
       };
       applyNoCacheHeaders(res);
