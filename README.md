@@ -76,8 +76,8 @@ For common issues, run:
 
 Contributors names and contact info
 
-* Yasir Nawaz
-  - [yasirnawaz.me](https://yasirnawaz.me) | [Mail ✉️](mailto:y451rmahar@gmail.com) | [LinkedIn](https://linkedin.com/in/suodyasir)
+* Mehdi__EB
+  - [cOOciDev.me](https://cOOciDev.me) | [Mail ✉️](mailto:cooci.ebrahimi@gmail.com)
 ## Version History
 
 * 0.1
