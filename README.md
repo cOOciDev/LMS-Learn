@@ -76,7 +76,7 @@ For common issues, run:
 
 Contributors names and contact info
 
-* Yasir Nawaz
+* Mehdi__EB
   - [cOOciDev.me](https://cOOciDev.me) | [Mail ✉️](mailto:cooci.ebrahimi@gmail.com) 
 ## Version History
 
