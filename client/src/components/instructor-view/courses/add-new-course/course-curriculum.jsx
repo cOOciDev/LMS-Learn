@@ -87,6 +87,7 @@ function CourseCurriculum({ onNext }) {
 
   const bulkUploadRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
+  const [uploadController, setUploadController] = useState(null);
   const { courseLandingFormData } = useContext(InstructorContext);
 
   const groupedLectures = useMemo(
@@ -274,6 +275,8 @@ function CourseCurriculum({ onNext }) {
 
     setMediaUploadProgress(true);
     setMediaUploadProgressPercentage(0);
+    const controller = new AbortController();
+    setUploadController(controller);
 
     toast({
       title: t("curriculum.uploadStartTitle") || "Uploading files",
@@ -287,11 +290,13 @@ function CourseCurriculum({ onNext }) {
         replaceIndex !== null
           ? await mediaLocalUploadService(
               formData,
-              setMediaUploadProgressPercentage
+              setMediaUploadProgressPercentage,
+              controller.signal
             )
           : await mediaLocalBulkUploadService(
               formData,
-              setMediaUploadProgressPercentage
+              setMediaUploadProgressPercentage,
+              controller.signal
             );
 
       if (!response?.success) {
@@ -314,6 +319,13 @@ function CourseCurriculum({ onNext }) {
         description: `${valid.length} file(s) uploaded successfully.`,
       });
     } catch (err) {
+      if (err?.name === "CanceledError" || err?.code === "ERR_CANCELED") {
+        toast({
+          title: t("common.info") || "Info",
+          description: t("curriculum.uploadCanceled") || "Upload canceled.",
+        });
+        return;
+      }
       const errMessage =
         err?.response?.data?.message || "Upload failed. Please try again.";
       toast({
@@ -325,6 +337,13 @@ function CourseCurriculum({ onNext }) {
     } finally {
       setMediaUploadProgress(false);
       setMediaUploadProgressPercentage(0);
+      setUploadController(null);
+    }
+  };
+
+  const handleCancelUpload = () => {
+    if (uploadController) {
+      uploadController.abort();
     }
   };
 
@@ -596,6 +615,15 @@ function CourseCurriculum({ onNext }) {
               {t("curriculum.largeFilesHint") ||
                 "Large uploads can take a few minutes. Please keep this tab open until the bar reaches 100%."}
             </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={handleCancelUpload}
+            >
+              {t("curriculum.cancelUpload") || "Cancel upload"}
+            </Button>
           </div>
         )}
 

@@ -587,6 +587,8 @@
     "uploadSuccessDescription": "All videos are processed and ready in the curriculum.",
     "uploadFailedTitle": "Video upload failed",
     "largeFilesHint": "Large uploads can take a few minutes. Keep this tab open until completion.",
+    "cancelUpload": "Cancel upload",
+    "uploadCanceled": "Upload canceled.",
     "invalidVideo": "Please select video or PDF files only",
     "uploadFailed": "Video upload failed",
     "uploadedLectures": "uploaded Lectures",

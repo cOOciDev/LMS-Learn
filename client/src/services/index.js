@@ -33,13 +33,14 @@ export async function logoutService() {
   return data;
 }
 
-export async function mediaUploadService(formData, onProgressCallback) {
+export async function mediaUploadService(formData, onProgressCallback, signal) {
   const { data } = await axiosInstance.post("/media/upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
     maxBodyLength: Infinity,
     maxContentLength: Infinity,
+    signal,
     onUploadProgress: (progressEvent) => {
       const percentCompleted = Math.round(
         (progressEvent.loaded * 100) / Math.max(progressEvent.total, 1)
@@ -57,13 +58,14 @@ export async function mediaDeleteService(id) {
   return data;
 }
 
-export async function mediaLocalUploadService(formData, onProgressCallback) {
+export async function mediaLocalUploadService(formData, onProgressCallback, signal) {
   const { data } = await axiosInstance.post("/media/local-upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
     maxBodyLength: Infinity,
     maxContentLength: Infinity,
+    signal,
     onUploadProgress: (progressEvent) => {
       if (typeof onProgressCallback === "function") {
         const percentCompleted = Math.round(
@@ -77,13 +79,14 @@ export async function mediaLocalUploadService(formData, onProgressCallback) {
   return data;
 }
 
-export async function mediaLocalBulkUploadService(formData, onProgressCallback) {
+export async function mediaLocalBulkUploadService(formData, onProgressCallback, signal) {
   const { data } = await axiosInstance.post("/media/local-bulk-upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
     maxBodyLength: Infinity,
     maxContentLength: Infinity,
+    signal,
     onUploadProgress: (progressEvent) => {
       if (typeof onProgressCallback === "function") {
         const percentCompleted = Math.round(
@@ -198,13 +201,14 @@ export async function fetchStudentLiveClassPlanByIdService(planId) {
   return data;
 }
 
-export async function mediaBulkUploadService(formData, onProgressCallback) {
+export async function mediaBulkUploadService(formData, onProgressCallback, signal) {
   const { data } = await axiosInstance.post("/media/bulk-upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
     maxBodyLength: Infinity,
     maxContentLength: Infinity,
+    signal,
     onUploadProgress: (progressEvent) => {
       if (typeof onProgressCallback === "function") {
         const percentCompleted = Math.round(

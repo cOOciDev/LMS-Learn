@@ -586,6 +586,8 @@
     "uploadSuccessDescription": "همه ویدیوها پردازش شده‌اند و در سرفصل آماده هستند.",
     "uploadFailedTitle": "آپلود ویدیو ناموفق بود",
     "largeFilesHint": "آپلود فایل‌های بزرگ ممکن است چند دقیقه طول بکشد. تا پایان این تب را نبندید.",
+    "cancelUpload": "لغو آپلود",
+    "uploadCanceled": "آپلود لغو شد.",
     "invalidVideo": "لطفاً فقط فایل‌های ویدیو یا PDF انتخاب کنید",
     "uploadFailed": "آپلود ویدیو ناموفق بود",
     "uploadedLectures": "جلسات آپلودشده",

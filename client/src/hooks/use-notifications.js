@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getUnreadNotificationCountService } from "@/services";
 
-const REFRESH_INTERVAL_MS = 30000;
+const REFRESH_INTERVAL_MS = 120000;
 
 export function useUnreadNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);

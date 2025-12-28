@@ -90,6 +90,7 @@ export default function AuthProvider({ children }) {
       console.error("Auth check error:", error);
       // Clear tokens if check fails
       sessionStorage.removeItem("accessToken");
+      localStorage.removeItem("accessToken");
       setAuth({
         authenticate: false,
         user: null,
@@ -109,6 +110,7 @@ export default function AuthProvider({ children }) {
       );
     } finally {
       sessionStorage.removeItem("accessToken");
+      localStorage.removeItem("accessToken");
       setAuth({
         authenticate: false,
         user: null,

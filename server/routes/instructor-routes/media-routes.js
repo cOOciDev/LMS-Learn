@@ -69,11 +69,16 @@ const getInstructorUploadDir = (req) => {
 
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    cb(null, getInstructorUploadDir(req));
+    const destination = getInstructorUploadDir(req);
+    req._uploadDestination = destination;
+    cb(null, destination);
   },
   filename: (_req, file, cb) => {
     const originalName = path.basename(file.originalname || "file");
     const safeName = originalName.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
+    const destination = _req._uploadDestination || getInstructorUploadDir(_req);
+    _req._pendingUploadPaths = _req._pendingUploadPaths || [];
+    _req._pendingUploadPaths.push(path.join(destination, safeName));
     cb(null, safeName);
   },
 });
@@ -124,8 +129,36 @@ const cleanupFile = async (filePath) => {
       }
     }
   } catch (error) {
+    if (error?.code === "ENOENT") {
+      return;
+    }
     console.warn("Failed to remove temp file:", filePath, error.message);
   }
+};
+
+const attachAbortCleanup = (req, res, next) => {
+  let cleaned = false;
+  const cleanup = async () => {
+    if (cleaned) return;
+    cleaned = true;
+    const paths = new Set();
+    if (req.file?.path) paths.add(req.file.path);
+    if (Array.isArray(req.files)) {
+      req.files.forEach((file) => file?.path && paths.add(file.path));
+    }
+    if (Array.isArray(req._pendingUploadPaths)) {
+      req._pendingUploadPaths.forEach((filePath) => paths.add(filePath));
+    }
+    await Promise.all(Array.from(paths).map((filePath) => cleanupFile(filePath)));
+  };
+
+  req.on("aborted", cleanup);
+  res.on("close", () => {
+    if (req.aborted) {
+      cleanup();
+    }
+  });
+  next();
 };
 
 const buildFileResponse = (file, req) => {
@@ -162,7 +195,7 @@ const isInstructorOwner = (req, fileKey) => {
   return fileKey?.startsWith(`${folderName}/`);
 };
 
-router.post("/upload", upload.single("file"), async (req, res) => {
+router.post("/upload", attachAbortCleanup, upload.single("file"), async (req, res) => {
   const filePath = req.file?.path;
 
   if (!filePath) {
@@ -214,7 +247,11 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
-router.post("/bulk-upload", upload.array("files"), async (req, res) => {
+router.post(
+  "/bulk-upload",
+  attachAbortCleanup,
+  upload.array("files"),
+  async (req, res) => {
   const files = Array.isArray(req.files) ? req.files : [];
   const filePaths = files.map((fileItem) => fileItem.path).filter(Boolean);
 
@@ -247,7 +284,11 @@ router.post("/bulk-upload", upload.array("files"), async (req, res) => {
   }
 });
 
-router.post("/local-upload", localUpload.single("file"), async (req, res) => {
+router.post(
+  "/local-upload",
+  attachAbortCleanup,
+  localUpload.single("file"),
+  async (req, res) => {
   const file = req.file;
 
   if (!file) {
@@ -263,7 +304,11 @@ router.post("/local-upload", localUpload.single("file"), async (req, res) => {
   });
 });
 
-router.post("/local-bulk-upload", localUpload.array("files"), async (req, res) => {
+router.post(
+  "/local-bulk-upload",
+  attachAbortCleanup,
+  localUpload.array("files"),
+  async (req, res) => {
   const files = Array.isArray(req.files) ? req.files : [];
 
   if (files.length === 0) {
