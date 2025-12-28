@@ -19,6 +19,8 @@ import { Delete, Edit, Plus } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/language-context";
+import { deleteInstructorCourseService } from "@/services";
+import { useToast } from "@/hooks/use-toast";
 
 
 function InstructorCourses({ listOfCourses }) {
@@ -27,9 +29,10 @@ function InstructorCourses({ listOfCourses }) {
     setCurrentEditedCourseId,
     setCourseLandingFormData,
     setCourseCurriculumFormData,
+    setInstructorCoursesList,
   } = useContext(InstructorContext);
-  const { t, language } = useLanguage();
-  const isRTL = language === "fa";
+  const { t } = useLanguage();
+  const { toast } = useToast();
   
   const courses = Array.isArray(listOfCourses)
     ? listOfCourses
@@ -44,6 +47,49 @@ function InstructorCourses({ listOfCourses }) {
 
   const handleEditCourse = (courseId) => {
     navigate(`/instructor/edit-course/${courseId}`);
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    const confirmMessage =
+      t("instructor.deleteCourseConfirm") ||
+      "Are you sure you want to delete this course?";
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      const response = await deleteInstructorCourseService(courseId);
+      if (!response?.success) {
+        throw new Error(response?.message || "Delete failed");
+      }
+      setInstructorCoursesList((prev) => {
+        const current = Array.isArray(prev)
+          ? prev
+          : (prev?.courses || []);
+        const updatedCourses = current.filter((course) => course._id !== courseId);
+        return Array.isArray(prev)
+          ? updatedCourses
+          : { ...prev, courses: updatedCourses };
+      });
+      toast({
+        title: t("common.success") || "Success",
+        description:
+          response?.message ||
+          t("instructor.deleteCourseSuccess") ||
+          "Course deleted successfully.",
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        t("instructor.deleteCourseError") ||
+        "Failed to delete course.";
+      toast({
+        title: t("common.error") || "Error",
+        description: message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -110,6 +156,7 @@ function InstructorCourses({ listOfCourses }) {
                           variant="ghost"
                           size="sm"
                           className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                          onClick={() => handleDeleteCourse(course._id)}
                         >
                           <Delete className="h-5 w-5" />
                         </Button>

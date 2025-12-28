@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "signIn": "ورود",
     "signOut": "خروج",
@@ -204,6 +204,9 @@
     "myCourses": "دوره‌های من",
     "createCourse": "ایجاد دوره",
     "editCourse": "ویرایش دوره",
+    "deleteCourseConfirm": "آیا مطمئن هستید که می‌خواهید این دوره را حذف کنید؟",
+    "deleteCourseSuccess": "دوره با موفقیت حذف شد.",
+    "deleteCourseError": "حذف دوره ناموفق بود.",
     "totalStudentsIn": "لیست دانشجوهای ثبت‌نام‌شده",
     "noStudentsEnrolled": "هنوز دانشجویی ثبت‌نام نکرده است",
     "studentsWillAppearHere": "وقتی دانشجوها در دوره‌های شما ثبت‌نام کنند، اینجا نمایش داده می‌شوند",
@@ -701,4 +704,3 @@
     "errorAssigning": "خطا در واگذاری تیکت"
   }
 }
-

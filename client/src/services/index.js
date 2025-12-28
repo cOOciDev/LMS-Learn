@@ -133,6 +133,13 @@ export async function updateCourseByIdService(id, formData) {
   return data;
 }
 
+export async function deleteInstructorCourseService(courseId) {
+  const { data } = await axiosInstance.delete(
+    `/instructor/course/delete/${courseId}`
+  );
+  return data;
+}
+
 export async function createLiveClassPlanService(payload) {
   const { data } = await axiosInstance.post(
     "/instructor/live-class-plans",
