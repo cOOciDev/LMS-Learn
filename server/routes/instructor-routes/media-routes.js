@@ -282,10 +282,17 @@ const resolveLegacyCoursePath = async (relativePath) => {
     const instructorEntries = await fs.promises.readdir(instructorDir, {
       withFileTypes: true,
     });
-    const targetCourseName = normalizeFolderName(courseFolder);
+    const normalizedCourseName = normalizeFolderName(courseFolder);
+    const courseNameWithoutPrefix = normalizeFolderName(
+      courseFolder.replace(/^[^-]+-/, "")
+    );
+    const targetNames = new Set(
+      [normalizedCourseName, courseNameWithoutPrefix].filter(Boolean)
+    );
+
     const matched = instructorEntries.find((entry) => {
       if (!entry.isDirectory()) return false;
-      return normalizeFolderName(entry.name) === targetCourseName;
+      return targetNames.has(normalizeFolderName(entry.name));
     });
 
     if (!matched) {
