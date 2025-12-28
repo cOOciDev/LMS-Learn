@@ -49,6 +49,30 @@ function StudentViewCourseProgressPage() {
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const [courseCompleted, setCourseCompleted] = useState(false);
+
+  const handleAttachmentDownload = (attachmentUrl) => {
+    if (!attachmentUrl) return;
+    const downloadUrl = withAuthToken(attachmentUrl, { download: true });
+    const returnUrl = encodeURIComponent(
+      `${window.location.pathname}${window.location.search}`
+    );
+    const fileName = encodeURIComponent(
+      currentLecture?.attachmentFileName || ""
+    );
+    const downloadPageUrl = `/download?url=${encodeURIComponent(
+      downloadUrl
+    )}&name=${fileName}&returnUrl=${returnUrl}`;
+    const newWindow = window.open(downloadPageUrl, "_blank", "noopener,noreferrer");
+    if (!newWindow) {
+      toast({
+        title: t("common.error") || "Error",
+        description:
+          t("downloadPage.popupBlocked") ||
+          "Popup blocked. Please allow popups to download the file.",
+        variant: "destructive",
+      });
+    }
+  };
   const curriculum = studentCurrentCourseProgress?.courseDetails?.curriculum || [];
   const currentIndex = curriculum.findIndex(
     (item) => item._id === currentLecture?._id
@@ -431,18 +455,22 @@ function StudentViewCourseProgressPage() {
                     height="100%"
                     onProgress={handleVideoProgress}
                     progressData={currentLecture}
-                    thumbnail={studentCurrentCourseProgress?.courseDetails?.image}
+                    thumbnail={withAuthToken(
+                      studentCurrentCourseProgress?.courseDetails?.image
+                    )}
                   />
                 </div>
                 {currentLecture?.attachmentUrl && (
                   <div className="bg-black/60 px-4 py-2 text-right">
-                    <a
+                    <button
+                      type="button"
                       className="text-xs text-blue-300 hover:underline"
-                      href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
-                      download
+                      onClick={() =>
+                        handleAttachmentDownload(currentLecture.attachmentUrl)
+                      }
                     >
                       {t("course.downloadAttachment") || "Download lesson file"}
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
@@ -452,13 +480,15 @@ function StudentViewCourseProgressPage() {
                   {t("course.noVideo") || "No video for this lesson."}
                 </p>
                 {currentLecture?.attachmentUrl && (
-                  <a
+                  <button
+                    type="button"
                     className="text-blue-400 hover:underline"
-                    href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
-                    download
+                    onClick={() =>
+                      handleAttachmentDownload(currentLecture.attachmentUrl)
+                    }
                   >
                     {t("course.downloadAttachment") || "Download lesson file"}
-                  </a>
+                  </button>
                 )}
                 <Button size="sm" onClick={handleMarkLectureComplete}>
                   {t("course.markComplete") || "Mark as completed"}
@@ -495,13 +525,15 @@ function StudentViewCourseProgressPage() {
               {currentLecture?.attachmentUrl && (
                 <div className="flex items-center justify-between rounded-2xl border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs text-blue-200">
                   <span>{t("course.downloadAttachment") || "Download lesson file"}</span>
-                  <a
+                  <button
+                    type="button"
                     className="text-blue-300 hover:underline"
-                    href={withAuthToken(currentLecture.attachmentUrl, { download: true })}
-                    download
+                    onClick={() =>
+                      handleAttachmentDownload(currentLecture.attachmentUrl)
+                    }
                   >
                     {t("common.download") || "Download"}
-                  </a>
+                  </button>
                 </div>
               )}
               <div className="rounded-2xl bg-white/5 p-3 text-sm text-gray-200">

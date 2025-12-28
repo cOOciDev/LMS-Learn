@@ -182,6 +182,10 @@ export const courseLandingInitialFormData = {
   objectives: "",
   welcomeMessage: "",
   image: "",
+  imageFileKey: "",
+  imageFileName: "",
+  imageFileType: "",
+  imageFileSize: 0,
 };
 
 export const courseCurriculumInitialFormData = [

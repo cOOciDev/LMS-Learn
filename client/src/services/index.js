@@ -33,30 +33,6 @@ export async function logoutService() {
   return data;
 }
 
-export async function mediaUploadService(formData, onProgressCallback, signal) {
-  const { data } = await axiosInstance.post("/media/upload", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-    maxBodyLength: Infinity,
-    maxContentLength: Infinity,
-    signal,
-    onUploadProgress: (progressEvent) => {
-      const percentCompleted = Math.round(
-        (progressEvent.loaded * 100) / Math.max(progressEvent.total, 1)
-      );
-      onProgressCallback(percentCompleted);
-    },
-  });
-
-  return data;
-}
-
-export async function mediaDeleteService(id) {
-  const { data } = await axiosInstance.delete(`/media/delete/${id}`);
-
-  return data;
-}
 
 export async function mediaLocalUploadService(formData, onProgressCallback, signal) {
   const { data } = await axiosInstance.post("/media/local-upload", formData, {
@@ -201,26 +177,6 @@ export async function fetchStudentLiveClassPlanByIdService(planId) {
   return data;
 }
 
-export async function mediaBulkUploadService(formData, onProgressCallback, signal) {
-  const { data } = await axiosInstance.post("/media/bulk-upload", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-    maxBodyLength: Infinity,
-    maxContentLength: Infinity,
-    signal,
-    onUploadProgress: (progressEvent) => {
-      if (typeof onProgressCallback === "function") {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / Math.max(progressEvent.total, 1)
-        );
-        onProgressCallback(percentCompleted);
-      }
-    },
-  });
-
-  return data;
-}
 
 // client/src/services/index.js — فقط این تابع رو عوض کن
 export async function fetchStudentViewCourseListService(queryParams = {}) {

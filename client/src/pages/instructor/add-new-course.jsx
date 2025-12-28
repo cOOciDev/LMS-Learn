@@ -143,7 +143,10 @@ function AddNewCoursePage() {
       objectives: courseLandingFormData.objectives,
       welcomeMessage: courseLandingFormData.welcomeMessage,
       image: courseLandingFormData.image || "",
-      image_public_id: courseLandingFormData.image_public_id,
+      imageFileKey: courseLandingFormData.imageFileKey || "",
+      imageFileName: courseLandingFormData.imageFileName || "",
+      imageFileType: courseLandingFormData.imageFileType || "",
+      imageFileSize: courseLandingFormData.imageFileSize || 0,
       curriculum: courseCurriculumFormData.map((item) => ({
         title: item.title?.trim(),
         videoUrl: item.videoUrl,

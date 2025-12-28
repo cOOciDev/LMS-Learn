@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { useCategories } from "@/context/category-context";
 import { buildCategoryOptions } from "@/utils/category";
 import { useLanguage } from "@/context/language-context";
+import { withAuthToken } from "@/utils/media";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -437,7 +438,7 @@ function StudentViewCoursesPage() {
                         className="cursor-pointer h-full"
                       >
                         <img
-                          src={course.image}
+                          src={withAuthToken(course.image)}
                           alt={course.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />

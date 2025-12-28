@@ -470,7 +470,7 @@ function CourseCurriculum({ onNext }) {
                 url={lecture.videoUrl}
                 width="100%"
                 height="320px"
-                thumbnail={courseLandingFormData?.image || null}
+                thumbnail={withAuthToken(courseLandingFormData?.image) || null}
               />
             </div>
             <Button

@@ -3,10 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const authenticateMiddleware = require("../../middleware/auth-middleware");
-const {
-  uploadMediaToCloudinary,
-  deleteMediaFromCloudinary,
-} = require("../../helpers/cloudinary");
+const { getCorsOrigins } = require("../../config/env");
 
 const router = express.Router();
 
@@ -14,6 +11,34 @@ const uploadDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+const applyCorsHeaders = (req, res) => {
+  const origin = req.headers.origin;
+  if (!origin) return;
+  const allowedOrigins = getCorsOrigins();
+  if (!allowedOrigins.includes(origin)) return;
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Vary", "Origin");
+};
+
+router.use((req, res, next) => {
+  if (req.method !== "OPTIONS") {
+    return next();
+  }
+  applyCorsHeaders(req, res);
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,PATCH,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Authorization, Content-Type, Cache-Control, Pragma"
+  );
+  return res.sendStatus(204);
+});
+
+router.use((req, res, next) => {
+  applyCorsHeaders(req, res);
+  next();
+});
 
 router.use(authenticateMiddleware);
 
@@ -76,7 +101,8 @@ const storage = multer.diskStorage({
   },
   filename: (_req, file, cb) => {
     const originalName = path.basename(file.originalname || "file");
-    const safeName = originalName
+    const normalizedOriginalName = normalizeUtf8Mojibake(originalName);
+    const safeName = normalizedOriginalName
       .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
       .replace(/\s+/g, "_")
       .replace(/_+/g, "_")
@@ -93,9 +119,10 @@ const MAX_FILE_SIZE = 200 * 1024 * 1024;
 const isAllowedLocalFile = (file) => {
   if (!file) return false;
   if (file.mimetype?.startsWith("video/")) return true;
+  if (file.mimetype?.startsWith("image/")) return true;
   if (file.mimetype === "application/pdf") return true;
   const ext = path.extname(file.originalname || "").toLowerCase();
-  return ext === ".pdf";
+  return [".pdf", ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"].includes(ext);
 };
 
 const localUpload = multer({
@@ -106,11 +133,10 @@ const localUpload = multer({
       cb(null, true);
       return;
     }
-    cb(new Error("Only video or PDF files are allowed"));
+    cb(new Error("Only video, image, or PDF files are allowed"));
   },
 });
 
-const upload = multer({ storage });
 
 const cleanupFile = async (filePath) => {
   if (!filePath) {
@@ -180,20 +206,43 @@ const buildFileResponse = (file, req) => {
   return {
     fileUrl,
     fileKey: relativePath,
-    fileName: file.originalname,
+    fileName: normalizeUtf8Mojibake(file.originalname),
     fileType: file.mimetype,
     fileSize: file.size,
   };
 };
 
-const decodeRequestedPath = (rawPath) => {
-  if (!rawPath) return "";
-  const plusFixed = rawPath.replace(/\+/g, " ");
-  try {
-    return decodeURIComponent(plusFixed);
-  } catch (error) {
-    return plusFixed;
+const normalizeUtf8Mojibake = (value) => {
+  if (!value) return value;
+  if (!/[ÃØÙ]/.test(value)) {
+    return value;
   }
+  try {
+    return Buffer.from(value, "latin1").toString("utf8");
+  } catch (error) {
+    return value;
+  }
+};
+
+const decodePathCandidates = (rawPath) => {
+  if (!rawPath) return [];
+  let decoded = rawPath;
+  for (let i = 0; i < 3; i += 1) {
+    decoded = decoded.replace(/\+/g, " ");
+    try {
+      decoded = decodeURIComponent(decoded);
+    } catch (error) {
+      break;
+    }
+  }
+
+  const normalized = decoded
+    .split("/")
+    .map((segment) => normalizeUtf8Mojibake(segment))
+    .join("/");
+
+  const candidates = [normalized, decoded].filter(Boolean);
+  return Array.from(new Set(candidates));
 };
 
 const resolveFilePath = (relativePath) => {
@@ -267,94 +316,26 @@ const isInstructorOwner = (req, fileKey) => {
   return fileKey?.startsWith(`${folderName}/`);
 };
 
-router.post("/upload", attachAbortCleanup, upload.single("file"), async (req, res) => {
-  const filePath = req.file?.path;
+router.post("/upload", (_req, res) =>
+  res.status(410).json({
+    success: false,
+    message: "Cloudinary uploads have been removed. Use local upload endpoints.",
+  })
+);
 
-  if (!filePath) {
-    return res.status(400).json({
-      success: false,
-      message: "File is required",
-    });
-  }
+router.delete("/delete/:id", (_req, res) =>
+  res.status(410).json({
+    success: false,
+    message: "Cloudinary deletes have been removed. Use local delete endpoint.",
+  })
+);
 
-  try {
-    const result = await uploadMediaToCloudinary(filePath);
-
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    console.error("Upload failed:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error uploading file",
-    });
-  } finally {
-    await cleanupFile(filePath);
-  }
-});
-
-router.delete("/delete/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Assest Id is required",
-      });
-    }
-
-    await deleteMediaFromCloudinary(id);
-
-    res.status(200).json({
-      success: true,
-      message: "Assest deleted successfully from cloudinary",
-    });
-  } catch (error) {
-    console.error("Delete failed:", error);
-
-    res.status(500).json({ success: false, message: "Error deleting file" });
-  }
-});
-
-router.post(
-  "/bulk-upload",
-  attachAbortCleanup,
-  upload.array("files"),
-  async (req, res) => {
-  const files = Array.isArray(req.files) ? req.files : [];
-  const filePaths = files.map((fileItem) => fileItem.path).filter(Boolean);
-
-  if (filePaths.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: "No files were provided for upload",
-    });
-  }
-
-  try {
-    const results = [];
-    for (const fileItem of files) {
-      const uploaded = await uploadMediaToCloudinary(fileItem.path);
-      results.push(uploaded);
-    }
-
-    res.status(200).json({
-      success: true,
-      data: results,
-    });
-  } catch (error) {
-    console.error("Bulk upload failed:", error);
-
-    res
-      .status(500)
-      .json({ success: false, message: "Error in bulk uploading files" });
-  } finally {
-    await Promise.all(filePaths.map((filePath) => cleanupFile(filePath)));
-  }
-});
+router.post("/bulk-upload", (_req, res) =>
+  res.status(410).json({
+    success: false,
+    message: "Cloudinary bulk uploads have been removed. Use local upload endpoints.",
+  })
+);
 
 router.post(
   "/local-upload",
@@ -399,6 +380,7 @@ router.post(
 });
 
 const sendAssetFile = async (req, res, absolutePath) => {
+  applyCorsHeaders(req, res);
   let stat;
   try {
     stat = await fs.promises.stat(absolutePath);
@@ -425,15 +407,29 @@ const sendAssetFile = async (req, res, absolutePath) => {
   const isVideo = Object.prototype.hasOwnProperty.call(videoTypes, ext);
   if (!isVideo) {
     const fileName = path.basename(absolutePath);
+    const safeAsciiName = fileName
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_+|_+$/g, "") || "download";
     const encodedName = encodeURIComponent(fileName);
+    const imageTypes = {
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".webp": "image/webp",
+      ".gif": "image/gif",
+      ".bmp": "image/bmp",
+    };
     const contentType =
-      ext === ".pdf" ? "application/pdf" : "application/octet-stream";
+      ext === ".pdf"
+        ? "application/pdf"
+        : imageTypes[ext] || "application/octet-stream";
     res.setHeader("Content-Type", contentType);
     res.setHeader("Content-Length", stat.size);
     if (req.query.download === "1") {
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${fileName.replace(/\"/g, "")}"; filename*=UTF-8''${encodedName}`
+        `attachment; filename="${safeAsciiName}"; filename*=UTF-8''${encodedName}`
       );
     }
     return fs.createReadStream(absolutePath).pipe(res);
@@ -470,8 +466,17 @@ router.get("/assets", async (req, res) => {
       });
     }
 
-    const decoded = decodeRequestedPath(rawPath);
-    const absolutePath = await resolveExistingFilePath(decoded);
+    const candidates = decodePathCandidates(rawPath);
+    let absolutePath = null;
+    let matchedPath = null;
+    for (const candidate of candidates) {
+      absolutePath = await resolveExistingFilePath(candidate);
+      if (absolutePath) {
+        matchedPath = candidate;
+        break;
+      }
+    }
+
     if (!absolutePath) {
       return res.status(400).json({
         success: false,
@@ -486,7 +491,7 @@ router.get("/assets", async (req, res) => {
       return sendFileResponse();
     }
 
-    if (req.user?.role === "instructor" && isInstructorOwner(req, decoded)) {
+    if (req.user?.role === "instructor" && isInstructorOwner(req, matchedPath)) {
       return sendFileResponse();
     }
 
@@ -494,8 +499,9 @@ router.get("/assets", async (req, res) => {
     const StudentCourses = require("../../models/StudentCourses");
     const course = await Course.findOne({
       $or: [
-        { "curriculum.videoFileKey": decoded },
-        { "curriculum.attachmentFileKey": decoded },
+        { imageFileKey: matchedPath },
+        { "curriculum.videoFileKey": matchedPath },
+        { "curriculum.attachmentFileKey": matchedPath },
       ],
     }).lean();
 
@@ -527,11 +533,12 @@ router.get("/assets", async (req, res) => {
 
       const lecture = course.curriculum?.find(
         (item) =>
-          item.videoFileKey === decoded || item.attachmentFileKey === decoded
+          item.videoFileKey === matchedPath || item.attachmentFileKey === matchedPath
       );
       const isFreePreview = !!lecture?.freePreview;
+      const isCourseImage = course.imageFileKey === matchedPath;
 
-      if (hasCourse || isFreePreview) {
+      if (hasCourse || isFreePreview || (isCourseImage && course.isPublished)) {
         return sendFileResponse();
       }
     }

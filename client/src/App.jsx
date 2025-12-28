@@ -34,6 +34,7 @@ import AdminHelpCenterPage from "./pages/admin/help-center";
 import StudentCategoryRoadmapPage from "./pages/student/roadmap-category";
 import AboutPage from "./pages/student/about";
 import StudentTicketsPage from "./pages/student/tickets";
+import DownloadPage from "./pages/download";
 import InstructorTicketsPage from "./pages/instructor/tickets";
 import NotificationsPage from "./pages/notifications";
 
@@ -72,6 +73,7 @@ function App() {
         <Route path="tickets" element={<InstructorTicketsPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
       </Route>
+      <Route path="download" element={<DownloadPage />} />
 
       {/* Admin */}
       <Route

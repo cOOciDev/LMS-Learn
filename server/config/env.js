@@ -18,11 +18,21 @@ const env = {
 };
 
 const getCorsOrigins = () => {
+  const origins = new Set();
   if (env.CLIENT_URLS.length > 0) {
-    return env.CLIENT_URLS;
+    env.CLIENT_URLS.forEach((item) => origins.add(item));
+  } else if (env.CLIENT_URL) {
+    origins.add(env.CLIENT_URL);
   }
 
-  return [env.CLIENT_URL];
+  [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+  ].forEach((item) => origins.add(item));
+
+  return Array.from(origins);
 };
 
 const validateEnv = () => {

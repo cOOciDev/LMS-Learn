@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { InstructorContext } from "@/context/instructor-context";
 import { useLanguage } from "@/context/language-context";
-import { mediaUploadService, mediaDeleteService } from "@/services";
+import { mediaLocalDeleteService, mediaLocalUploadService } from "@/services";
+import { withAuthToken } from "@/utils/media";
 import { Upload, Trash2, Replace } from "lucide-react";
 import { useContext, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,7 @@ function CourseSettings() {
     setMediaUploadProgress,
     mediaUploadProgressPercentage,
     setMediaUploadProgressPercentage,
+    currentEditedCourseId,
   } = useContext(InstructorContext);
 
   const { t, language } = useLanguage();
@@ -38,24 +40,36 @@ function CourseSettings() {
     }
 
     const formData = new FormData();
+    if (currentEditedCourseId) {
+      formData.append("courseId", currentEditedCourseId);
+    }
+    if (courseLandingFormData?.title) {
+      formData.append("courseTitle", courseLandingFormData.title);
+    }
     formData.append("file", file);
 
     setMediaUploadProgress(true);
     setMediaUploadProgressPercentage(0);
 
     try {
-      const response = await mediaUploadService(formData, setMediaUploadProgressPercentage);
+      const response = await mediaLocalUploadService(
+        formData,
+        setMediaUploadProgressPercentage
+      );
       if (response?.success) {
         // اگر قبلاً عکسی بود، حذفش کن
-        if (courseLandingFormData?.image_public_id) {
-          await mediaDeleteService(courseLandingFormData.image_public_id);
+        if (courseLandingFormData?.imageFileKey) {
+          await mediaLocalDeleteService(courseLandingFormData.imageFileKey);
         }
 
-        const uploadedUrl = response.data.secure_url || response.data.url;
+        const uploadedUrl = response.data.fileUrl;
         setCourseLandingFormData({
           ...courseLandingFormData,
           image: uploadedUrl,
-          image_public_id: response.data.public_id,
+          imageFileKey: response.data.fileKey,
+          imageFileName: response.data.fileName,
+          imageFileType: response.data.fileType,
+          imageFileSize: response.data.fileSize,
         });
 
         toast({
@@ -76,13 +90,16 @@ function CourseSettings() {
   };
 
   const handleDeleteImage = async () => {
-    if (courseLandingFormData?.image_public_id) {
-      await mediaDeleteService(courseLandingFormData.image_public_id);
+    if (courseLandingFormData?.imageFileKey) {
+      await mediaLocalDeleteService(courseLandingFormData.imageFileKey);
     }
     setCourseLandingFormData({
       ...courseLandingFormData,
       image: "",
-      image_public_id: "",
+      imageFileKey: "",
+      imageFileName: "",
+      imageFileType: "",
+      imageFileSize: 0,
     });
     toast({ description: "تصویر دوره حذف شد." });
   };
@@ -129,7 +146,7 @@ function CourseSettings() {
           <div className="space-y-4">
             <div className="relative rounded-xl overflow-hidden border-2 border-border shadow-lg">
               <img
-                src={courseLandingFormData.image}
+                src={withAuthToken(courseLandingFormData.image)}
                 alt="Course cover"
                 className="w-full h-64 sm:h-80 object-cover"
               />

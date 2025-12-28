@@ -93,6 +93,10 @@ const CourseSchema = new mongoose.Schema(
       type: String,
       required: [true, "Course image is required"],
     },
+    imageFileKey: String,
+    imageFileName: String,
+    imageFileType: String,
+    imageFileSize: Number,
     welcomeMessage: String,
     pricing: {
       type: Number,

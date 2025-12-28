@@ -551,6 +551,10 @@ function StudentViewCourseDetailsPage() {
             <DialogTitle>
               {t("courseDetails.previewTitle") || "Course preview"}
             </DialogTitle>
+            <DialogDescription>
+              {t("courseDetails.previewDescription") ||
+                "Watch the free preview lessons before enrolling."}
+            </DialogDescription>
           </DialogHeader>
           <div className="aspect-video bg-black">
             {resolvedDialogUrl ? (
@@ -623,7 +627,7 @@ function StudentViewCourseDetailsPage() {
                 >
                   <div className="relative aspect-video overflow-hidden">
                     <img
-                      src={course.image || "/placeholder.jpg"}
+                      src={withAuthToken(course.image) || "/placeholder.jpg"}
                       alt={course.title}
                       className="h-full w-full object-cover transition-transform group-hover:scale-110 duration-500"
                     />

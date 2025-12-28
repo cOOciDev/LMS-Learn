@@ -7,6 +7,7 @@ import {
   registerService,
 } from "@/services";
 import { createContext, useEffect, useState } from "react";
+import PropTypes from "prop-types";
 
 export const AuthContext = createContext(null);
 
@@ -22,6 +23,13 @@ export default function AuthProvider({ children }) {
   async function handleRegisterUser(event) {
     event.preventDefault();
     const data = await registerService(signUpFormData);
+     if (data?.success) {
+      return { success: true, message: data.message || "Registration successful" };
+    }
+    return {
+      success: false,
+      message: data?.message || "Registration failed. Please try again.",
+    };
   }
 
   async function handleLoginUser(event) {
@@ -140,3 +148,7 @@ export default function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

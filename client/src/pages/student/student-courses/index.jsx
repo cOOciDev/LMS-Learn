@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
 import { useLanguage } from "@/context/language-context";
+import { withAuthToken } from "@/utils/media";
 import { fetchStudentBoughtCoursesService } from "@/services";
 import { Watch } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
@@ -93,7 +94,7 @@ function StudentCoursesPage() {
                 <Card key={courseId || course?.title} className="flex flex-col">
                   <CardContent className="p-4 flex-grow">
                     <img
-                      src={course?.courseImage || course?.image}
+                      src={withAuthToken(course?.courseImage || course?.image)}
                       alt={course?.title}
                       className="h-52 w-full object-cover rounded-md mb-4"
                     />

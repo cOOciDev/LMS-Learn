@@ -10,6 +10,7 @@ import {
 import { AuthContext } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/language-context";
+import { withAuthToken } from "@/utils/media";
 import { useCategories } from "@/context/category-context";
 import { buildCategoryOptions } from "@/utils/category";
 import { Radio } from "lucide-react";
@@ -260,7 +261,7 @@ function StudentHomePage() {
               >
                 <div className="relative w-full">
                   <img
-                    src={courseItem?.image}
+                    src={withAuthToken(courseItem?.image)}
                     alt={courseItem?.title}
                     className="w-full h-44 object-cover group-hover:scale-105 transform transition-all duration-500"
                   />

@@ -50,7 +50,7 @@
     "currency": "Toman",
     "free": "Free",
     "new": "New",
-    "continue":"Continiue",
+    "continue": "Continiue",
     "saveAndContinue": "save and continue",
     "publish": "Publish"
   },
@@ -435,6 +435,7 @@
     "subtitle": "course subtitle under tilte",
     "noVideo": "No video for this lesson.",
     "downloadAttachment": "Download lesson file",
+    "downloadFailed": "Download failed. Please try again.",
     "markComplete": "Mark as completed",
     "hasAttachment": "PDF attached"
   },
@@ -454,6 +455,7 @@
     "descriptionTitle": "Course description",
     "freePreview": "Free preview",
     "previewTitle": "Course preview",
+    "previewDescription": "Watch the free preview lessons before enrolling.",
     "videoNotSupported": "Your browser does not support the video tag.",
     "moreFromInstructor": "More from this Instructor",
     "emptyEmoji": "Search",
@@ -472,7 +474,6 @@
     "startWatching": "Start Watching",
     "noCourses": "You haven't purchased any courses yet.",
     "detailButton": "View Details"
-
   },
   "home": {
     "heroTitle": "Build Your Future with Learning",
@@ -705,5 +706,18 @@
     "errorSending": "Error sending reply",
     "errorUpdating": "Error updating status",
     "errorAssigning": "Error assigning ticket"
+  },
+  "downloadPage": {
+    "title": "Download file",
+    "description": "Your download should start automatically. If it does not, use the button below.",
+    "fileLabel": "File",
+    "unknownFile": "Unknown file",
+    "retry": "Retry download",
+    "close": "Close",
+    "directLink": "Open direct download link",
+    "missingLink": "Download link is missing.",
+    "back": "Back to course",
+    "popupBlocked": "Popup blocked. Please allow popups to download the file.",
+    "secureNotice": "This download uses secure account access."
   }
 }
