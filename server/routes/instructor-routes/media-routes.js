@@ -26,8 +26,9 @@ const sanitizeFolderName = (value, fallback = "unknown") => {
     .toString()
     .trim()
     .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
-    .replace(/[\s_]+/g, " ")
-    .replace(/^[\s\.]+|[\s\.]+$/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^[\s\._]+|[\s\._]+$/g, "")
     .trim();
 
   return sanitized || fallback;
@@ -75,7 +76,11 @@ const storage = multer.diskStorage({
   },
   filename: (_req, file, cb) => {
     const originalName = path.basename(file.originalname || "file");
-    const safeName = originalName.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
+    const safeName = originalName
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+      .replace(/\s+/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^[\s\._]+|[\s\._]+$/g, "");
     const destination = _req._uploadDestination || getInstructorUploadDir(_req);
     _req._pendingUploadPaths = _req._pendingUploadPaths || [];
     _req._pendingUploadPaths.push(path.join(destination, safeName));
@@ -181,6 +186,16 @@ const buildFileResponse = (file, req) => {
   };
 };
 
+const decodeRequestedPath = (rawPath) => {
+  if (!rawPath) return "";
+  const plusFixed = rawPath.replace(/\+/g, " ");
+  try {
+    return decodeURIComponent(plusFixed);
+  } catch (error) {
+    return plusFixed;
+  }
+};
+
 const resolveFilePath = (relativePath) => {
   const normalized = path.normalize(relativePath).replace(/^(\.\.(\/|\\|$))+/, "");
   const absolute = path.join(uploadDir, normalized);
@@ -188,6 +203,63 @@ const resolveFilePath = (relativePath) => {
     return null;
   }
   return absolute;
+};
+
+const normalizeFolderName = (value) => {
+  if (!value) return "";
+  return value
+    .toString()
+    .trim()
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^[\s\._]+|[\s\._]+$/g, "")
+    .trim();
+};
+
+const resolveLegacyCoursePath = async (relativePath) => {
+  const normalized = path.normalize(relativePath).replace(/^(\.\.(\/|\\|$))+/, "");
+  const parts = normalized.split(/[\\/]/).filter(Boolean);
+  if (parts.length < 3) {
+    return null;
+  }
+
+  const instructorFolder = parts[0];
+  const courseFolder = parts.slice(1, -1).join(path.sep);
+  const fileName = parts[parts.length - 1];
+  const instructorDir = path.join(uploadDir, instructorFolder);
+
+  try {
+    const instructorEntries = await fs.promises.readdir(instructorDir, {
+      withFileTypes: true,
+    });
+    const targetCourseName = normalizeFolderName(courseFolder);
+    const matched = instructorEntries.find((entry) => {
+      if (!entry.isDirectory()) return false;
+      return normalizeFolderName(entry.name) === targetCourseName;
+    });
+
+    if (!matched) {
+      return null;
+    }
+
+    const candidate = path.join(instructorDir, matched.name, fileName);
+    await fs.promises.access(candidate);
+    return candidate;
+  } catch (error) {
+    return null;
+  }
+};
+
+const resolveExistingFilePath = async (relativePath) => {
+  const absolute = resolveFilePath(relativePath);
+  if (!absolute) return null;
+  try {
+    await fs.promises.access(absolute);
+    return absolute;
+  } catch (error) {
+    return resolveLegacyCoursePath(relativePath);
+  }
 };
 
 const isInstructorOwner = (req, fileKey) => {
@@ -398,8 +470,8 @@ router.get("/assets", async (req, res) => {
       });
     }
 
-    const decoded = decodeURIComponent(rawPath);
-    const absolutePath = resolveFilePath(decoded);
+    const decoded = decodeRequestedPath(rawPath);
+    const absolutePath = await resolveExistingFilePath(decoded);
     if (!absolutePath) {
       return res.status(400).json({
         success: false,
