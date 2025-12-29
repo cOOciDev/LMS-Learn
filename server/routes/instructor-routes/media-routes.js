@@ -494,7 +494,7 @@ const sendAssetFile = async (req, res, absolutePath) => {
   return fs.createReadStream(absolutePath, { start, end }).pipe(res);
 };
 
-router.get("/assets", async (req, res) => {
+const handleAssetRequest = async (req, res) => {
   try {
     const rawPath = req.query.path;
     if (!rawPath) {
@@ -592,7 +592,10 @@ router.get("/assets", async (req, res) => {
       message: "Error fetching asset",
     });
   }
-});
+};
+
+router.get("/assets", handleAssetRequest);
+router.get("/", handleAssetRequest);
 
 router.delete("/local-delete", async (req, res) => {
   try {
