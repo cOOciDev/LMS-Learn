@@ -7,7 +7,9 @@ const { getCorsOrigins } = require("../../config/env");
 
 const router = express.Router();
 
-const uploadDir = path.join(__dirname, "../../uploads");
+const uploadDir = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -266,6 +268,12 @@ const normalizeFolderName = (value) => {
     .trim();
 };
 
+const normalizeLooseKey = (value) =>
+  normalizeFolderName(value)
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9_-]/g, "");
+
 const resolveLegacyCoursePath = async (relativePath) => {
   const normalized = path.normalize(relativePath).replace(/^(\.\.(\/|\\|$))+/, "");
   const parts = normalized.split(/[\\/]/).filter(Boolean);
@@ -289,22 +297,45 @@ const resolveLegacyCoursePath = async (relativePath) => {
     const targetNames = new Set(
       [normalizedCourseName, courseNameWithoutPrefix].filter(Boolean)
     );
+    const looseTargets = new Set(
+      Array.from(targetNames)
+        .map((name) => normalizeLooseKey(name))
+        .filter(Boolean)
+    );
 
     const matched = instructorEntries.find((entry) => {
       if (!entry.isDirectory()) return false;
-      return targetNames.has(normalizeFolderName(entry.name));
+      const entryName = normalizeFolderName(entry.name);
+      if (targetNames.has(entryName)) return true;
+      const looseEntry = normalizeLooseKey(entryName);
+      return looseEntry && looseTargets.has(looseEntry);
     });
 
-    if (!matched) {
-      return null;
+    if (matched) {
+      const candidate = path.join(instructorDir, matched.name, fileName);
+      await fs.promises.access(candidate);
+      return candidate;
     }
 
-    const candidate = path.join(instructorDir, matched.name, fileName);
-    await fs.promises.access(candidate);
-    return candidate;
+    const candidates = [];
+    for (const entry of instructorEntries) {
+      if (!entry.isDirectory()) continue;
+      const candidate = path.join(instructorDir, entry.name, fileName);
+      try {
+        await fs.promises.access(candidate);
+        candidates.push(candidate);
+      } catch (error) {
+        // ignore
+      }
+    }
+    if (candidates.length === 1) {
+      return candidates[0];
+    }
   } catch (error) {
     return null;
   }
+
+  return null;
 };
 
 const resolveExistingFilePath = async (relativePath) => {
@@ -326,21 +357,21 @@ const isInstructorOwner = (req, fileKey) => {
 router.post("/upload", (_req, res) =>
   res.status(410).json({
     success: false,
-    message: "Cloudinary uploads have been removed. Use local upload endpoints.",
+    message: "Upload endpoint removed. Use local upload endpoints.",
   })
 );
 
 router.delete("/delete/:id", (_req, res) =>
   res.status(410).json({
     success: false,
-    message: "Cloudinary deletes have been removed. Use local delete endpoint.",
+    message: "Delete endpoint removed. Use local delete endpoint.",
   })
 );
 
 router.post("/bulk-upload", (_req, res) =>
   res.status(410).json({
     success: false,
-    message: "Cloudinary bulk uploads have been removed. Use local upload endpoints.",
+    message: "Bulk upload endpoint removed. Use local upload endpoints.",
   })
 );
 
