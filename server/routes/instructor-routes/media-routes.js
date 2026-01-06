@@ -17,8 +17,11 @@ if (!fs.existsSync(uploadDir)) {
 const applyCorsHeaders = (req, res) => {
   const origin = req.headers.origin;
   if (!origin) return;
-  const allowedOrigins = getCorsOrigins();
-  if (!allowedOrigins.includes(origin)) return;
+  const isAssetRequest = req.path === "/assets" || req.path === "/";
+  if (!isAssetRequest) {
+    const allowedOrigins = getCorsOrigins();
+    if (!allowedOrigins.includes(origin)) return;
+  }
   res.setHeader("Access-Control-Allow-Origin", origin);
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Vary", "Origin");

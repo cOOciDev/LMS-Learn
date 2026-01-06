@@ -13,6 +13,7 @@ import {
   mediaLocalBulkUploadService,
   mediaLocalDeleteService,
   mediaLocalUploadService,
+  updateCourseByIdService,
 } from "@/services";
 import { withAuthToken } from "@/utils/media";
 import {
@@ -173,58 +174,52 @@ function CourseCurriculum({ onNext }) {
     return { valid, rejected };
   };
 
-  const applyUploadedFileToLecture = (payload, replaceIndex, fileType) => {
-    setCourseCurriculumFormData((prev) => {
-      const updated = [...prev];
-      const nextAvailableIndex =
-        replaceIndex !== null && replaceIndex !== undefined
-          ? replaceIndex
-          : updated.findIndex(
-              (lecture) => !lecture.videoUrl && !lecture.attachmentUrl
-            );
-      const targetIndex =
-        nextAvailableIndex !== -1 ? nextAvailableIndex : updated.length;
-      const baseLecture =
-        updated[targetIndex] ||
-        {
-          title: "",
-          videoUrl: "",
-          videoFileKey: "",
-          videoFileName: "",
-          videoFileType: "",
-          videoFileSize: 0,
-          attachmentUrl: "",
-          attachmentFileKey: "",
-          attachmentFileName: "",
-          attachmentFileType: "",
-          attachmentFileSize: 0,
-          freePreview: false,
-          public_id: "",
-        };
+  const applyUploadedFileToLecture = (lectures, payload, replaceIndex, fileType) => {
+    const updated = [...lectures];
+    const nextAvailableIndex =
+      replaceIndex !== null && replaceIndex !== undefined
+        ? replaceIndex
+        : updated.findIndex((lecture) => !lecture.videoUrl && !lecture.attachmentUrl);
+    const targetIndex = nextAvailableIndex !== -1 ? nextAvailableIndex : updated.length;
+    const baseLecture =
+      updated[targetIndex] || {
+        title: "",
+        videoUrl: "",
+        videoFileKey: "",
+        videoFileName: "",
+        videoFileType: "",
+        videoFileSize: 0,
+        attachmentUrl: "",
+        attachmentFileKey: "",
+        attachmentFileName: "",
+        attachmentFileType: "",
+        attachmentFileSize: 0,
+        freePreview: false,
+        public_id: "",
+      };
 
-      const nextLecture = { ...baseLecture };
-      if (!nextLecture.title?.trim()) {
-        nextLecture.title = `${t("curriculum.lecture") || "Lecture"} ${
-          targetIndex + 1
-        }`;
-      }
-      if (fileType === "video") {
-        nextLecture.videoUrl = payload.fileUrl;
-        nextLecture.videoFileKey = payload.fileKey;
-        nextLecture.videoFileName = payload.fileName;
-        nextLecture.videoFileType = payload.fileType;
-        nextLecture.videoFileSize = payload.fileSize;
-      } else {
-        nextLecture.attachmentUrl = payload.fileUrl;
-        nextLecture.attachmentFileKey = payload.fileKey;
-        nextLecture.attachmentFileName = payload.fileName;
-        nextLecture.attachmentFileType = payload.fileType;
-        nextLecture.attachmentFileSize = payload.fileSize;
-      }
+    const nextLecture = { ...baseLecture };
+    if (!nextLecture.title?.trim()) {
+      nextLecture.title = `${t("curriculum.lecture") || "Lecture"} ${
+        targetIndex + 1
+      }`;
+    }
+    if (fileType === "video") {
+      nextLecture.videoUrl = payload.fileUrl;
+      nextLecture.videoFileKey = payload.fileKey;
+      nextLecture.videoFileName = payload.fileName;
+      nextLecture.videoFileType = payload.fileType;
+      nextLecture.videoFileSize = payload.fileSize;
+    } else {
+      nextLecture.attachmentUrl = payload.fileUrl;
+      nextLecture.attachmentFileKey = payload.fileKey;
+      nextLecture.attachmentFileName = payload.fileName;
+      nextLecture.attachmentFileType = payload.fileType;
+      nextLecture.attachmentFileSize = payload.fileSize;
+    }
 
-      updated[targetIndex] = nextLecture;
-      return updated;
-    });
+    updated[targetIndex] = nextLecture;
+    return updated;
   };
 
   const processLectureFiles = async (
@@ -307,12 +302,34 @@ function CourseCurriculum({ onNext }) {
         ? response.data
         : [response.data];
 
+      let updatedLectures = courseCurriculumFormData;
       payloads.forEach((payload, idx) => {
         const file = valid[replaceIndex !== null ? 0 : idx];
         const derivedType = isPdfFile(file) ? "attachment" : "video";
         const fileType = targetType === "auto" ? derivedType : targetType;
-        applyUploadedFileToLecture(payload, replaceIndex, fileType);
+        updatedLectures = applyUploadedFileToLecture(
+          updatedLectures,
+          payload,
+          replaceIndex,
+          fileType
+        );
       });
+      setCourseCurriculumFormData(updatedLectures);
+      if (currentEditedCourseId) {
+        try {
+          await updateCourseByIdService(currentEditedCourseId, {
+            curriculum: updatedLectures,
+          });
+        } catch (updateError) {
+          toast({
+            title: t("common.error") || "Error",
+            description:
+              t("curriculum.fillDetails") ||
+              "Failed to save lecture media. Please click Save.",
+            variant: "destructive",
+          });
+        }
+      }
 
       toast({
         title: t("common.success") || "Success",
@@ -394,7 +411,23 @@ function CourseCurriculum({ onNext }) {
     if (lecture?.attachmentFileKey) {
       await mediaLocalDeleteService(lecture.attachmentFileKey);
     }
-    setCourseCurriculumFormData((prev) => prev.filter((_, idx) => idx !== i));
+    const nextLectures = courseCurriculumFormData.filter((_, idx) => idx !== i);
+    setCourseCurriculumFormData(nextLectures);
+    if (currentEditedCourseId) {
+      try {
+        await updateCourseByIdService(currentEditedCourseId, {
+          curriculum: nextLectures,
+        });
+      } catch (updateError) {
+        toast({
+          title: t("common.error") || "Error",
+          description:
+            t("curriculum.fillDetails") ||
+            "Failed to save lecture media. Please click Save.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const addLecture = () => {

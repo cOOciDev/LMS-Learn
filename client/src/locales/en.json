@@ -716,6 +716,7 @@
     "close": "Close",
     "directLink": "Open direct download link",
     "missingLink": "Download link is missing.",
+    "retryMessage": "Download failed. Please try again or use the direct link.",
     "back": "Back to course",
     "popupBlocked": "Popup blocked. Please allow popups to download the file.",
     "secureNotice": "This download uses secure account access."

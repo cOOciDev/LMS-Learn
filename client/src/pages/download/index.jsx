@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
-import { useEffect, useMemo } from "react";
+import { downloadAssetByPath, extractAssetPath } from "@/utils/media";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 const getQueryParam = (search, key) => {
@@ -23,10 +24,24 @@ function DownloadPage() {
     () => decodeURIComponent(getQueryParam(location.search, "returnUrl")),
     [location.search]
   );
+  const [downloadError, setDownloadError] = useState("");
 
-  const handleStartDownload = () => {
+  const handleStartDownload = async () => {
     if (!downloadUrl) return;
-    window.location.href = downloadUrl;
+    setDownloadError("");
+    const assetPath = extractAssetPath(downloadUrl);
+    if (!assetPath) {
+      window.location.href = downloadUrl;
+      return;
+    }
+    try {
+      await downloadAssetByPath(assetPath, fileName);
+    } catch {
+      setDownloadError(
+        t("downloadPage.retryMessage") ||
+          "Download failed. Please try again or use the direct link."
+      );
+    }
   };
 
   const handleClose = () => {
@@ -44,7 +59,7 @@ function DownloadPage() {
       handleStartDownload();
     }, 300);
     return () => clearTimeout(timer);
-  }, [downloadUrl]);
+  }, [downloadUrl, fileName]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
@@ -77,7 +92,17 @@ function DownloadPage() {
           </Button>
         </div>
 
-        {downloadUrl ? (
+        {downloadError ? (
+          <>
+            <p className="mt-6 text-xs text-destructive">{downloadError}</p>
+            <a
+              className="mt-6 inline-block text-xs text-blue-400 hover:underline"
+              href={downloadUrl}
+            >
+              {t("downloadPage.directLink") || "Open direct download link"}
+            </a>
+          </>
+        ) : downloadUrl ? (
           <a
             className="mt-6 inline-block text-xs text-blue-400 hover:underline"
             href={downloadUrl}

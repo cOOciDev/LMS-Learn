@@ -6,7 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { InstructorContext } from "@/context/instructor-context";
 import { useLanguage } from "@/context/language-context";
-import { mediaLocalDeleteService, mediaLocalUploadService } from "@/services";
+import {
+  mediaLocalDeleteService,
+  mediaLocalUploadService,
+  updateCourseByIdService,
+} from "@/services";
 import { withAuthToken } from "@/utils/media";
 import { Upload, Trash2, Replace } from "lucide-react";
 import { useContext, useState } from "react";
@@ -63,14 +67,34 @@ function CourseSettings() {
         }
 
         const uploadedUrl = response.data.fileUrl;
-        setCourseLandingFormData({
+        const nextLandingData = {
           ...courseLandingFormData,
           image: uploadedUrl,
           imageFileKey: response.data.fileKey,
           imageFileName: response.data.fileName,
           imageFileType: response.data.fileType,
           imageFileSize: response.data.fileSize,
-        });
+        };
+        setCourseLandingFormData(nextLandingData);
+        if (currentEditedCourseId) {
+          try {
+            await updateCourseByIdService(currentEditedCourseId, {
+              image: uploadedUrl,
+              imageFileKey: response.data.fileKey,
+              imageFileName: response.data.fileName,
+              imageFileType: response.data.fileType,
+              imageFileSize: response.data.fileSize,
+            });
+          } catch (updateError) {
+            toast({
+              title: t("common.error") || "Error",
+              description:
+                t("courseDetails.enrollError") ||
+                "Failed to save image. Please click Save.",
+              variant: "destructive",
+            });
+          }
+        }
 
         toast({
           title: "موفق",
@@ -93,14 +117,34 @@ function CourseSettings() {
     if (courseLandingFormData?.imageFileKey) {
       await mediaLocalDeleteService(courseLandingFormData.imageFileKey);
     }
-    setCourseLandingFormData({
+    const nextLandingData = {
       ...courseLandingFormData,
       image: "",
       imageFileKey: "",
       imageFileName: "",
       imageFileType: "",
       imageFileSize: 0,
-    });
+    };
+    setCourseLandingFormData(nextLandingData);
+    if (currentEditedCourseId) {
+      try {
+        await updateCourseByIdService(currentEditedCourseId, {
+          image: "",
+          imageFileKey: "",
+          imageFileName: "",
+          imageFileType: "",
+          imageFileSize: 0,
+        });
+      } catch (updateError) {
+        toast({
+          title: t("common.error") || "Error",
+          description:
+            t("courseDetails.enrollError") ||
+            "Failed to save image. Please click Save.",
+          variant: "destructive",
+        });
+      }
+    }
     toast({ description: "تصویر دوره حذف شد." });
   };
 
